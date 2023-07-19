@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">FakeBnB</string>
+    <string name="log_in">LOG IN</string>
+    <string name="register">REGISTER</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="chat_text">Chat</string>
+    <string name="title_activity_main2">MainActivity2</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="email">Email</string>
+    <string name="test_gmail_com">test@gmail.com</string>
+    <string name="_6987548536">6987548536</string>
+    <string name="phone">Phone</string>
+    <string name="warning">Warning</string>
+    <string name="photo">Photo</string>
+    <string name="athens_str_95">Athens str. 95</string>
+    <string name="address">Address</string>
+    <string name="photo_path_png">photo_path.png</string>
+    <string name="save_changes">Save changes</string>
+    <string name="become_a_host">Become a host</string>
+    <string name="jane">Jane</string>
+    <string name="jane_email_com">jane@email.com</string>
+    <string name="your_reserv">Your reservation is completed</string>
+    <string name="press_below_">Press below to go back to home page</string>
+    <string name="home_page">Home page</string>
+    <string name="write_your_review">Write your review:</string>
+    <string name="add_stars">Add stars at the place you stayed:</string>
+    <string name="submit_review">Submit Review</string>
+    <string name="add_new_place_text">Add a new place to FakeBnB</string>
+    <string name="add_new_place">Add new place</string>
+</resources>
