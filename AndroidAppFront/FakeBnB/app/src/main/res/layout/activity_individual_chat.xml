@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".IndividualChatPage">
+
+    <!-- Top segment with text and line separator -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/topUsernameBar">
+
+        <!-- Text view -->
+        <TextView
+            android:id="@+id/chatTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="20dp"
+            android:text="USER 1"
+            android:textSize="18sp"
+            android:textStyle="normal"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal|top"
+            />
+
+        <!-- Line separator -->
+        <View
+            android:id="@+id/topViewLine"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"
+            android:layout_marginTop="20dp"/>
+
+    </LinearLayout>
+
+    <!-- CONVERSATION -->
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/topUsernameBar"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="231dp"
+        android:text="CONVERSATION" />
+
+    <include
+        layout="@layout/bottom_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="0dp"/>
+
+</RelativeLayout>

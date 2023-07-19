@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".AddNewPlaceActivity">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/include"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/addNewPlaceBoldText"
+                    android:layout_width="262dp"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="40dp"
+                    android:layout_marginBottom="50dp"
+                    android:text="@string/add_new_place_text"
+                    android:textSize="24sp"
+                    android:gravity="center"
+                    android:textStyle="bold"/>
+
+                <!-- Address -->
+                <TextView
+                    android:id="@+id/addPlaceWarningAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/address"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceAddressEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- must change to map view -->
+                <EditText
+                    android:id="@+id/addPlaceAddressMapEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- Dates -->
+                <TextView
+                    android:id="@+id/addPlaceWarningDates"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Dates"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceDatesEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- Maximum visitors -->
+                <TextView
+                    android:id="@+id/addPlaceWarningMaxVisitors"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Maximum visitors"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceMaxVisitorsEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border"
+                    android:ems="10"
+                    android:inputType="number" />
+
+                <!-- Minimum rental price -->
+                <TextView
+                    android:id="@+id/addPlaceWarningMinPrice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Minimum rental price"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceMinPriceEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border"
+                    android:ems="10"
+                    android:inputType="numberDecimal"/>
+
+                <!-- Extra cost/person -->
+                <TextView
+                    android:id="@+id/addPlaceWarningExtraCost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Extra cost per person"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceExtraCostEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border"
+                    android:ems="10"
+                    android:inputType="numberDecimal" />
+
+                <!-- Rental type -->
+                <TextView
+                    android:id="@+id/addPlaceWarningRentType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Rental type"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/addPlaceRentalTypeRadioGroup"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/roomTypeRadioButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="Room"
+                        android:checked="true" />
+
+                    <RadioButton
+                        android:id="@+id/houseTypeRadioButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="House" />
+
+                </RadioGroup>
+
+                <!-- Photo upload -->
+                <TextView
+                    android:id="@+id/addPlaceWarningPhotoUpload"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Photo upload"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlacePhotoUploadEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- Rules -->
+                <TextView
+                    android:id="@+id/addPlaceWarningRules"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Rules"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceRulesEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- Description -->
+                <TextView
+                    android:id="@+id/addPlaceWarningDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Description"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceDescriptionEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- Beds -->
+                <TextView
+                    android:id="@+id/addPlaceWarningBeds"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Beds"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceBedsEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border"
+                    android:ems="10"
+                    android:inputType="number" />
+
+                <!-- Bedrooms -->
+                <TextView
+                    android:id="@+id/addPlaceWarningBedrooms"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Bedrooms"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceBedroomsEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border"
+                    android:ems="10"
+                    android:inputType="number" />
+
+                <!-- Bathrooms -->
+                <TextView
+                    android:id="@+id/addPlaceWarningBathrooms"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Bathrooms"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceBathroomsEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border"
+                    android:ems="10"
+                    android:inputType="number" />
+
+                <!-- Living rooms -->
+                <TextView
+                    android:id="@+id/addPlaceWarningLivingRooms"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Living rooms"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceLivingRoomsEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border"
+                    android:ems="10"
+                    android:inputType="number" />
+
+                <!-- Area -->
+                <TextView
+                    android:id="@+id/addPlaceWarningArea"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Area"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceAreaEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border"
+                    android:ems="10"
+                    android:inputType="number" />
+
+                <Button
+                    android:id="@+id/addPlaceButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="30dp"
+                    android:text="@string/add_new_place" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+    <include
+        android:id="@+id/include"
+        layout="@layout/bottom_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

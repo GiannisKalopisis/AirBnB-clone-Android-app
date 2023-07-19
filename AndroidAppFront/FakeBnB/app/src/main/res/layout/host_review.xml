@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- review_item.xml -->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="0dp"
+            android:layout_marginBottom="5dp">
+
+            <TextView
+                android:id="@+id/reviewUsernameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="1dp"
+                android:text="SakisKarpas"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <RatingBar
+
+                android:id="@+id/reviewRatingStarBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="-15dp"
+                android:layout_marginTop="-16dp"
+                android:layout_marginEnd="-50dp"
+                android:layout_marginBottom="-15dp"
+                android:numStars="5"
+                android:rating="3.5"
+                android:scaleX="0.4"
+                android:scaleY="0.4"
+                android:stepSize="0.5" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/commentTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="qwerfqwefqwerfqs efqwedf qsdgqerg asdvwrg qsdf qrg qwqwerf safg a" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
