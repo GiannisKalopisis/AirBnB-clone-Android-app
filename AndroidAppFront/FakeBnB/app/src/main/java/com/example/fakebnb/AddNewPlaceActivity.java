@@ -1,6 +1,10 @@
 package com.example.fakebnb;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,8 +17,24 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 
 public class AddNewPlaceActivity extends AppCompatActivity {
 
@@ -42,6 +62,13 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
     private boolean fieldsAreValid = false;
 
+    // MapView
+    private MapView addPlaceMapView;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
+    private boolean isMapReady = false;
+    private String addressToShowOnMap;
+    private GoogleMap googleMap;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,10 +78,95 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         initView();
         bottomBarClickListeners();
         resetWarnVisibility();
-
         setTextWatchers();
-
         addPlaceButtonClickListener();
+
+        checkGoogleAPIAvailability();
+
+        addPlaceMapView.onCreate(savedInstanceState);
+        addPlaceMapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(@NonNull GoogleMap map) {
+                googleMap = map; // Store the GoogleMap object in the global variable
+                isMapReady = true; // Mark the map as ready
+                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                googleMap.getUiSettings().setZoomControlsEnabled(true);
+                // Check if an address is available and show it on the map
+                if (addressToShowOnMap != null) {
+                    showAddressOnMap(addressToShowOnMap);
+                }
+            }
+        });
+
+        // Check for location permissions and request if not granted
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    private void checkGoogleAPIAvailability() {
+        // Check for Google Play Services availability
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (googleApiAvailability.isUserResolvableError(resultCode)) {
+                Objects.requireNonNull(googleApiAvailability.getErrorDialog(this, resultCode, 1)).show();
+            } else {
+                Toast.makeText(this, "This device does not support Google Play Services.", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        addPlaceMapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        addPlaceMapView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        addPlaceMapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        addPlaceMapView.onLowMemory();
+    }
+
+    private void showAddressOnMap(String address) {
+        if (isMapReady && googleMap != null) {
+            googleMap.clear(); // Clear any existing markers on the map
+            LatLng locationLatLng = getLocationFromAddress(address);
+            if (locationLatLng != null) {
+                googleMap.addMarker(new MarkerOptions().position(locationLatLng).title(address));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, 15));
+            }
+        }
+    }
+
+    private LatLng getLocationFromAddress(String strAddress) {
+        Geocoder geocoder = new Geocoder(this);
+        List<Address> addressList;
+        LatLng locationLatLng = null;
+        try {
+            addressList = geocoder.getFromLocationName(strAddress, 1);
+            if (addressList != null && addressList.size() > 0) {
+                Address address = addressList.get(0);
+                locationLatLng = new LatLng(address.getLatitude(), address.getLongitude());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return locationLatLng;
     }
 
     private void setTextWatchers() {
@@ -87,6 +199,10 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningAddress.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningAddress.setVisibility(View.GONE);
+                    addressToShowOnMap = addPlaceAddressEditText.getText().toString();
+                    if (isMapReady && googleMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
+                    }
                 }
             }
         };
@@ -438,8 +554,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                 }
 
                 sendDataToDatabase(address, dates, maxVisitors, minPrice, extraCost, rentalType,
-                                   photoUpload, rules, description, beds, bedrooms, bathrooms,
-                                   livingRooms, area);
+                        photoUpload, rules, description, beds, bedrooms, bathrooms,
+                        livingRooms, area);
 
                 Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
                 startActivity(host_main_page_intent);
@@ -559,6 +675,9 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceAreaEditText = findViewById(R.id.addPlaceAreaEditText);
 
         addPlaceRentalTypeRadioGroup = findViewById(R.id.addPlaceRentalTypeRadioGroup);
+
+        // MapView
+        addPlaceMapView = findViewById(R.id.addPlaceMapView);
 
         // Buttons
         addPlaceButton = findViewById(R.id.addPlaceButton);
