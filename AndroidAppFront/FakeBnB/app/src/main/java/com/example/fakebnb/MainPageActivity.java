@@ -38,12 +38,12 @@ public class MainPageActivity extends AppCompatActivity {
 //                startActivity(write_review_intent);
 
 //                go to add new place page
-                Intent add_new_place_intent = new Intent(getApplicationContext(), AddNewPlaceActivity.class);
-                startActivity(add_new_place_intent);
+//                Intent add_new_place_intent = new Intent(getApplicationContext(), AddNewPlaceActivity.class);
+//                startActivity(add_new_place_intent);
 
 //                go to rent room page
-//                Intent rent_room_intent = new Intent(getApplicationContext(), RentRoomPage.class);
-//                startActivity(rent_room_intent);
+                Intent rent_room_intent = new Intent(getApplicationContext(), RentRoomPage.class);
+                startActivity(rent_room_intent);
             }
         });
 

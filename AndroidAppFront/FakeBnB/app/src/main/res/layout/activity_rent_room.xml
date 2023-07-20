@@ -537,7 +537,7 @@
                     android:textSize="20sp"
                     android:textColor="#777777"
                     tools:ignore="RtlSymmetry"
-                    android:visibility="visible"/>
+                    android:visibility="gone"/>
 
                 <Button
                     android:id="@+id/writeReviewButton"
@@ -550,7 +550,7 @@
                     android:text="Write a Review"
                     android:backgroundTint="@color/green"
                     android:gravity="center"
-                    android:visibility="visible"/>
+                    android:visibility="gone"/>
 
             </LinearLayout>
         </RelativeLayout>

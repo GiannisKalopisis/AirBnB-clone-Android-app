@@ -244,6 +244,8 @@ public class RentRoomPage extends AppCompatActivity {
     }
 
     private void renderReviewSection() {
+        Log.d(TAG, "renderReviewSection: started");
+        userStayedAtRental = info.getUserStayedHere();
         if (userStayedAtRental) {
             rentRoomReviewTitle.setVisibility(View.VISIBLE);
             writeReviewButton.setVisibility(View.VISIBLE);
@@ -251,6 +253,7 @@ public class RentRoomPage extends AppCompatActivity {
             rentRoomReviewTitle.setVisibility(View.GONE);
             writeReviewButton.setVisibility(View.GONE);
         }
+        Log.d(TAG, "renderReviewSection: finished");
     }
 
     private void createSlider() {
@@ -280,6 +283,7 @@ public class RentRoomPage extends AppCompatActivity {
         rentRoomAddressValue = findViewById(R.id.rentRoomAddressValue);
         rentRoomAreaValue = findViewById(R.id.rentRoomAreaValue);
         rentRoomHostNameValue = findViewById(R.id.rentRoomHostNameValue);
+        rentRoomReviewTitle = findViewById(R.id.rentRoomReviewTitle);
 
         // init recycler views
         recyclerViewRules = findViewById(R.id.recyclerViewRules);
@@ -360,17 +364,13 @@ public class RentRoomPage extends AppCompatActivity {
             }
         });
 
-        if (userStayedAtRental) {
-            writeReviewButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
-                    Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewPage.class);
-                    startActivity(write_review_intent);
-                }
-            });
-        } else {
-            writeReviewButton.setVisibility(View.GONE);
-        }
+        writeReviewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
+                Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewPage.class);
+                startActivity(write_review_intent);
+            }
+        });
     }
 }
