@@ -36,11 +36,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class RentRoomPage extends AppCompatActivity {
 
-    private String TAG = "RentRoomPage";
+    private static final String TAG = "RentRoomPage";
 
     private TextView rentRoomPersonsValue, rentRoomBedsValue, rentRoomBathroomsValue,
             rentRoomBedroomsValue, rentRoomPriceValue, rentRoomExtraPriceValue, rentRoomFinalPriceValue,
@@ -56,6 +57,8 @@ public class RentRoomPage extends AppCompatActivity {
     private Button chatButton, profileButton, roleButton;
     private RentHouseInfo info;
 
+    private boolean userStayedAtRental = false;
+    private TextView rentRoomReviewTitle;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,7 +95,7 @@ public class RentRoomPage extends AppCompatActivity {
                     "This is a descriptionwerg wgwe werg wergwer gwergwer gwerg werg wwerg werfgwefg wdfgsdfgwertg wergswdfg sdfg sdfg we ",
                     "These are the rules. These are the rules1. These are the rules2. These are the rules3. These are the rules4. These are the rules5.",
                     "Sperchiou 70, Peristeri 121 37", "These are the amenities. These are the amenities1. These are the amenities2. These are the amenities3. These are the amenities4.",
-                    "photo_path.png", "Sakis Karpas");
+                    "photo_path.png", "Sakis Karpas", true);
             rentRoomMapView.onCreate(savedInstanceState);
             rentRoomMapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
@@ -146,7 +149,6 @@ public class RentRoomPage extends AppCompatActivity {
             }
         }
     }
-
 
     private LatLng getLocationFromAddress(String strAddress) {
         Geocoder geocoder = new Geocoder(this);
@@ -240,7 +242,15 @@ public class RentRoomPage extends AppCompatActivity {
         rentRoomHostNameValue.setText(info.getHostName());
     }
 
-    private void renderReviewSection() {}
+    private void renderReviewSection() {
+        if (userStayedAtRental) {
+            rentRoomReviewTitle.setVisibility(View.VISIBLE);
+            writeReviewButton.setVisibility(View.VISIBLE);
+        } else {
+            rentRoomReviewTitle.setVisibility(View.GONE);
+            writeReviewButton.setVisibility(View.GONE);
+        }
+    }
 
     private void createSlider() {
         // get images from database
