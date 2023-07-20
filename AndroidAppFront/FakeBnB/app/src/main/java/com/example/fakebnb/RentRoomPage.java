@@ -60,6 +60,7 @@ public class RentRoomPage extends AppCompatActivity {
     private boolean userStayedAtRental = false;
     private TextView rentRoomReviewTitle;
 
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -329,5 +330,47 @@ public class RentRoomPage extends AppCompatActivity {
                 startActivity(profile_intent);
             }
         });
+    }
+
+    private void buttonClickListener() {
+        seeHostButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(view.getContext(), "Pressed SEE HOST BUTTON", Toast.LENGTH_SHORT).show();
+                Intent see_host_intent = new Intent(getApplicationContext(), HostReviewPageActivity.class);
+                startActivity(see_host_intent);
+            }
+        });
+
+        contactHostButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(view.getContext(), "Pressed CONTACT HOST BUTTON", Toast.LENGTH_SHORT).show();
+                Intent contact_host_intent = new Intent(getApplicationContext(), IndividualChatPage.class);
+                startActivity(contact_host_intent);
+            }
+        });
+
+        makeReservationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(view.getContext(), "Pressed MAKE RESERVATION BUTTON", Toast.LENGTH_SHORT).show();
+                Intent make_reservation_intent = new Intent(getApplicationContext(), ReservationDoneActivity.class);
+                startActivity(make_reservation_intent);
+            }
+        });
+
+        if (userStayedAtRental) {
+            writeReviewButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
+                    Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewPage.class);
+                    startActivity(write_review_intent);
+                }
+            });
+        } else {
+            writeReviewButton.setVisibility(View.GONE);
+        }
     }
 }
