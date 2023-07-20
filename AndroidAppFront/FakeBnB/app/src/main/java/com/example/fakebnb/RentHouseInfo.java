@@ -14,12 +14,13 @@ public class RentHouseInfo {
     String amenities;
     String hostImage;
     String hostName;
+    boolean userStayedHere;
 
 
     public RentHouseInfo(int max_persons_allowed, int bathrooms, int bedrooms, int price,
                          int extra_person_cost, String rental_type, String description,
                          String rules, String address, String amenities, String hostImage,
-                         String hostName) {
+                         String hostName, boolean userStayedHere) {
         this.max_persons_allowed = max_persons_allowed;
         this.bathrooms = bathrooms;
         this.bedrooms = bedrooms;
@@ -32,6 +33,7 @@ public class RentHouseInfo {
         this.amenities = amenities;
         this.hostImage = hostImage;
         this.hostName = hostName;
+        this.userStayedHere = userStayedHere;
     }
 
     public int getMax_persons_allowed() {
@@ -80,5 +82,9 @@ public class RentHouseInfo {
 
     public String getHostName() {
         return hostName;
+    }
+
+    public boolean getUserStayedHere() {
+        return userStayedHere;
     }
 }
