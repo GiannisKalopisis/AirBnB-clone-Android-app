@@ -66,22 +66,7 @@ public class RentRoomPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rent_room);
 
-        initView();
-        bottomBarClickListeners();
-
-        // Initialize the MapView
-
-        // Check for Google Play Services availability
-        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (googleApiAvailability.isUserResolvableError(resultCode)) {
-                googleApiAvailability.getErrorDialog(this, resultCode, 1).show();
-            } else {
-                Toast.makeText(this, "This device does not support Google Play Services.", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        }
+        checkGoogleAPIAvailability();
 
         // Check for location permissions and request if not granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -114,6 +99,21 @@ public class RentRoomPage extends AppCompatActivity {
                 }
             });
             getDataFromDatabase();
+            buttonClickListener();
+        }
+    }
+
+    private void checkGoogleAPIAvailability() {
+        // Check for Google Play Services availability
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (googleApiAvailability.isUserResolvableError(resultCode)) {
+                Objects.requireNonNull(googleApiAvailability.getErrorDialog(this, resultCode, 1)).show();
+            } else {
+                Toast.makeText(this, "This device does not support Google Play Services.", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
     }
 
