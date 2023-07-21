@@ -1,60 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".IndividualChatPage">
 
-    <!-- Top segment with text and line separator -->
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id="@+id/topUsernameBar">
+        android:background="@color/my_primary"
+        android:padding="10dp"
+        android:id="@+id/toolbar">
 
-        <!-- Text view -->
         <TextView
-            android:id="@+id/chatTxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="0dp"
-            android:layout_marginTop="20dp"
-            android:text="USER 1"
-            android:textSize="18sp"
-            android:textStyle="normal"
-            android:textColor="@android:color/black"
-            android:layout_gravity="center"
-            android:gravity="center_horizontal|top"
+            android:text="Username"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_marginStart="10dp"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/profile_pic_layout"
+            android:id="@+id/other_username"
             />
 
-        <!-- Line separator -->
-        <View
-            android:id="@+id/topViewLine"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/black"
-            android:layout_marginTop="20dp"/>
+        <include layout="@layout/profile_pic_view"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@id/back_btn"
+            android:id="@+id/profile_pic_layout"
+            />
 
-    </LinearLayout>
+        <ImageButton
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/icon_back"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white"
+            android:layout_centerVertical="true"
+            android:id="@+id/back_btn"/>
 
-    <!-- CONVERSATION -->
+    </RelativeLayout>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/topUsernameBar"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="231dp"
-        android:text="CONVERSATION" />
-
-    <include
-        layout="@layout/bottom_menu"
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="0dp"/>
+        android:layout_height="0dp"
+        android:id="@+id/chat_recycler_view"
+        android:layout_weight="1"/>
 
-</RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:padding="8dp"
+        android:id="@+id/bottom_layout">
+
+        <EditText
+            android:id="@+id/chat_message_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_toStartOf="@id/message_send_btn"
+            android:background="@drawable/edit_text_rounded_corner"
+            android:elevation="4dp"
+            android:hint="Write message here"
+            android:padding="10dp" />
+
+        <ImageButton
+            android:id="@+id/message_send_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/icon_send"
+            app:tint="@color/my_primary" />
+
+    </RelativeLayout>
+
+    <!--    Need to be LinearLayout the main layout to work. See host_review_page.xml -->
+    <!--    <include-->
+    <!--        layout="@layout/bottom_menu"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginBottom="0dp"/>-->
+    <!--    -->
+</LinearLayout>

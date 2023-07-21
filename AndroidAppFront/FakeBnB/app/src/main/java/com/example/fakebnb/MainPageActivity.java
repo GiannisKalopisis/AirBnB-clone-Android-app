@@ -9,6 +9,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.fakebnb.model.UserModel;
+import com.example.fakebnb.utils.AndroidUtil;
+
 public class MainPageActivity extends AppCompatActivity {
 
     @Override
@@ -42,8 +45,13 @@ public class MainPageActivity extends AppCompatActivity {
 //                startActivity(add_new_place_intent);
 
 //                go to rent room page
-                Intent rent_room_intent = new Intent(getApplicationContext(), RentRoomPage.class);
-                startActivity(rent_room_intent);
+//                Intent rent_room_intent = new Intent(getApplicationContext(), RentRoomPage.class);
+//                startActivity(rent_room_intent);
+
+//                go to chat page
+                Intent individual_chat_intent = new Intent(getApplicationContext(), IndividualChatPage.class);
+                AndroidUtil.passUserModelAsIntent(individual_chat_intent, new UserModel("Sakis Karpas"));
+                startActivity(individual_chat_intent);
             }
         });
 
