@@ -19,7 +19,7 @@
         android:layout_marginTop="17dp"
         android:layout_marginEnd="17dp"
         android:layout_marginBottom="17dp"
-        android:layout_toEndOf="@id/back_btn" />
+        />
 
     <!-- Welcome message at top left -->
     <TextView
@@ -36,28 +36,196 @@
         android:textStyle="bold" />
 
     <LinearLayout
-        android:id="@+id/linearLayoutMainPage"
+        android:id="@+id/searchContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@+id/profile_pic_layout"
-        android:layout_marginTop="16dp">
+        android:layout_below="@+id/profile_pic_layout">
 
-        <EditText
+        <TextView
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/edit_text_rounded_corner"
+            android:background="@drawable/background_search"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
-            android:elevation="10dp"/>
+            android:elevation="10dp"
+            android:paddingStart="16dp"
+            android:text="  Search here..."
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:gravity="center_vertical"
+            tools:ignore="RtlSymmetry"
+            android:onClick="onSearchBarClicked"
+            app:drawableStartCompat="@drawable/baseline_search_24" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/searchFieldsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible"
+        android:layout_below="@+id/searchContainer"
+        android:background="@drawable/background_search"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:elevation="10dp"
+        android:paddingStart="16dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        tools:ignore="RtlSymmetry">
+
+
+        <!-- Location search field -->
+        <EditText
+            android:id="@+id/districtEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="District"
+            android:padding="16dp"
+            android:drawablePadding="8dp" />
+
+        <!-- City search field -->
+        <EditText
+            android:id="@+id/cityEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="City"
+            android:padding="16dp"
+            android:drawablePadding="8dp" />
+
+        <!-- Country search field -->
+        <EditText
+            android:id="@+id/countryEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Country"
+            android:padding="16dp"
+            android:drawablePadding="8dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:drawablePadding="8dp">
+
+            <TextView
+                android:id="@+id/txtRole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rental type" />
+
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/rentalTypeGroup">
+
+                <RadioButton
+                    android:id="@+id/roomRentTypeCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Room"
+                    android:layout_marginEnd="20dp"
+                    android:checked="true"/>
+
+                <RadioButton
+                    android:id="@+id/houseRentalTypeCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="House" />
+
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- Check-in date -->
+        <EditText
+            android:id="@+id/checkInDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:drawablePadding="8dp"
+            android:clickable="false"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="Check-in date"/>
+
+        <!-- Check-out date -->
+        <EditText
+            android:id="@+id/checkOutDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:drawablePadding="8dp"
+            android:clickable="false"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="Check-out date" />
+
+        <!-- Number of guests -->
+        <Spinner
+            android:id="@+id/numGuestsSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:drawablePadding="8dp"/>
+
+        <!-- Search button -->
+        <Button
+            android:id="@+id/searchFieldsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="Search"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/rentalsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/searchFieldsLayout"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="5dp"
+        android:text="Top Deals"
+        android:textStyle="bold"
+        android:textSize="28sp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rentalsRecyclerView"
+        android:layout_below="@+id/rentalsTextView"
+        android:layout_above="@id/included_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:orientation="vertical">
+    </androidx.recyclerview.widget.RecyclerView>
+
 
     <include
         layout="@layout/bottom_menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="0dp" />
+        android:layout_marginBottom="0dp"
+        android:id="@+id/included_bottom_bar"/>
+
 
 </RelativeLayout>
