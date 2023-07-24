@@ -1,4 +1,4 @@
-package com.example.fakebnb;
+package com.example.fakebnb.model;
 
 public class HostReviewModel {
 

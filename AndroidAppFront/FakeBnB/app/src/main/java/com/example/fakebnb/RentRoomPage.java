@@ -25,6 +25,7 @@ import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.fakebnb.adapter.RulesAdapter;
+import com.example.fakebnb.model.RentRoomModel;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -56,7 +57,7 @@ public class RentRoomPage extends AppCompatActivity {
 
     private Button seeHostButton, contactHostButton, makeReservationButton, writeReviewButton;
     private Button chatButton, profileButton, roleButton;
-    private RentHouseInfo info;
+    private RentRoomModel info;
 
     private boolean userStayedAtRental = false;
     private TextView rentRoomReviewTitle;
@@ -78,7 +79,7 @@ public class RentRoomPage extends AppCompatActivity {
             bottomBarClickListeners();
 
             createSlider();
-            info = new RentHouseInfo(4, 2, 2, 100, 15,"Entire House",
+            info = new RentRoomModel(4, 2, 2, 100, 15,"Entire House",
                     "This is a descriptionwerg wgwe werg wergwer gwergwer gwerg werg wwerg werfgwefg wdfgsdfgwertg wergswdfg sdfg sdfg we ",
                     "These are the rules. These are the rules1. These are the rules2. These are the rules3. These are the rules4. These are the rules5.",
                     "Sperchiou 70, Peristeri 121 37", "These are the amenities. These are the amenities1. These are the amenities2. These are the amenities3. These are the amenities4.",
@@ -102,6 +103,8 @@ public class RentRoomPage extends AppCompatActivity {
             getDataFromDatabase();
             buttonClickListener();
         }
+
+        Toast.makeText(this, TAG + " ID: " + getIntent().getIntExtra("rental_id", 0) + 1, Toast.LENGTH_SHORT).show();
     }
 
     private void checkGoogleAPIAvailability() {
@@ -369,7 +372,7 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
-                Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewPage.class);
+                Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewActivity.class);
                 startActivity(write_review_intent);
             }
         });

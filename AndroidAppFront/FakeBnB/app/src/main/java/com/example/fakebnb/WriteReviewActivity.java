@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class WriteReviewPage extends AppCompatActivity {
+public class WriteReviewActivity extends AppCompatActivity {
 
     private static final String TAG = "WriteReviewPage";
 

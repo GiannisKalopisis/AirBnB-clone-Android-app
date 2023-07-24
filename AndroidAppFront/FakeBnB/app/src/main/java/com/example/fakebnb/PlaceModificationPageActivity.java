@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class PlaceModificationPageActivity extends AppCompatActivity {
 
+    private static final String TAG = "PlaceModificationPage";
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,5 +46,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
             }
         });
+
+
+        Toast.makeText(this, TAG + " ID: " + getIntent().getIntExtra("host_rental_id", 0) + 1, Toast.LENGTH_SHORT).show();
     }
 }
