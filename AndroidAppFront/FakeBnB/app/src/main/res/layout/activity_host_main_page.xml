@@ -7,22 +7,101 @@
     android:layout_height="match_parent"
     tools:context=".HostMainPageActivity">
 
-    <!-- CONVERSATION -->
+    <include
+        android:id="@+id/host_profile_pic_layout"
+        layout="@layout/profile_pic_view"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="17dp"
+        android:layout_marginTop="17dp"
+        android:layout_marginEnd="17dp"
+        android:layout_marginBottom="17dp" />
 
+    <!-- Welcome message at top left -->
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/welcomeHostMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/topUsernameBar"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="231dp"
-        android:text="HOST MAIN PAGE" />
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginBottom="25dp"
+        android:text="Welcome, User"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/rentalInfoMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/host_profile_pic_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="30dp"
+        android:gravity="center"
+        android:text="Here you can view your places, modify them and add new ones."
+        android:textColor="#777777"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/rentalsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rentalInfoMessage"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="5dp"
+        android:text="Your rentals"
+        android:textStyle="bold"
+        android:textSize="28sp" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/hostRentalsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_below="@+id/rentalsTextView"
+        android:layout_above="@id/included_bottom_bar"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:orientation="vertical">
+    </androidx.recyclerview.widget.RecyclerView>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/addRentalButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="80dp"
+            android:layout_marginEnd="30dp"
+            app:backgroundTint="@color/colorPrimary"
+            android:src="@drawable/baseline_add_24"
+            android:text="+"
+            android:textStyle="normal"
+            android:textSize="30sp"/>
+
+    </RelativeLayout>
+
+    <!-- Your included bottom menu -->
     <include
+        android:id="@+id/included_bottom_bar"
         layout="@layout/bottom_menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="0dp"/>
+        android:layout_marginBottom="0dp" />
 
 </RelativeLayout>
