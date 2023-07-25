@@ -330,8 +330,12 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 //                startActivity(write_review_intent);
 
 //                go to add new place page
-                Intent add_new_place_intent = new Intent(getApplicationContext(), AddNewPlaceActivity.class);
-                startActivity(add_new_place_intent);
+//                Intent add_new_place_intent = new Intent(getApplicationContext(), AddNewPlaceActivity.class);
+//                startActivity(add_new_place_intent);
+
+//                go to modify rental page
+                Intent modify_rental_intent = new Intent(getApplicationContext(), PlaceModificationPageActivity.class);
+                startActivity(modify_rental_intent);
 
 //                go to rent room page
 //                Intent rent_room_intent = new Intent(getApplicationContext(), RentRoomPage.class);
