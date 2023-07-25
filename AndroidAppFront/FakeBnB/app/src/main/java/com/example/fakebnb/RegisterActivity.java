@@ -20,10 +20,12 @@ public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
 
-    private EditText usernameEditText, passwordEditText, confirmPasswordEditText, firstNameEditText, lastNameEditText, emailEditText, phoneNumberEditText;
+    private EditText usernameEditText, passwordEditText, confirmPasswordEditText, firstNameEditText,
+            lastNameEditText, emailEditText, phoneNumberEditText, photoEditText;
     private RadioGroup roleGroup;
     private Button registerButton;
-    private TextView usernameWarn, passwordWarn, confirmPasswordWarn, firstNameWarn, lastNameWarn, emailWarn, phoneWarn, roleWarn;
+    private TextView usernameWarn, passwordWarn, confirmPasswordWarn, firstNameWarn, lastNameWarn,
+            emailWarn, phoneWarn, roleWarn, photoWarn;
 
 
     @Override
@@ -83,6 +85,7 @@ public class RegisterActivity extends AppCompatActivity {
         String lastName = lastNameEditText.getText().toString();
         String email = emailEditText.getText().toString();
         String phoneNumber = phoneNumberEditText.getText().toString();
+        String photo = photoEditText.getText().toString();
         String role;
         int roleId = roleGroup.getCheckedRadioButtonId();
         if (roleId == R.id.userRoleCheckBox) {
@@ -98,6 +101,7 @@ public class RegisterActivity extends AppCompatActivity {
         Log.d(TAG, "sendDataToDatabase: email: " + email);
         Log.d(TAG, "sendDataToDatabase: phoneNumber: " + phoneNumber);
         Log.d(TAG, "sendDataToDatabase: role: " + role);
+        Log.d(TAG, "sendDataToDatabase: photo: " + photo);
     }
 
     private void setTextWatchers() {
@@ -108,6 +112,7 @@ public class RegisterActivity extends AppCompatActivity {
         setTextWatcherLastName();
         setTextWatcherEmail();
         setTextWatcherPhone();
+        setTextWatcherPhoto();
     }
 
     private void setTextWatcherUsername() {
@@ -259,6 +264,26 @@ public class RegisterActivity extends AppCompatActivity {
         phoneNumberEditText.addTextChangedListener(textWatcher);
     }
 
+    private void setTextWatcherPhoto() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (photoEditText.getText().toString().isEmpty()) {
+                    photoWarn.setVisibility(View.VISIBLE);
+                } else {
+                    photoWarn.setVisibility(View.GONE);
+                }
+            }
+        };
+        photoEditText.addTextChangedListener(textWatcher);
+    }
+
     private boolean initRegister() {
         Log.d(TAG, "initRegister: Started");
 
@@ -278,6 +303,7 @@ public class RegisterActivity extends AppCompatActivity {
         emailWarn.setVisibility(View.GONE);
         phoneWarn.setVisibility(View.GONE);
         roleWarn.setVisibility(View.GONE);
+        photoWarn.setVisibility(View.GONE);
     }
 
     @SuppressLint("SetTextI18n")
@@ -324,6 +350,11 @@ public class RegisterActivity extends AppCompatActivity {
             phoneWarn.setText("Enter your phone number");
             return false;
         }
+        if (photoEditText.getText().toString().isEmpty()) {
+            photoWarn.setVisibility(View.VISIBLE);
+            photoWarn.setText("Enter your photo");
+            return false;
+        }
         int i = roleGroup.getCheckedRadioButtonId();
         if (i != R.id.userRoleCheckBox && i != R.id.hostRoleCheckBox) {
             roleWarn.setVisibility(View.VISIBLE);
@@ -342,6 +373,7 @@ public class RegisterActivity extends AppCompatActivity {
         lastNameEditText = findViewById(R.id.lastNameEditText);
         emailEditText = findViewById(R.id.emailEditText);
         phoneNumberEditText = findViewById(R.id.phoneNumberEditText);
+        photoEditText = findViewById(R.id.photoEditText);
 
         registerButton = findViewById(R.id.registerButton);
 
@@ -352,6 +384,7 @@ public class RegisterActivity extends AppCompatActivity {
         lastNameWarn = findViewById(R.id.lastNameWarn);
         emailWarn = findViewById(R.id.emailWarn);
         phoneWarn = findViewById(R.id.phoneWarn);
+        photoWarn = findViewById(R.id.photoWarn);
         roleWarn = findViewById(R.id.roleWarn);
 
         roleGroup = findViewById(R.id.roleGroup);
