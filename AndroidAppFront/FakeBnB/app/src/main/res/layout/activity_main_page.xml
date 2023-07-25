@@ -67,7 +67,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_below="@+id/searchContainer"
         android:background="@drawable/background_search"
         android:layout_marginTop="0dp"
