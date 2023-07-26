@@ -41,6 +41,7 @@ public class UserRegService {
     private PasswordEncoder passwordEncoder;
 
     public void signUpUser(SignUpRequest signUpRequest) {
+        System.out.println(signUpRequest.getUsername());
         userRegRepository.findByUsername(signUpRequest.getUsername())
                 .ifPresent((s) -> {
                     throw new UserExistsException("A user with the same username already exists");
@@ -79,5 +80,6 @@ public class UserRegService {
         return ResponseEntity.ok(SignInResponse.builder().id(userReg.getId()).jwtToken(jwt).username(userReg.getUsername())
                 .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName()));
     }
+
 
 }

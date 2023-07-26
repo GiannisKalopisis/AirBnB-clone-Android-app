@@ -26,4 +26,11 @@ public class UserRegController {
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return userRegService.signInUser(signInRequest);
     }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test() {
+        return ResponseEntity.ok(1);
+    }
+
+
 }
