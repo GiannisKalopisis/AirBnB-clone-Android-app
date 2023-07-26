@@ -101,7 +101,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".WriteReviewPage"
+            android:name=".WriteReviewActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.example.fakebnb.WRITE_REVIEW_PAGE" />

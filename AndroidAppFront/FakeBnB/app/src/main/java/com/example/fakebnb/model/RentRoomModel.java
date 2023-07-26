@@ -1,13 +1,13 @@
-package com.example.fakebnb;
+package com.example.fakebnb.model;
 
-public class RentHouseInfo {
+public class RentRoomModel {
 
     private int max_persons_allowed, bathrooms, bedrooms, price, extra_person_cost;
     private String rental_type, description, rules, address, amenities, hostImage, hostName;
     private boolean userStayedHere;
 
 
-    public RentHouseInfo(int max_persons_allowed, int bathrooms, int bedrooms, int price,
+    public RentRoomModel(int max_persons_allowed, int bathrooms, int bedrooms, int price,
                          int extra_person_cost, String rental_type, String description,
                          String rules, String address, String amenities, String hostImage,
                          String hostName, boolean userStayedHere) {

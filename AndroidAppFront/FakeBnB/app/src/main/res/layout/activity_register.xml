@@ -180,6 +180,22 @@
             </RadioGroup>
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/photoWarn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textColor="@android:color/holo_red_light"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/photoEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="text"
+            android:hint="Photo" />
+
         <Button
             android:id="@+id/registerButton"
             android:layout_width="match_parent"

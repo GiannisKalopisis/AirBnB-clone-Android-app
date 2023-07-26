@@ -52,7 +52,7 @@ public class ProfileActivity extends AppCompatActivity {
         // Initially hide the save button
         saveProfileInfoChangesButton.setVisibility(View.GONE);
 
-        setClickButtonSaveListener();
+        setButtonSaveClickListener();
 
         // Add host button only if USER has not the role of host
         setBecomeHostButton();
@@ -94,7 +94,7 @@ public class ProfileActivity extends AppCompatActivity {
         profilePhotoEditText.setText("photo_profile_path.png");
     }
 
-    private void setClickButtonSaveListener() {
+    private void setButtonSaveClickListener() {
         saveProfileInfoChangesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

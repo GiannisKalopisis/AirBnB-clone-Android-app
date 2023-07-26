@@ -1,6 +1,8 @@
 package com.example.fakebnb;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -11,6 +13,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -33,6 +36,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,7 +50,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             addPlaceWarningBeds, addPlaceWarningBedrooms, addPlaceWarningBathrooms,
             addPlaceWarningLivingRooms, addPlaceWarningArea;
 
-    private EditText addPlaceAddressEditText, addPlaceDatesEditText, addPlaceMaxVisitorsEditText,
+    private EditText addPlaceAddressEditText, startDateEditText, endDateEditText, addPlaceMaxVisitorsEditText,
             addPlaceMinPriceEditText, addPlaceExtraCostEditText, addPlacePhotoUploadEditText,
             addPlaceRulesEditText, addPlaceDescriptionEditText, addPlaceBedsEditText,
             addPlaceBedroomsEditText, addPlaceBathroomsEditText, addPlaceLivingRoomsEditText,
@@ -79,6 +83,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         bottomBarClickListeners();
         resetWarnVisibility();
         setTextWatchers();
+        onDatesClicked();
         addPlaceButtonClickListener();
 
         checkGoogleAPIAvailability();
@@ -171,7 +176,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
     private void setTextWatchers() {
         setTextWatcherAddress();
-        setTextWatcherDates();
+        setTextWatcherStartDate();
+        setTextWatcherEndDate();
         setTextWatcherMaxVisitors();
         setTextWatcherMinPrice();
         setTextWatcherExtraCost();
@@ -209,7 +215,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceAddressEditText.addTextChangedListener(textWatcher);
     }
 
-    private void setTextWatcherDates() {
+    private void setTextWatcherStartDate() {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -219,14 +225,34 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (addPlaceDatesEditText.getText().toString().isEmpty()) {
+                if (startDateEditText.getText().toString().isEmpty()) {
                     addPlaceWarningDates.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningDates.setVisibility(View.GONE);
                 }
             }
         };
-        addPlaceDatesEditText.addTextChangedListener(textWatcher);
+        startDateEditText.addTextChangedListener(textWatcher);
+    }
+
+    private void setTextWatcherEndDate() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (endDateEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningDates.setVisibility(View.VISIBLE);
+                } else {
+                    addPlaceWarningDates.setVisibility(View.GONE);
+                }
+            }
+        };
+        endDateEditText.addTextChangedListener(textWatcher);
     }
 
     private void setTextWatcherMaxVisitors() {
@@ -466,6 +492,83 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceWarningArea.setVisibility(View.GONE);
     }
 
+    private void onDatesClicked() {
+        Log.d(TAG, "onDatesClicked: started");
+
+        startDateEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Calendar c = Calendar.getInstance();
+
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        // on below line we are passing context.
+                        AddNewPlaceActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @SuppressLint("SetTextI18n")
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                startDateEditText.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                            }
+                        },
+                        year, month, day);
+                // not allow older dates to be selected
+                datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+                // display date picker dialog.
+                datePickerDialog.show();
+            }
+        });
+
+        endDateEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (startDateEditText.getText().toString().equals("")) {
+                    Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                final Calendar c = Calendar.getInstance();
+
+                // Get the selected check-in date from checkInDate TextView and parse it to Calendar.
+                String checkInDateText = startDateEditText.getText().toString();
+                String[] checkInDateParts = checkInDateText.split("-");
+                int checkInDay = Integer.parseInt(checkInDateParts[0]);
+                int checkInMonth = Integer.parseInt(checkInDateParts[1]) - 1; // Months are 0-based in Calendar.
+                int checkInYear = Integer.parseInt(checkInDateParts[2]);
+                c.set(checkInYear, checkInMonth, checkInDay);
+
+                // Add one day to the check-in date to get the minimum date for checkOutDate.
+                c.add(Calendar.DAY_OF_MONTH, 1);
+
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        // on below line we are passing context.
+                        AddNewPlaceActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @SuppressLint("SetTextI18n")
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                endDateEditText.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                            }
+                        },
+                        year, month, day);
+                // not allow older dates to be selected
+                datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
+                // display date picker dialog.
+                datePickerDialog.show();
+            }
+        });
+    }
+
     private void addPlaceButtonClickListener() {
         addPlaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -478,13 +581,14 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                 Toast.makeText(view.getContext(), "Pressed ADD PLACE BUTTON", Toast.LENGTH_SHORT).show();
 
                 // data fields
-                String address, dates, rentalType, rules, description, photoUpload;
+                String address, startDate, endDate, rentalType, rules, description, photoUpload;
                 int maxVisitors, beds, bedrooms, bathrooms, livingRooms;
                 float minPrice, extraCost, area;
 
                 // read the data and send to the database
                 address = addPlaceAddressEditText.getText().toString();
-                dates = addPlaceDatesEditText.getText().toString();
+                startDate = startDateEditText.getText().toString();
+                endDate = endDateEditText.getText().toString();
                 String tempMaxVisitors = addPlaceMaxVisitorsEditText.getText().toString();
                 try {
                     maxVisitors = Integer.parseInt(tempMaxVisitors);
@@ -553,7 +657,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     return;
                 }
 
-                sendDataToDatabase(address, dates, maxVisitors, minPrice, extraCost, rentalType,
+                sendDataToDatabase(address, startDate, endDate, maxVisitors, minPrice, extraCost, rentalType,
                         photoUpload, rules, description, beds, bedrooms, bathrooms,
                         livingRooms, area);
 
@@ -563,12 +667,13 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         });
     }
 
-    private void sendDataToDatabase(String address, String dates, int maxVisitors, float minPrice,
+    private void sendDataToDatabase(String address, String startDate, String endDate, int maxVisitors, float minPrice,
                                     float extraCost, String rentalType, String photoUpload,
                                     String rules, String description, int beds, int bedrooms,
                                     int bathrooms, int livingRooms, float area) {
         Log.d(TAG, "onClick: address: " + address);
-        Log.d(TAG, "onClick: dates: " + dates);
+        Log.d(TAG, "onClick: startDate: " + startDate);
+        Log.d(TAG, "onClick: endDate: " + endDate);
         Log.d(TAG, "onClick: maxVisitors: " + maxVisitors);
         Log.d(TAG, "onClick: minPrice: " + minPrice);
         Log.d(TAG, "onClick: extraCost: " + extraCost);
@@ -589,7 +694,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             addPlaceWarningAddress.setVisibility(View.VISIBLE);
             isValid = false;
         }
-        if (addPlaceDatesEditText.getText().toString().isEmpty()) {
+        if (startDateEditText.getText().toString().isEmpty()) {
+            addPlaceWarningDates.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (endDateEditText.getText().toString().isEmpty()) {
             addPlaceWarningDates.setVisibility(View.VISIBLE);
             isValid = false;
         }
@@ -661,7 +770,9 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // EditTexts
         addPlaceAddressEditText = findViewById(R.id.addPlaceAddressEditText);
-        addPlaceDatesEditText = findViewById(R.id.addPlaceDatesEditText);
+//        addPlaceDatesEditText = findViewById(R.id.addPlaceDatesEditText);
+        startDateEditText = findViewById(R.id.startDateEditText);
+        endDateEditText = findViewById(R.id.endDateEditText);
         addPlaceMaxVisitorsEditText = findViewById(R.id.addPlaceMaxVisitorsEditText);
         addPlaceMinPriceEditText = findViewById(R.id.addPlaceMinPriceEditText);
         addPlaceExtraCostEditText = findViewById(R.id.addPlaceExtraCostEditText);

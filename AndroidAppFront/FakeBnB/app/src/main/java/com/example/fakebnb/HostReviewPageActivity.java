@@ -14,6 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.adapter.HostReviewAdapter;
+import com.example.fakebnb.model.HostReviewModel;
+
 import java.util.ArrayList;
 
 public class HostReviewPageActivity extends AppCompatActivity {
