@@ -68,6 +68,7 @@ public class UserReg {
         this.username = signUpRequest.getUsername();
         this.email = signUpRequest.getEmail();
         this.password = signUpRequest.getPassword();
+        this.phone = signUpRequest.getPhone();
     }
 
 
