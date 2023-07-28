@@ -12,7 +12,21 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.fakebnb.model.SignInResponse;
+import com.example.fakebnb.model.UserLoginModel;
+import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.rest.UserRegAPI;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -32,34 +46,72 @@ public class LoginActivity extends AppCompatActivity {
 
         setTextWatchers();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                initRegister();
-            }
-        });
+        loginButton.setOnClickListener(view -> initRegister());
 
     }
 
     private void initRegister() {
         Log.d(TAG, "initRegister: Started");
 
-        // TODO: REMOVE THIS LINE BELOW. ONLY FOR TESTING PURPOSES
-        // debug purpose
-        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-        startActivity(main_page_intent);
+        if (validateData() && validateInputLength()){
 
-//        if (validateData()) {
-//            if (userCredentialsExists(usernameEditText.getText().toString(), passwordEditText.getText().toString())) {
-//                Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-//                startActivity(main_page_intent);
-//            } else {
-//                Toast.makeText(LoginActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-//            }
-//        } else {
-//            Toast.makeText(LoginActivity.this, "Username and Password must be field", Toast.LENGTH_SHORT).show();
-//        }
+            UserLoginModel userLoginModel = new UserLoginModel();
+            userLoginModel.setUsername(usernameEditText.getText().toString());
+            userLoginModel.setPassword(passwordEditText.getText().toString());
 
+            RestClient restClient = new RestClient();
+            UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+
+            userRegAPI.singInUser(userLoginModel)
+                    .enqueue(new Callback<SignInResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<SignInResponse> call, @NonNull Response<SignInResponse> response) {
+                            if (response.isSuccessful()) {
+                                SignInResponse signInResponse = response.body();
+                                if (signInResponse != null) {
+                                    Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                                    Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
+                                    startActivity(main_page_intent);
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "111 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(LoginActivity.this, "222 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<SignInResponse> call, @NonNull Throwable t) {
+                            Toast.makeText(LoginActivity.this, "333 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                            Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, "Error in SignIn occurred!", t);
+                            Log.d(TAG, "onFailure: " + t.getMessage());
+                        }
+                    });
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private boolean validateInputLength() {
+        boolean validInput = true;
+        if (usernameEditText.getText().toString().length() < 4) {
+            usernameLoginWarn.setVisibility(View.VISIBLE);
+            usernameLoginWarn.setText("Username must be at least 4 characters");
+            validInput = false;
+        } else if (usernameEditText.getText().toString().length() > 80) {
+            usernameLoginWarn.setVisibility(View.VISIBLE);
+            usernameLoginWarn.setText("Username must be at most 80 characters");
+            validInput = false;
+        }
+        if (passwordEditText.getText().toString().length() < 8) {
+            passwordLoginWarn.setVisibility(View.VISIBLE);
+            passwordLoginWarn.setText("Password must be at least 8 characters");
+            validInput = false;
+        } else if (passwordEditText.getText().toString().length() > 45) {
+            passwordLoginWarn.setVisibility(View.VISIBLE);
+            passwordLoginWarn.setText("Password must be at most 45 characters");
+            validInput = false;
+        }
+        return validInput;
     }
 
     private void setTextWatchers() {
@@ -115,18 +167,19 @@ public class LoginActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private boolean validateData() {
         Log.d(TAG, "validateData: Started");
+        boolean valid = true;
 
         if (usernameEditText.getText().toString().isEmpty()) {
             usernameLoginWarn.setVisibility(View.VISIBLE);
             usernameLoginWarn.setText("Enter your username");
-            return false;
+            valid = false;
         }
         if (passwordEditText.getText().toString().isEmpty()) {
             passwordLoginWarn.setVisibility(View.VISIBLE);
             passwordLoginWarn.setText("Enter your password");
-            return false;
+            valid = false;
         }
-        return true;
+        return valid;
     }
 
     private void resetWarnVisibility() {

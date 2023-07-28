@@ -18,12 +18,21 @@ public class UserRegController {
 
     @PostMapping("/signUp")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) {
+        System.out.println("username: " + signUpRequest.getUsername());
+        System.out.println("password: " + signUpRequest.getPassword());
+        System.out.println("phone: " + signUpRequest.getPhone());
+        System.out.println("email: " + signUpRequest.getEmail());
+        System.out.println("firstName: " + signUpRequest.getFirstName());
+        System.out.println("lastName: " + signUpRequest.getLastName());
+        System.out.println("roleName: " + signUpRequest.getRoleName());
         userRegService.signUpUser(signUpRequest);
         return ResponseEntity.ok(new ApiResponse(true, "Sign Up succeed"));
     }
 
     @PostMapping("/signIn")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
+        System.out.println("username: " + signInRequest.getUsername());
+        System.out.println("password: " + signInRequest.getPassword());
         return userRegService.signInUser(signInRequest);
     }
 

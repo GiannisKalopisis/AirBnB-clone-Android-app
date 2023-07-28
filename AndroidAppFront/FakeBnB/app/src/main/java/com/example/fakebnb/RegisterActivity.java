@@ -14,7 +14,20 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.fakebnb.enums.RoleName;
+import com.example.fakebnb.model.UserRegisterModel;
+import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.rest.UserRegAPI;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -53,7 +66,6 @@ public class RegisterActivity extends AppCompatActivity {
                 switch (registerResponse) {
                     case "OK":
                         Toast.makeText(RegisterActivity.this, "New user registered successfully", Toast.LENGTH_SHORT).show();
-                        sendDataToDatabase();
                         Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
                         startActivity(main_page_intent);
                         break;
@@ -64,7 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(RegisterActivity.this, "Please enter an other username", Toast.LENGTH_SHORT).show();
                         break;
                     case "PASSWORDS_NOT_MATCH":
-                        Toast.makeText(RegisterActivity.this, "Passwords must match", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
                         break;
                     case "REGISTER_ERROR":
                         Toast.makeText(RegisterActivity.this, "Unexpected error in backend. Please try later.", Toast.LENGTH_SHORT).show();
@@ -74,34 +86,23 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void sendDataToDatabase() {
+    private UserRegisterModel setUserRegisterModel() {
         // TODO: must change and send data to backend
 
-        Log.d(TAG, "sendDataToDatabase: Started");
+        Log.d(TAG, "setUserRegisterModel: Started");
 
-        String username = usernameEditText.getText().toString();
-        String password = passwordEditText.getText().toString();
-        String firstName = firstNameEditText.getText().toString();
-        String lastName = lastNameEditText.getText().toString();
-        String email = emailEditText.getText().toString();
-        String phoneNumber = phoneNumberEditText.getText().toString();
-        String photo = photoEditText.getText().toString();
-        String role;
-        int roleId = roleGroup.getCheckedRadioButtonId();
-        if (roleId == R.id.userRoleCheckBox) {
-            role = "User";
-        } else {
-            role = "Host";
-        }
+        UserRegisterModel userRegisterModel = new UserRegisterModel();
+        userRegisterModel.setUsername(usernameEditText.getText().toString());
+        userRegisterModel.setPassword(passwordEditText.getText().toString());
+        userRegisterModel.setFirstName(firstNameEditText.getText().toString());
+        userRegisterModel.setLastName(lastNameEditText.getText().toString());
+        userRegisterModel.setEmail(emailEditText.getText().toString());
+        userRegisterModel.setPhone(phoneNumberEditText.getText().toString());
+        userRegisterModel.setRoleName(roleGroup.getCheckedRadioButtonId() == R.id.userRoleCheckBox ? RoleName.ROLE_USER : RoleName.ROLE_HOST);
 
-        Log.d(TAG, "sendDataToDatabase: username: " + username);
-        Log.d(TAG, "sendDataToDatabase: password: " + password);
-        Log.d(TAG, "sendDataToDatabase: firstName: " + firstName);
-        Log.d(TAG, "sendDataToDatabase: lastName: " + lastName);
-        Log.d(TAG, "sendDataToDatabase: email: " + email);
-        Log.d(TAG, "sendDataToDatabase: phoneNumber: " + phoneNumber);
-        Log.d(TAG, "sendDataToDatabase: role: " + role);
-        Log.d(TAG, "sendDataToDatabase: photo: " + photo);
+        Log.d(TAG, "setUserRegisterModel: toString: " + userRegisterModel.toString());
+        Log.d(TAG, "setUserRegisterModel: Finished");
+        return userRegisterModel;
     }
 
     private void setTextWatchers() {
@@ -391,19 +392,42 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private String userRegisterSuccess() {
-        // Communicate with BACKEND and check the fields
+
+        UserRegisterModel userRegisterModel = setUserRegisterModel();
+
         if (!initRegister()) {
             if (!confirmPasswordEditText.getText().toString().equals(passwordEditText.getText().toString())) {
                 return "PASSWORDS_DO_NOT_MATCH";
             }
             return "NOT_ALL_FIELDS_COMPLETED";
         }
-//        if (error in register) {
-//            return "REGISTER_ERROR";
-//        }
-//        if (username exists) {
-//            return "USERNAME_IN_USE";
-//        }
+
+        RestClient restClient = new RestClient();
+        UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+
+        userRegAPI.registerUser(userRegisterModel)
+                .enqueue(new Callback<UserRegisterModel>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(RegisterActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "onResponse: " + response.body());
+                            Intent login_intent = new Intent(getApplicationContext(), LoginActivity.class);
+                            startActivity(login_intent);
+                        } else {
+                            Toast.makeText(RegisterActivity.this, "222 Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "onResponse: " + response.errorBody());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UserRegisterModel> call, @NonNull Throwable t) {
+                        Toast.makeText(RegisterActivity.this, "333 Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                        Logger.getLogger(RegisterActivity.class.getName()).log(Level.SEVERE, "Error in Register occurred!", t);
+                        Log.d(TAG, "onFailure: " + t.getMessage());
+                    }
+                });
+
         return "OK";
     }
 
