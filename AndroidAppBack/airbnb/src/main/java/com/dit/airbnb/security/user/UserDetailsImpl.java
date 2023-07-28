@@ -2,6 +2,7 @@ package com.dit.airbnb.security.user;
 
 import com.dit.airbnb.dto.UserReg;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,7 @@ public class UserDetailsImpl implements UserDetails {
 
     private final Long id;
 
+    @Getter
     private final String firstName;
 
     private final String lastName;
@@ -57,10 +59,6 @@ public class UserDetailsImpl implements UserDetails {
 
     public Long getId() {
         return id;
-    }
-
-    public String getFirstName() {
-        return firstName;
     }
 
     public String getLastName() {

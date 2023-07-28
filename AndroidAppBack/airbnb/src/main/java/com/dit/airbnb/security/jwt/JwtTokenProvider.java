@@ -2,18 +2,28 @@ package com.dit.airbnb.security.jwt;
 
 import com.dit.airbnb.security.config.SecurityConstants;
 import com.dit.airbnb.security.user.UserDetailsImpl;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
-import io.jsonwebtoken.*;
+
 
 @Component
 public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
+
+    private Key getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(SecurityConstants.SECRET);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
 
     public String generateToken(Authentication authentication) {
         UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
@@ -22,14 +32,14 @@ public class JwtTokenProvider {
                 .setSubject(Long.toString(userDetailsImpl.getId()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256, SecurityConstants.SECRET)
+                .signWith(getSigningKey())
                 .compact();
     }
 
     public Long getUserIdFromJWT(String token) {
         // get private from the payload
-        Claims claims = Jwts.parser()
-                .setSigningKey(SecurityConstants.SECRET)
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey()).build()
                 .parseClaimsJws(token)
                 .getBody();
 
@@ -38,7 +48,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(SecurityConstants.SECRET).parseClaimsJws(authToken);
+            Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
             return true;
         } catch (SignatureException ex) {
             logger.error("Invalid JWT signature");

@@ -19,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "reg_user", uniqueConstraints = {
+@Table(name = "user_reg", uniqueConstraints = {
         @UniqueConstraint(columnNames = {
                 "username"
         }),

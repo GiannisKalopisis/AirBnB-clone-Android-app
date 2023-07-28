@@ -30,7 +30,6 @@ public class UserRegService {
     @Autowired
     private RoleService roleService;
 
-
     @Autowired
     private JwtTokenProvider tokenProvider;
 
@@ -78,7 +77,8 @@ public class UserRegService {
         String jwt = tokenProvider.generateToken(authentication);
 
         return ResponseEntity.ok(SignInResponse.builder().id(userReg.getId()).jwtToken(jwt).username(userReg.getUsername())
-                .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName()));
+                .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName()).build());
+
     }
 
 
