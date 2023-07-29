@@ -22,6 +22,12 @@ import com.example.fakebnb.model.UserRegisterModel;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,26 +68,65 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 resetWarnVisibility();
-                String registerResponse = userRegisterSuccess();
-                switch (registerResponse) {
-                    case "OK":
-                        Toast.makeText(RegisterActivity.this, "New user registered successfully", Toast.LENGTH_SHORT).show();
-                        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-                        startActivity(main_page_intent);
-                        break;
-                    case "NOT_ALL_FIELDS_COMPLETED":
-                        Toast.makeText(RegisterActivity.this, "Must fill all fields", Toast.LENGTH_SHORT).show();
-                        break;
-                    case "USERNAME_IN_USE":
-                        Toast.makeText(RegisterActivity.this, "Please enter an other username", Toast.LENGTH_SHORT).show();
-                        break;
-                    case "PASSWORDS_NOT_MATCH":
+
+                UserRegisterModel userRegisterModel = setUserRegisterModel();
+
+                if (!initRegister()) {
+                    if (!confirmPasswordEditText.getText().toString().equals(passwordEditText.getText().toString())) {
                         Toast.makeText(RegisterActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-                        break;
-                    case "REGISTER_ERROR":
-                        Toast.makeText(RegisterActivity.this, "Unexpected error in backend. Please try later.", Toast.LENGTH_SHORT).show();
-                        break;
+                        return;
+                    }
+                    Toast.makeText(RegisterActivity.this, "Must fill all fields", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                RestClient restClient = new RestClient();
+                UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+
+                userRegAPI.registerUser(userRegisterModel)
+                        .enqueue(new Callback<UserRegisterModel>() {
+                            @Override
+                            public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
+                                if (response.isSuccessful()) {
+                                    Toast.makeText(RegisterActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "onResponse: " + response.body());
+                                    Intent login_intent = new Intent(getApplicationContext(), LoginActivity.class);
+                                    startActivity(login_intent);
+                                } else {
+                                    if (response.code() == HttpURLConnection.HTTP_CONFLICT){
+                                        String errorBodyString;
+                                        JSONObject errorObject;
+                                        try {
+                                            errorBodyString = Objects.requireNonNull(response.errorBody()).string();
+                                            errorObject = new JSONObject(errorBodyString);
+                                        } catch (IOException | JSONException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                        String errorMessage = errorObject.optString("message");
+
+                                        if (errorMessage.equals("A user with the same username already exists")) {
+                                            Toast.makeText(RegisterActivity.this, "A user with the same username already exists", Toast.LENGTH_SHORT).show();
+                                            usernameWarn.setText("Username already exists");
+                                            usernameWarn.setVisibility(View.VISIBLE);
+                                        } else if (errorMessage.equals("A user with the same email already exists")) {
+                                            Toast.makeText(RegisterActivity.this, "A user with the same email already exists", Toast.LENGTH_SHORT).show();
+                                            emailWarn.setText("Email already exists");
+                                            emailWarn.setVisibility(View.VISIBLE);
+                                        }
+                                    } else {
+                                        Toast.makeText(RegisterActivity.this, "Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                                        Log.d(TAG, "onResponse: " + response.errorBody());
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<UserRegisterModel> call, @NonNull Throwable t) {
+                                Toast.makeText(RegisterActivity.this, "Unexpected error in backend. Please try later.", Toast.LENGTH_SHORT).show();
+                                Logger.getLogger(RegisterActivity.class.getName()).log(Level.SEVERE, "Error in Register occurred!", t);
+                                Log.d(TAG, "onFailure: " + t.getMessage());
+                            }
+                        });
             }
         });
     }
@@ -100,7 +145,7 @@ public class RegisterActivity extends AppCompatActivity {
         userRegisterModel.setPhone(phoneNumberEditText.getText().toString());
         userRegisterModel.setRoleName(roleGroup.getCheckedRadioButtonId() == R.id.userRoleCheckBox ? RoleName.ROLE_USER : RoleName.ROLE_HOST);
 
-        Log.d(TAG, "setUserRegisterModel: toString: " + userRegisterModel.toString());
+        Log.d(TAG, "setUserRegisterModel: toString: " + userRegisterModel);
         Log.d(TAG, "setUserRegisterModel: Finished");
         return userRegisterModel;
     }
@@ -390,48 +435,4 @@ public class RegisterActivity extends AppCompatActivity {
 
         roleGroup = findViewById(R.id.roleGroup);
     }
-
-    private String userRegisterSuccess() {
-
-        UserRegisterModel userRegisterModel = setUserRegisterModel();
-
-        if (!initRegister()) {
-            if (!confirmPasswordEditText.getText().toString().equals(passwordEditText.getText().toString())) {
-                return "PASSWORDS_DO_NOT_MATCH";
-            }
-            return "NOT_ALL_FIELDS_COMPLETED";
-        }
-
-        RestClient restClient = new RestClient();
-        UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
-
-        userRegAPI.registerUser(userRegisterModel)
-                .enqueue(new Callback<UserRegisterModel>() {
-                    @Override
-                    public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "onResponse: " + response.body());
-                            Intent login_intent = new Intent(getApplicationContext(), LoginActivity.class);
-                            startActivity(login_intent);
-                        } else {
-                            Toast.makeText(RegisterActivity.this, "222 Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "onResponse: " + response.errorBody());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<UserRegisterModel> call, @NonNull Throwable t) {
-                        Toast.makeText(RegisterActivity.this, "333 Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
-                        Logger.getLogger(RegisterActivity.class.getName()).log(Level.SEVERE, "Error in Register occurred!", t);
-                        Log.d(TAG, "onFailure: " + t.getMessage());
-                    }
-                });
-
-        return "OK";
-    }
-
-//    private boolean allFieldsFilled() {
-//
-//    }
 }

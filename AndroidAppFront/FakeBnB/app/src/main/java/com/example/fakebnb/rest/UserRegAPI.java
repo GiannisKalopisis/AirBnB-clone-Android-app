@@ -1,6 +1,6 @@
 package com.example.fakebnb.rest;
 
-import com.example.fakebnb.model.SignInResponse;
+import com.example.fakebnb.model.response.SignInResponse;
 import com.example.fakebnb.model.UserLoginModel;
 import com.example.fakebnb.model.UserRegisterModel;
 

@@ -15,12 +15,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.fakebnb.model.SignInResponse;
+import com.example.fakebnb.model.response.SignInResponse;
 import com.example.fakebnb.model.UserLoginModel;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,6 +68,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (response.isSuccessful()) {
                                 SignInResponse signInResponse = response.body();
                                 if (signInResponse != null) {
+                                    Log.d(TAG, "onResponse: toString: " + signInResponse.toString());
                                     Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                                     Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
                                     startActivity(main_page_intent);
@@ -196,10 +196,5 @@ public class LoginActivity extends AppCompatActivity {
         passwordLoginWarn = findViewById(R.id.passwordLoginWarn);
 
         loginButton = findViewById(R.id.loginPageButton);
-    }
-
-    private boolean userCredentialsExists(String username, String password) {
-        // TODO: change and communicate with BACKEND
-        return username.equals("admin") && password.equals("password");
     }
 }
