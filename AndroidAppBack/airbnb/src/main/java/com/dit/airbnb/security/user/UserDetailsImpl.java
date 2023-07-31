@@ -2,7 +2,10 @@ package com.dit.airbnb.security.user;
 
 import com.dit.airbnb.dto.UserReg;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,7 +14,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Getter
+@Data
+@AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
     private final Long id;
@@ -28,18 +32,6 @@ public class UserDetailsImpl implements UserDetails {
     private final String email;
 
     private final Collection<? extends GrantedAuthority> authorities;
-
-    public UserDetailsImpl(Long id, String firstName, String lastName, String email, String username,
-                           String password, Collection<? extends GrantedAuthority> authorities) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.username = username;
-        this.password = password;
-        this.authorities = authorities;
-
-    }
 
     public static UserDetailsImpl create(UserReg user) {
         List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
