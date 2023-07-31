@@ -16,23 +16,17 @@ import java.util.Set;
 @NoArgsConstructor
 public class UserRegUpdateRequest {
 
-    @Size(min = 2, max = 80)
     private String firstName;
 
-    @Size(min = 2, max = 80)
     private String lastName;
 
-    @Size(min = 4, max = 80)
     private String username;
 
-    @Size(min = 8, max = 45)
     private String password;
 
-    @Size(max = 80)
     @Email
     private String email;
 
-    @Size(max = 45)
     private String phone;
 
     @Enumerated

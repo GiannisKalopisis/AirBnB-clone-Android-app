@@ -20,7 +20,6 @@ import static com.dit.airbnb.security.config.SecurityConstants.SIGN_UP_URL;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfiguration {
 
     @Autowired
