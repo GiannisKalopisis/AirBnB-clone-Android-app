@@ -44,7 +44,6 @@ public class UserRegService {
     private PasswordEncoder passwordEncoder;
 
     public void signUpUser(SignUpRequest signUpRequest) {
-        System.out.println(signUpRequest.getUsername());
         userRegRepository.findByUsername(signUpRequest.getUsername())
                 .ifPresent((s) -> {
                     throw new UserExistsException("A user with the same username already exists");
