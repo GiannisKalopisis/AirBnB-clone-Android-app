@@ -48,8 +48,4 @@ public class Booking {
     @JoinColumn(name = "user_reg_id")
     private UserReg userReg;
 
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "image_id")
-    private Set<Image> images;
 }

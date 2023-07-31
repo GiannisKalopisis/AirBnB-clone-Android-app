@@ -89,4 +89,8 @@ public class Apartment {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "apartment", cascade = CascadeType.ALL)
     private Set<Booking> bookings = new HashSet<>();
 
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "apartment", cascade = CascadeType.ALL)
+    private Set<Image> images;
+
 }
