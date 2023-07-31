@@ -1,4 +1,4 @@
-package com.dit.airbnb.request;
+package com.dit.airbnb.request.user_reg;
 
 
 import com.dit.airbnb.dto.enums.RoleName;
@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -23,11 +25,11 @@ public class SignUpRequest {
     private String lastName;
 
     @NotNull
-    @Size(min = 4, max = 80)
+    @Size(min = 2, max = 80)
     private String username;
 
     @NotNull
-    @Size(min = 8, max = 45)
+    @Size(min = 6, max = 45)
     private String password;
 
     @NotNull
@@ -39,6 +41,6 @@ public class SignUpRequest {
     private String phone;
 
     @Enumerated
-    private RoleName roleName;
+    private Set<RoleName> roleNames;
 
 }

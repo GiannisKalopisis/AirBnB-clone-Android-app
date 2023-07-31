@@ -1,4 +1,4 @@
-package com.dit.airbnb.request;
+package com.dit.airbnb.request.user_reg;
 
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

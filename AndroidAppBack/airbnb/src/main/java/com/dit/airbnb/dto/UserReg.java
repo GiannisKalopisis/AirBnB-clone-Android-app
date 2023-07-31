@@ -1,7 +1,7 @@
 package com.dit.airbnb.dto;
 
 
-import com.dit.airbnb.request.SignUpRequest;
+import com.dit.airbnb.request.user_reg.SignUpRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -54,6 +54,34 @@ public class UserReg {
     private String phone;
 
     @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userRegHost", cascade = CascadeType.ALL)
+    private Set<Apartment> apartments = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userReg", cascade = CascadeType.ALL)
+    private Set<Booking> bookings = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userReg", cascade = CascadeType.ALL)
+    private Set<Chat> chats = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userRegCreator", cascade = CascadeType.ALL)
+    private Set<BookingReview> bookingReviews = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userRegSender", cascade = CascadeType.ALL)
+    private Set<Message> sentMessages = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userRegReceiver", cascade = CascadeType.ALL)
+    private Set<Message> receivedMessages = new HashSet<>();
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_id")
+    private Image image; // may be null
+
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "user_roles",
@@ -70,6 +98,5 @@ public class UserReg {
         this.password = signUpRequest.getPassword();
         this.phone = signUpRequest.getPhone();
     }
-
 
 }

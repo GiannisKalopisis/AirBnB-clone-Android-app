@@ -11,11 +11,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
 public class UserDetailsImpl implements UserDetails {
 
     private final Long id;
 
-    @Getter
     private final String firstName;
 
     private final String lastName;
@@ -55,26 +55,6 @@ public class UserDetailsImpl implements UserDetails {
                 user.getPassword(),
                 authorities
         );
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     @Override
