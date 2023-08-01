@@ -17,7 +17,7 @@ public class RoleService {
     public Role saveRole(RoleName roleName) {
         Role searchedRole = roleRepository.findByName(roleName).orElse(null);
         if (searchedRole != null) return searchedRole;
-        return roleRepository.save(Role.builder().name(roleName).build());
+        return roleRepository.save(new Role(roleName));
     }
 
     public Optional<Role> findByName(RoleName roleName) {

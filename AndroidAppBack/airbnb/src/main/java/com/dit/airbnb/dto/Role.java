@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "role")
 public class Role {
@@ -33,4 +29,39 @@ public class Role {
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<UserReg> userRegs = new HashSet<>();
 
+    public Role() {
+    }
+
+    public Role(RoleName name) {
+        this.name = name;
+    }
+
+    public Role(RoleName name, Set<UserReg> userRegs) {
+        this.name = name;
+        this.userRegs = userRegs;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public RoleName getName() {
+        return name;
+    }
+
+    public void setName(RoleName name) {
+        this.name = name;
+    }
+
+    public Set<UserReg> getUserRegs() {
+        return userRegs;
+    }
+
+    public void setUserRegs(Set<UserReg> userRegs) {
+        this.userRegs = userRegs;
+    }
 }

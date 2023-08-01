@@ -32,5 +32,4 @@ public class Image {
     @JoinColumn(name = "apartment_id")
     private Apartment apartment;
 
-
 }

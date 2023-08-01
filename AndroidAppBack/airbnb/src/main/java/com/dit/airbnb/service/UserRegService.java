@@ -83,8 +83,13 @@ public class UserRegService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
 
+        Set<RoleName> roleNames = new HashSet<>();
+        for (Role role: userReg.getRoles()) {
+            roleNames.add(role.getName());
+        }
+
         return SignInResponse.builder().id(userReg.getId()).jwtToken(jwt).username(userReg.getUsername())
-                .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName()).build();
+                .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName()).roleNames(roleNames).build();
 
     }
 
