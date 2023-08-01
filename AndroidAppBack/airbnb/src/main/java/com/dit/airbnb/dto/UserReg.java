@@ -15,10 +15,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Builder
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "user_reg", uniqueConstraints = {
         @UniqueConstraint(columnNames = {
                 "username"
@@ -99,4 +98,16 @@ public class UserReg {
         this.phone = signUpRequest.getPhone();
     }
 
+    @Override
+    public String toString() {
+        return "UserReg{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                '}';
+    }
 }

@@ -2,6 +2,7 @@ package com.dit.airbnb.security.user;
 
 import com.dit.airbnb.dto.UserReg;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.transaction.Transactional;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

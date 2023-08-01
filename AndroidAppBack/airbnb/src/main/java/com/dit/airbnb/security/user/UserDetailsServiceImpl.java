@@ -2,6 +2,7 @@ package com.dit.airbnb.security.user;
 
 import com.dit.airbnb.dto.UserReg;
 import com.dit.airbnb.repository.UserRegRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      * otherwise an exception is thrown.
      */
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserReg user = userRegRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User with username: \"" + username + "\" was not found.")
@@ -32,6 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     // This method is used by JWTAuthenticationFilter
+    @Transactional
     public UserDetails loadUserById(Long id) {
         UserReg user = userRegRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User with id: \"" + id + "\" was not found.")

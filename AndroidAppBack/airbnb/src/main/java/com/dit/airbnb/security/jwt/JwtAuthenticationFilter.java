@@ -50,6 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception exception) {
+            System.out.println(exception.getMessage());
             logger.error("Could not set user authentication in security context", exception);
         }
 
