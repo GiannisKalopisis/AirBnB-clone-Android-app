@@ -5,11 +5,14 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 public class SignInRequest {
 

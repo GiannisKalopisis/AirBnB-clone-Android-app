@@ -2,12 +2,10 @@ package com.dit.airbnb.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,13 +21,22 @@ public class Image {
     @Column(name = "path", nullable = false)
     private String path;
 
+    @Getter
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "image")
     private UserReg userReg;
 
+    @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "apartment_id")
     private Apartment apartment;
 
+    public void setUserReg(UserReg userReg) {
+        this.userReg = userReg;
+    }
+
+    public void setApartment(Apartment apartment) {
+        this.apartment = apartment;
+    }
 }

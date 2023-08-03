@@ -2,12 +2,10 @@ package com.dit.airbnb.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,9 +18,13 @@ public class Chat {
     @Column(name = "id")
     private Long id;
 
+    @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_reg_id")
     private UserReg userReg;
 
+    public void setUserReg(UserReg userReg) {
+        this.userReg = userReg;
+    }
 }

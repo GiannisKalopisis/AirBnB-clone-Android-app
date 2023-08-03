@@ -12,16 +12,20 @@ import com.dit.airbnb.request.user_reg.SignUpRequest;
 import com.dit.airbnb.request.user_reg.UserRegUpdateRequest;
 import com.dit.airbnb.response.SignInResponse;
 import com.dit.airbnb.response.UserRegResponse;
+import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.security.jwt.JwtTokenProvider;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,7 +47,7 @@ public class UserRegService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public void signUpUser(SignUpRequest signUpRequest) {
+    public ResponseEntity<?> signUpUser(SignUpRequest signUpRequest) {
         userRegRepository.findByUsername(signUpRequest.getUsername())
                 .ifPresent((s) -> {
                     throw new UserExistsException("A user with the same username already exists");
@@ -66,9 +70,14 @@ public class UserRegService {
         userReg.setRoles(new HashSet<>(){{addAll(roleSet);}});
         userRegRepository.save(userReg);
 
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentContextPath().path("/{userId}")
+                .buildAndExpand(userReg.getId()).toUri();
+
+        return ResponseEntity.created(uri).body(new ApiResponse(true, "signUpUser succeed", userReg));
     }
 
-    public SignInResponse signInUser(SignInRequest signInRequest) {
+    public ResponseEntity<?> signInUser(SignInRequest signInRequest) {
         // Check if the user exists
         UserReg userReg = userRegRepository.findByUsername(signInRequest.getUsername()).
                 orElseThrow(() -> new AppException("Invalid username or password."));
@@ -88,12 +97,14 @@ public class UserRegService {
             roleNames.add(role.getName());
         }
 
-        return SignInResponse.builder().id(userReg.getId()).jwtToken(jwt).username(userReg.getUsername())
+        SignInResponse signInResponseRes = SignInResponse.builder().id(userReg.getId()).jwtToken(jwt).username(userReg.getUsername())
                 .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName()).roleNames(roleNames).build();
+
+        return ResponseEntity.ok(new ApiResponse(true, "signIn succeed", signInResponseRes));
 
     }
 
-    public void updateUserRegById(Long userRegId, UserDetailsImpl userDetails, UserRegUpdateRequest userRegUpdateRequest) {
+    public ResponseEntity<?> updateUserRegById(Long userRegId, UserDetailsImpl userDetails, UserRegUpdateRequest userRegUpdateRequest) {
         if (!userRegId.equals(userDetails.getId())) {
             throw new ResourceNotFoundException("UserReg", "id", userRegId);
         }
@@ -107,23 +118,9 @@ public class UserRegService {
             userReg.setLastName(userRegUpdateRequest.getLastName());
         }
 
-//        if (userRegUpdateRequest.getUsername() != null) {
-//            userRegRepository.findByUsername(userReg.getUsername()).ifPresent(user -> { throw new UserExistsException("A user with same username already exists");});
-//            userReg.setUsername(userReg.getUsername());
-//        }
-
         if (userRegUpdateRequest.getPhone() != null) {
             userReg.setPhone(userRegUpdateRequest.getPhone());
         }
-
-//        if (userRegUpdateRequest.getPassword() != null) {
-//            userReg.setPassword(passwordEncoder.encode(userRegUpdateRequest.getPassword()));
-//        }
-
-//        if (userRegUpdateRequest.getEmail() != null) {
-//            userRegRepository.findByEmail(userRegUpdateRequest.getEmail()).ifPresent((s) -> { throw new UserExistsException("A user with same email already exists ");});
-//            userReg.setEmail(userRegUpdateRequest.getEmail());
-//        }
 
         if (userRegUpdateRequest.getRoleNames() != null) {
             Set<Role> roleSet = new HashSet<>(userReg.getRoles());
@@ -136,16 +133,19 @@ public class UserRegService {
         }
 
         userRegRepository.save(userReg);
+
+        return ResponseEntity.ok(new ApiResponse(true, "updateUserReg succeed"));
     }
 
-    public UserRegResponse getUserRegById(Long userRegId, UserDetailsImpl userDetails) {
+    public ResponseEntity<?> getUserRegById(Long userRegId, UserDetailsImpl userDetails) {
         if (!userRegId.equals(userDetails.getId())) {
             throw new ResourceNotFoundException("UserReg", "id", userRegId);
         }
         UserReg userReg = userRegRepository.findById(userRegId).orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", userRegId));
-        return UserRegResponse.builder().id(userReg.getId()).username(userReg.getUsername())
-                .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName())
-                .phone(userReg.getPhone()).build();
+        UserRegResponse userRegResponseRes = new UserRegResponse(userReg.getId(), userReg.getFirstName(),
+                userReg.getLastName(), userReg.getUsername(), userReg.getEmail(), userReg.getPhone());
+
+        return ResponseEntity.ok(new ApiResponse(true, "getUserReg succeed", userRegResponseRes));
     }
 
 }

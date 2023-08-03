@@ -17,40 +17,36 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/app/user")
+@RequestMapping("/app")
 public class UserRegController {
 
     @Autowired
     private UserRegService userRegService;
 
-    @PostMapping("/signUp")
+    @PostMapping("/user/signUp")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) {
-        userRegService.signUpUser(signUpRequest);
-        return ResponseEntity.ok(new ApiResponse(true, "Sign Up succeed"));
+        return userRegService.signUpUser(signUpRequest);
     }
 
-    @PostMapping("/signIn")
+    @PostMapping("/user/signIn")
     public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest) {
-        SignInResponse signInResponse = userRegService.signInUser(signInRequest);
-        return ResponseEntity.ok(new ApiResponse(true, "signIn succeed", signInResponse));
+        return userRegService.signInUser(signInRequest);
     }
 
 
-    @PutMapping("/{userId}")
+    @PutMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('ROLE_USER, ROLE_HOST')")
     public ResponseEntity<?> updateUserReg(@PathVariable(value = "userId") Long userId,
                                            @Valid @RequestBody UserRegUpdateRequest userRegUpdateRequest,
                                            @Valid @CurrentUser UserDetailsImpl currentUser) {
-        userRegService.updateUserRegById(userId, currentUser, userRegUpdateRequest);
-        return ResponseEntity.ok(new ApiResponse(true, "updateUserReg succeed"));
+        return userRegService.updateUserRegById(userId, currentUser, userRegUpdateRequest);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('ROLE_USER, ROLE_HOST')")
     public ResponseEntity<?> getUserReg(@PathVariable(value = "userId") Long userId,
                                         @Valid @CurrentUser UserDetailsImpl currentUser) {
-        UserRegResponse userRegResponse = userRegService.getUserRegById(userId, currentUser);
-        return ResponseEntity.ok(new ApiResponse(true, "getUserReg succeed", userRegResponse));
+        return userRegService.getUserRegById(userId, currentUser);
     }
 
 }

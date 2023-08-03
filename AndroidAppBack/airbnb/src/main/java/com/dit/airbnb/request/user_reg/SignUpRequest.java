@@ -5,14 +5,13 @@ import com.dit.airbnb.dto.enums.RoleName;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 public class SignUpRequest {
 

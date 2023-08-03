@@ -4,14 +4,13 @@ package com.dit.airbnb.dto;
 import com.dit.airbnb.dto.enums.RoleName;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "role")
 public class Role {
@@ -26,6 +25,7 @@ public class Role {
     //@NaturalId
     private RoleName name;
 
+    @Getter
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<UserReg> userRegs = new HashSet<>();
 
@@ -39,26 +39,6 @@ public class Role {
     public Role(RoleName name, Set<UserReg> userRegs) {
         this.name = name;
         this.userRegs = userRegs;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public RoleName getName() {
-        return name;
-    }
-
-    public void setName(RoleName name) {
-        this.name = name;
-    }
-
-    public Set<UserReg> getUserRegs() {
-        return userRegs;
     }
 
     public void setUserRegs(Set<UserReg> userRegs) {

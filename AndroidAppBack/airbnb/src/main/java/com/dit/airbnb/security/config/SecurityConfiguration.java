@@ -38,7 +38,7 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable).cors(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/**").permitAll().requestMatchers(SIGN_UP_URL).permitAll().requestMatchers(SIGN_IN_URL).permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth/*.requestMatchers("/**").permitAll()*/.requestMatchers(SIGN_UP_URL).permitAll().requestMatchers(SIGN_IN_URL).permitAll().anyRequest().authenticated())
                 .authenticationProvider(authenticationConfig.authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();

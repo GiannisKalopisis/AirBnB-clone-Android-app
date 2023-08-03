@@ -2,12 +2,10 @@ package com.dit.airbnb.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,14 +25,23 @@ public class BookingReview {
     private String description;
 
     // external tables
+    @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_reg_creator_id")
     private UserReg userRegCreator;
 
+    @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
     private Booking booking;
 
+    public void setUserRegCreator(UserReg userRegCreator) {
+        this.userRegCreator = userRegCreator;
+    }
+
+    public void setBooking(Booking booking) {
+        this.booking = booking;
+    }
 }

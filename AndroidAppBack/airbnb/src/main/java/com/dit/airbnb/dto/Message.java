@@ -2,14 +2,12 @@ package com.dit.airbnb.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Timestamp;
 
-@Data
+@Setter
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,6 +20,7 @@ public class Message {
     @Column(name = "id")
     private Long id;
 
+    @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id")
@@ -40,14 +39,27 @@ public class Message {
     private Boolean isLastMessage;
 
     // external tables
+    @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_reg_sender_id")
     private UserReg userRegSender;
 
+    @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_reg_receiver_id")
     private UserReg userRegReceiver;
 
+    public void setChat(Chat chat) {
+        this.chat = chat;
+    }
+
+    public void setUserRegSender(UserReg userRegSender) {
+        this.userRegSender = userRegSender;
+    }
+
+    public void setUserRegReceiver(UserReg userRegReceiver) {
+        this.userRegReceiver = userRegReceiver;
+    }
 }
