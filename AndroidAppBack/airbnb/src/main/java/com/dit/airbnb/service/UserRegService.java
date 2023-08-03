@@ -107,23 +107,23 @@ public class UserRegService {
             userReg.setLastName(userRegUpdateRequest.getLastName());
         }
 
-        if (userRegUpdateRequest.getUsername() != null) {
-            userRegRepository.findByUsername(userReg.getUsername()).ifPresent(user -> { throw new UserExistsException("A user with same username already exists");});
-            userReg.setUsername(userReg.getUsername());
-        }
+//        if (userRegUpdateRequest.getUsername() != null) {
+//            userRegRepository.findByUsername(userReg.getUsername()).ifPresent(user -> { throw new UserExistsException("A user with same username already exists");});
+//            userReg.setUsername(userReg.getUsername());
+//        }
 
         if (userRegUpdateRequest.getPhone() != null) {
             userReg.setPhone(userRegUpdateRequest.getPhone());
         }
 
-        if (userRegUpdateRequest.getPassword() != null) {
-            userReg.setPassword(passwordEncoder.encode(userRegUpdateRequest.getPassword()));
-        }
+//        if (userRegUpdateRequest.getPassword() != null) {
+//            userReg.setPassword(passwordEncoder.encode(userRegUpdateRequest.getPassword()));
+//        }
 
-        if (userRegUpdateRequest.getEmail() != null) {
-            userRegRepository.findByEmail(userRegUpdateRequest.getEmail()).ifPresent((s) -> { throw new UserExistsException("A user with same email already exists ");});
-            userReg.setEmail(userRegUpdateRequest.getEmail());
-        }
+//        if (userRegUpdateRequest.getEmail() != null) {
+//            userRegRepository.findByEmail(userRegUpdateRequest.getEmail()).ifPresent((s) -> { throw new UserExistsException("A user with same email already exists ");});
+//            userReg.setEmail(userRegUpdateRequest.getEmail());
+//        }
 
         if (userRegUpdateRequest.getRoleNames() != null) {
             Set<Role> roleSet = new HashSet<>(userReg.getRoles());
@@ -144,7 +144,8 @@ public class UserRegService {
         }
         UserReg userReg = userRegRepository.findById(userRegId).orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", userRegId));
         return UserRegResponse.builder().id(userReg.getId()).username(userReg.getUsername())
-                .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName()).build();
+                .email(userReg.getEmail()).firstName(userReg.getFirstName()).lastName(userReg.getLastName())
+                .phone(userReg.getPhone()).build();
     }
 
 }

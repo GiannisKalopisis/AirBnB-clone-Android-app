@@ -45,7 +45,6 @@ public class UserDetailsImpl implements UserDetails {
                 user.getEmail(),
                 authorities
         );
-
     }
 
     @Override

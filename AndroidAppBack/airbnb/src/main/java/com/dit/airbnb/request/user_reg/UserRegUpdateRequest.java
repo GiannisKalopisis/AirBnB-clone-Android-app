@@ -20,12 +20,12 @@ public class UserRegUpdateRequest {
 
     private String lastName;
 
-    private String username;
-
-    private String password;
-
-    @Email
-    private String email;
+//    private String username;
+//
+//    private String password;
+//
+//    @Email
+//    private String email;
 
     private String phone;
 

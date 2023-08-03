@@ -6,11 +6,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_reg", uniqueConstraints = {
         @UniqueConstraint(columnNames = {
                 "username"
@@ -89,138 +96,6 @@ public class UserReg {
         this.email = signUpRequest.getEmail();
         this.password = signUpRequest.getPassword();
         this.phone = signUpRequest.getPhone();
-    }
-
-    public UserReg() {
-    }
-
-    public UserReg(String firstName, String lastName, String username, String password, String email, String phone) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.phone = phone;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Set<Apartment> getApartments() {
-        return apartments;
-    }
-
-    public void setApartments(Set<Apartment> apartments) {
-        this.apartments = apartments;
-    }
-
-    public Set<Booking> getBookings() {
-        return bookings;
-    }
-
-    public void setBookings(Set<Booking> bookings) {
-        this.bookings = bookings;
-    }
-
-    public Set<Chat> getChats() {
-        return chats;
-    }
-
-    public void setChats(Set<Chat> chats) {
-        this.chats = chats;
-    }
-
-    public Set<BookingReview> getBookingReviews() {
-        return bookingReviews;
-    }
-
-    public void setBookingReviews(Set<BookingReview> bookingReviews) {
-        this.bookingReviews = bookingReviews;
-    }
-
-    public Set<Message> getSentMessages() {
-        return sentMessages;
-    }
-
-    public void setSentMessages(Set<Message> sentMessages) {
-        this.sentMessages = sentMessages;
-    }
-
-    public Set<Message> getReceivedMessages() {
-        return receivedMessages;
-    }
-
-    public void setReceivedMessages(Set<Message> receivedMessages) {
-        this.receivedMessages = receivedMessages;
-    }
-
-    public Image getImage() {
-        return image;
-    }
-
-    public void setImage(Image image) {
-        this.image = image;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
     }
 
     @Override
