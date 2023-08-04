@@ -63,6 +63,8 @@ public class ApartmentService {
 
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
 
+        authorizationService.isHostOfTheApartment(currentUser.getId(), apartmentId);
+
         ApartmentResponse apartmentResponse = new ApartmentResponse(
                 apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
                 apartment.getAvailableEndDate(), apartment.getMaxVisitors(), apartment.getMinRetailPrice(),

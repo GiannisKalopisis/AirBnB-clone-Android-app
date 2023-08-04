@@ -3,6 +3,7 @@ package com.dit.airbnb.security.config;
 import com.dit.airbnb.security.jwt.JwtAuthenticationEntryPoint;
 import com.dit.airbnb.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,6 +21,7 @@ import static com.dit.airbnb.security.config.SecurityConstants.SIGN_UP_URL;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
 
     @Autowired
@@ -38,7 +40,7 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable).cors(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth/*.requestMatchers("/**").permitAll()*/.requestMatchers(SIGN_UP_URL).permitAll().requestMatchers(SIGN_IN_URL).permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(SIGN_UP_URL).permitAll().requestMatchers(SIGN_IN_URL).permitAll().anyRequest().authenticated())
                 .authenticationProvider(authenticationConfig.authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();

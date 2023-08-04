@@ -2,10 +2,7 @@ package com.dit.airbnb.request.apartment;
 
 import com.dit.airbnb.dto.enums.RentalType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;

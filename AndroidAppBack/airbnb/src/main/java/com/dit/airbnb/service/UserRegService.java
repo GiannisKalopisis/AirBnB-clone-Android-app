@@ -134,7 +134,7 @@ public class UserRegService {
 
         userRegRepository.save(userReg);
 
-        return ResponseEntity.ok(new ApiResponse(true, "updateUserReg succeed"));
+        return ResponseEntity.ok(new ApiResponse(true, "updateUserReg succeed", userReg));
     }
 
     public ResponseEntity<?> getUserRegById(Long userRegId, UserDetailsImpl userDetails) {

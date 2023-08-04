@@ -26,8 +26,6 @@ public class AirbnbApplication {
         public void run(String... args) throws Exception {
             roleService.saveRole(RoleName.ROLE_USER);
             roleService.saveRole(RoleName.ROLE_HOST);
-            assert roleService.findByName(RoleName.ROLE_USER).isPresent();
-            assert roleService.findByName(RoleName.ROLE_HOST).isPresent();
         }
     }
 

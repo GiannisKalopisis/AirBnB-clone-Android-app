@@ -1,7 +1,6 @@
 package com.dit.airbnb.response;
 
 import com.dit.airbnb.dto.enums.RentalType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
