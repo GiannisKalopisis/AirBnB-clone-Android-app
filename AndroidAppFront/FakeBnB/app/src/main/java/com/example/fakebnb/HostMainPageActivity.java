@@ -15,19 +15,36 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.adapter.HostMainPageRentalAdapter;
+import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.HostRentalMainPageModel;
+import com.example.fakebnb.model.response.UserRegResponse;
+import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.rest.UserRegAPI;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HostMainPageActivity extends AppCompatActivity implements HostMainPageRecyclerViewInterface {
 
     private static final String TAG = "HostMainPageActivity";
+
+    // User variables for main page layout
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
+    private UserRegResponse.UserRegData userRegData;
 
     private TextView welcomeMessage;
     private ImageView host_profile_pic_layout;
@@ -40,9 +57,52 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
         setContentView(R.layout.activity_host_main_page);
 
         initView();
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
+
+        RestClient restClient = new RestClient(jwtToken);
+        UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+
+        userRegAPI.getUserReg(userId)
+                .enqueue(new Callback<UserRegResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserRegResponse> call, @NonNull Response<UserRegResponse> response) {
+                        if (response.isSuccessful()) {
+                            UserRegResponse userRegResponse = response.body();
+                            if (userRegResponse != null) {
+                                Log.d("API_CALL", "GetUserReg successful");
+                                userRegData = userRegResponse.getObject();
+                                getAndSetWelcomeData();
+                            } else {
+                                // Handle unsuccessful response
+                                Log.d("API_CALL", "GetUserReg failed");
+                            }
+                        } else {
+                            // Handle unsuccessful response
+                            Log.d("API_CALL", "GetUserReg failed");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UserRegResponse> call, @NonNull Throwable t) {
+                        // Handle failure
+                        Log.e("API_CALL", "Error: " + t.getMessage());
+                    }
+                });
+
         bottomBarClickListeners();
         addButtonClickListener();
-        getAndSetWelcomeData();
 
         ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
         hostRentals.add(new HostRentalMainPageModel("Amalfi1 coast rooms", "Αθήνα", 4.5f));
@@ -70,10 +130,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     private void getAndSetWelcomeData() {
         Log.d(TAG, "getAndSetWelcomeData: started");
 
-        // get username and picture
-        String username = "Sakis Karpas";
-
-        welcomeMessage.setText("Welcome, " + username);
+        welcomeMessage.setText("Welcome, " + userRegData.getUsername());
 //        Bitmap userImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.people1);
 //        userImageBitmap = getCircularBitmap(userImageBitmap);
 //        if (userImageBitmap != null) {

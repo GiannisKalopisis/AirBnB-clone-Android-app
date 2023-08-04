@@ -34,16 +34,33 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.adapter.MainPageRentalAdapter;
+import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.RentalMainPageModel;
 import com.example.fakebnb.model.UserModel;
+import com.example.fakebnb.model.response.UserRegResponse;
+import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.rest.UserRegAPI;
 import com.example.fakebnb.utils.AndroidUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainPageActivity extends AppCompatActivity implements MainPageRecyclerViewInterface {
 
     private static final String TAG = "MainPageActivity";
+
+    // User variables for main page layout
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
+    private UserRegResponse.UserRegData userRegData;
+
     private TextView welcomeMessage;
     private ImageView profile_pic_layout;
     private RecyclerView rentalsRecyclerView;
@@ -57,14 +74,61 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     private Spinner numGuestsSpinner;
     private Button searchFieldsButton;
 
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
 
         initView();
-        bottomBarClickListeners();
-        getAndSetWelcomeData();
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
+
+
+        RestClient restClient = new RestClient(jwtToken);
+        UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+
+        userRegAPI.getUserReg(userId)
+                .enqueue(new Callback<UserRegResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserRegResponse> call, @NonNull Response<UserRegResponse> response) {
+                        if (response.isSuccessful()) {
+                            UserRegResponse userRegResponse = response.body();
+                            if (userRegResponse != null) {
+                                Log.d("API_CALL", "GetUserReg successful");
+                                userRegData = userRegResponse.getObject();
+                                bottomBarClickListeners();
+                                getAndSetWelcomeData();
+                            } else {
+                                // Handle unsuccessful response
+                                Log.d("API_CALL", "GetUserReg failed");
+                            }
+                        } else {
+                            // Handle unsuccessful response
+                            Log.d("API_CALL", "GetUserReg failed");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UserRegResponse> call, @NonNull Throwable t) {
+                        // Handle failure
+                        Log.e("API_CALL", "Error: " + t.getMessage());
+                    }
+                });
+
+
+
         onDatesClicked();
 
         ArrayList<RentalMainPageModel> rentals = new ArrayList<>();
@@ -114,13 +178,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
         searchFieldsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (districtEditText.getText().toString().isEmpty() ||
-                        cityEditText.getText().toString().isEmpty() ||
-                        countryEditText.getText().toString().isEmpty() ||
-                        checkInDate.getText().toString().isEmpty() ||
-                        checkOutDate.getText().toString().isEmpty() ||
-                        numGuestsSpinner.getSelectedItemPosition() == 0 ||
-                        rentalTypeGroup.getCheckedRadioButtonId() == -1) {
+                if (notAllSearchFieldsCompleted()) {
                     Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -141,6 +199,16 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 Toast.makeText(view.getContext(), "Pressed SEARCH BUTTON", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private boolean notAllSearchFieldsCompleted() {
+        return districtEditText.getText().toString().isEmpty() ||
+                cityEditText.getText().toString().isEmpty() ||
+                countryEditText.getText().toString().isEmpty() ||
+                checkInDate.getText().toString().isEmpty() ||
+                checkOutDate.getText().toString().isEmpty() ||
+                numGuestsSpinner.getSelectedItemPosition() == 0 ||
+                rentalTypeGroup.getCheckedRadioButtonId() == -1;
     }
 
     public void onSearchBarClicked(View view) {
@@ -171,10 +239,8 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
         Log.d(TAG, "getAndSetWelcomeData: started");
 
         // get username and picture
-        String username = "Sakis Karpas";
+        welcomeMessage.setText("Welcome " + userRegData.getUsername());
 
-
-        welcomeMessage.setText("Welcome, " + username);
         Bitmap userImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.people1);
         userImageBitmap = getCircularBitmap(userImageBitmap);
         if (userImageBitmap != null) {
