@@ -12,19 +12,41 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.fakebnb.enums.RoleName;
+import com.example.fakebnb.model.request.UserRegUpdateRequest;
+import com.example.fakebnb.model.response.UserRegResponse;
+import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.rest.UserRegAPI;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "ProfileActivity";
 
+    // User variables for main page layout
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
+    private UserRegResponse.UserRegData userRegData;
+
     // warning text fields
-    private TextView profileNameWarn, profileEmailWarn, profileAddressWarn, profilePhoneWarn, profilePhotoWarn;
+    private TextView profileUserUsernameView, profileUserEmailView;
+    private TextView profileFirstNameWarn, profileLastNameWarn, profilePhoneWarn, profilePhotoWarn;
     // editable text
-    private EditText profileNameEditText, profileEmailEditText, profileAddressEditText, profilePhoneEditText, profilePhotoEditText;
+    private EditText profileFirstNameEditText, profileLastNameEditText, profilePhoneEditText, profilePhotoEditText;
     // Linear View buttons
-    private Button saveProfileInfoChangesButton, becomeHostButton;
+    private Button saveProfileInfoChangesButton, takeExtraRoleButton;
 
     // bottom bar buttons
     private Button chatButton, profileButton, roleButton;
@@ -38,91 +60,210 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         Toast.makeText(this, "Welcome to your profile", Toast.LENGTH_SHORT).show();
 
-
         initView();
-        bottomBarClickListeners();
-        resetWarnVisibility();
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
+
+        RestClient restClient = new RestClient(jwtToken);
+        UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+
+        userRegAPI.getUserReg(userId)
+                .enqueue(new Callback<UserRegResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserRegResponse> call, @NonNull Response<UserRegResponse> response) {
+                        if (response.isSuccessful()) {
+                            UserRegResponse userRegResponse = response.body();
+                            if (userRegResponse != null) {
+                                Log.d("API_CALL", "GetUserReg successful");
+                                userRegData = userRegResponse.getObject();
+                                bottomBarClickListeners();
+                                setData();
+                                saveProfileInfoChangesButton.setVisibility(View.GONE);
+                            } else {
+                                // Handle unsuccessful response
+                                Log.d("API_CALL", "GetUserReg failed");
+                            }
+                        } else {
+                            // Handle unsuccessful response
+                            Log.d("API_CALL", "GetUserReg failed");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UserRegResponse> call, @NonNull Throwable t) {
+                        // Handle failure
+                        Log.e("API_CALL", "Error: " + t.getMessage());
+                    }
+                });
+
 
         // Set values
-        getSetDataFromBackend();
-
-        setTextValues();
+        resetWarnVisibility();
         setTextWatchers();
-
-        // Initially hide the save button
-        saveProfileInfoChangesButton.setVisibility(View.GONE);
 
         setButtonSaveClickListener();
 
-        // Add host button only if USER has not the role of host
-        setBecomeHostButton();
-    }
-
-    private void getSetDataFromBackend() {
-        //TODO: get the data from backend
-        //TODO: render the data to frontend
-
-        // get from backend
-        profileNameEditText.setText("Jane McNeil");
-        profileEmailEditText.setText("jane_mcneil@gmail.com");
-        profileAddressEditText.setText("Athens str. 95");
-        profilePhoneEditText.setText("6987458632");
-        profilePhotoEditText.setText("photo_profile_path.png");
-    }
-
-    private void setBecomeHostButton() {
-        if (isAlreadyHost) {
-            becomeHostButton.setVisibility(View.GONE);
-        } else {
-            becomeHostButton.setOnClickListener(view -> {
-                resetWarnVisibility();
-                Toast.makeText(view.getContext(), "You became host", Toast.LENGTH_SHORT).show();
-                // send backend request
-                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                startActivity(host_main_page_intent);
-            });
-        }
+        setTakeRoleButton();
     }
 
     @SuppressLint("SetTextI18n")
-    private void setTextValues() {
-        // Set initial text for TextView fields, get it from backend
-        profileNameEditText.setText("Jane McNeil");
-        profileEmailEditText.setText("jane85@gmail.com");
-        profileAddressEditText.setText("Athens str. 95");
-        profilePhoneEditText.setText("6987458632");
+    private void setData() {
+
+        profileUserUsernameView.setText(userRegData.getUsername());
+        profileUserEmailView.setText(userRegData.getEmail());
+
+        profileFirstNameEditText.setText(userRegData.getFirstName());
+        profileLastNameEditText.setText(userRegData.getLastName());
+        profilePhoneEditText.setText(userRegData.getPhone());
+
+        // get from backend
         profilePhotoEditText.setText("photo_profile_path.png");
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void setTakeRoleButton() {
+        if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+            takeExtraRoleButton.setVisibility(View.GONE);
+        } else {
+            if (roles.contains(RoleName.ROLE_HOST)) {
+                takeExtraRoleButton.setText("Become a User");
+
+            } else {
+                takeExtraRoleButton.setText("Become a Host");
+            }
+
+            takeExtraRoleButton.setOnClickListener(view -> {
+                resetWarnVisibility();
+
+                Set<RoleName> newRole = new HashSet<>();
+                newRole.add(RoleName.ROLE_USER);
+                newRole.add(RoleName.ROLE_HOST);
+
+                UserRegUpdateRequest userRegUpdateRequest = new UserRegUpdateRequest();
+                userRegUpdateRequest.setRoleNames(newRole);
+
+                RestClient restClient = new RestClient(jwtToken);
+                UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+
+                userRegAPI.updateUserReg(userId, userRegUpdateRequest)
+                        .enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    Log.d("API_CALL", "UpdateUserReg successful");
+                                    Toast.makeText(view.getContext(), "New role added", Toast.LENGTH_SHORT).show();
+
+                                    if (roles.contains(RoleName.ROLE_HOST)) {
+                                        roles.add(RoleName.ROLE_USER);
+                                        // add user role so go to user's main page
+                                        Intent main_page_intent = new Intent(ProfileActivity.this, MainPageActivity.class);
+                                        main_page_intent.putExtra("user_id", userId);
+                                        main_page_intent.putExtra("user_jwt", jwtToken);
+                                        ArrayList<String> roleList = new ArrayList<>();
+                                        for (RoleName role : roles) {
+                                            roleList.add(role.toString());
+                                        }
+                                        main_page_intent.putExtra("user_roles", roleList);
+                                        startActivity(main_page_intent);
+                                    } else {
+                                        roles.add(RoleName.ROLE_HOST);
+                                        // add host role so go to host's main page
+                                        Intent host_main_page_intent = new Intent(ProfileActivity.this, HostMainPageActivity.class);
+                                        host_main_page_intent.putExtra("user_id", userId);
+                                        host_main_page_intent.putExtra("user_jwt", jwtToken);
+                                        ArrayList<String> roleList = new ArrayList<>();
+                                        for (RoleName role : roles) {
+                                            roleList.add(role.toString());
+                                        }
+                                        host_main_page_intent.putExtra("user_roles", roleList);
+                                        startActivity(host_main_page_intent);
+                                    }
+                                } else {
+                                    // Handle unsuccessful response
+                                    Log.d("API_CALL", "UpdateUserReg failed");
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                                // Handle failure
+                                Log.e("API_CALL", "Error: " + t.getMessage());
+                            }
+                        });
+            });
+        }
     }
 
     private void setButtonSaveClickListener() {
         saveProfileInfoChangesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "Name: " + profileNameEditText.getText().toString());
-                Log.d(TAG, "Email: " + profileEmailEditText.getText().toString());
-                Log.d(TAG, "Address: " + profileAddressEditText.getText().toString());
-                Log.d(TAG, "Phone: " + profilePhoneEditText.getText().toString());
-                Log.d(TAG, "Photo: " + profilePhotoEditText.getText().toString());
 
                 Toast.makeText(ProfileActivity.this, "Saving changes to Database", Toast.LENGTH_SHORT).show();
+
+                UserRegUpdateRequest userRegUpdateRequest = setUpdateUserRegRequestValues();
+                // TODO: add photo update
+
+                RestClient restClient = new RestClient(jwtToken);
+                UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+
+                userRegAPI.updateUserReg(userId, userRegUpdateRequest)
+                    .enqueue(new Callback<Void>() {
+                        @Override
+                        public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                            if (response.isSuccessful()) {
+                                Log.d("API_CALL", "User's info updated successfully");
+                                Toast.makeText(ProfileActivity.this, "User's info updated successfully", Toast.LENGTH_SHORT).show();
+                                saveProfileInfoChangesButton.setVisibility(View.GONE);
+                            } else {
+                                Log.e("API_CALL", "Couldn't update the user's info");
+                                Toast.makeText(ProfileActivity.this, "Couldn't update the user's info", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                            Log.e("API_CALL", "Error: " + t.getMessage());
+                            Toast.makeText(ProfileActivity.this, "Error at update user's info", Toast.LENGTH_SHORT).show();
+                        }
+                    });
             }
         });
     }
 
+    @NonNull
+    private UserRegUpdateRequest setUpdateUserRegRequestValues() {
+        UserRegUpdateRequest userRegUpdateRequest = new UserRegUpdateRequest();
+        userRegUpdateRequest.setFirstName(profileFirstNameEditText.getText().toString());
+        userRegUpdateRequest.setLastName(profileLastNameEditText.getText().toString());
+        userRegUpdateRequest.setPhone(profilePhoneEditText.getText().toString());
+        return userRegUpdateRequest;
+    }
+
     private void setTextWatchers() {
-        setTextWatcherEmail();
-        setTextWatcherAddress();
+        setTextWatcherFirstName();
+        setTextWatcherLastName();
         setTextWatcherPhone();
         setTextWatcherPhoto();
-        setTextWatcherName();
     }
 
-    private void setTextWatcherName() {
+    private void setTextWatcherFirstName() {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                if (!profileNameEditText.getText().toString().isEmpty()) {
-                    profileNameWarn.setVisibility(View.GONE);
+                if (!profileFirstNameEditText.getText().toString().isEmpty()) {
+                    profileFirstNameWarn.setVisibility(View.GONE);
                 }
             }
 
@@ -131,24 +272,24 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                Toast.makeText(ProfileActivity.this, "Username text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
-                if (profileNameEditText.getText().toString().isEmpty()) {
-                    profileNameWarn.setVisibility(View.VISIBLE);
+//                Toast.makeText(ProfileActivity.this, "First name text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
+                if (profileFirstNameEditText.getText().toString().isEmpty()) {
+                    profileFirstNameWarn.setVisibility(View.VISIBLE);
                     saveProfileInfoChangesButton.setVisibility(View.GONE);
                 } else {
                     saveProfileInfoChangesButton.setVisibility(View.VISIBLE);
                 }
             }
         };
-        profileNameEditText.addTextChangedListener(textWatcher);
+        profileFirstNameEditText.addTextChangedListener(textWatcher);
     }
 
-    private void setTextWatcherEmail() {
+    private void setTextWatcherLastName() {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                if (!profileEmailEditText.getText().toString().isEmpty()) {
-                    profileEmailWarn.setVisibility(View.GONE);
+                if (!profileLastNameEditText.getText().toString().isEmpty()) {
+                    profileLastNameWarn.setVisibility(View.GONE);
                 }
             }
 
@@ -157,42 +298,16 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                Toast.makeText(ProfileActivity.this, "Email text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
-                if (profileEmailEditText.getText().toString().isEmpty()) {
-                    profileEmailWarn.setVisibility(View.VISIBLE);
+//                Toast.makeText(ProfileActivity.this, "Last name text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
+                if (profileLastNameEditText.getText().toString().isEmpty()) {
+                    profileLastNameWarn.setVisibility(View.VISIBLE);
                     saveProfileInfoChangesButton.setVisibility(View.GONE);
                 } else {
                     saveProfileInfoChangesButton.setVisibility(View.VISIBLE);
                 }
             }
         };
-        profileEmailEditText.addTextChangedListener(textWatcher);
-    }
-
-    private void setTextWatcherAddress() {
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                if (!profileAddressEditText.getText().toString().isEmpty()) {
-                    profileAddressWarn.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                Toast.makeText(ProfileActivity.this, "Address text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
-                if (profileAddressEditText.getText().toString().isEmpty()) {
-                    profileAddressWarn.setVisibility(View.VISIBLE);
-                    saveProfileInfoChangesButton.setVisibility(View.GONE);
-                } else {
-                    saveProfileInfoChangesButton.setVisibility(View.VISIBLE);
-                }
-            }
-        };
-        profileAddressEditText.addTextChangedListener(textWatcher);
+        profileLastNameEditText.addTextChangedListener(textWatcher);
     }
 
     private void setTextWatcherPhone() {
@@ -209,7 +324,7 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                Toast.makeText(ProfileActivity.this, "Phone text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(ProfileActivity.this, "Phone text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
                 if (profilePhoneEditText.getText().toString().isEmpty()) {
                     profilePhoneWarn.setVisibility(View.VISIBLE);
                     saveProfileInfoChangesButton.setVisibility(View.GONE);
@@ -235,7 +350,7 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                Toast.makeText(ProfileActivity.this, "Photo text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(ProfileActivity.this, "Photo text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
                 if (profilePhotoEditText.getText().toString().isEmpty()) {
                     profilePhotoWarn.setVisibility(View.VISIBLE);
                     saveProfileInfoChangesButton.setVisibility(View.GONE);
@@ -250,23 +365,25 @@ public class ProfileActivity extends AppCompatActivity {
     private void initView() {
         Log.d(TAG, "initViews: started");
 
+        // Initializing uneditable text
+        profileUserUsernameView = findViewById(R.id.profileUserUsernameView);
+        profileUserEmailView = findViewById(R.id.profileUserEmailView);
+
         // Initializing warning text
-        profileNameWarn = findViewById(R.id.profileNameWarn);
-        profileEmailWarn = findViewById(R.id.profileEmailWarn);
-        profileAddressWarn = findViewById(R.id.profileAddressWarn);
+        profileFirstNameWarn = findViewById(R.id.profileFirstNameWarn);
+        profileLastNameWarn = findViewById(R.id.profileLastNameWarn);
         profilePhoneWarn = findViewById(R.id.profilePhoneWarn);
         profilePhotoWarn = findViewById(R.id.profilePhotoWarn);
 
         // Initializing editable text
-        profileNameEditText = findViewById(R.id.profileNameEditText);
-        profileEmailEditText = findViewById(R.id.profileEmailEditText);
-        profileAddressEditText = findViewById(R.id.profileAddressEditText);
+        profileFirstNameEditText = findViewById(R.id.profileFirstNameEditText);
+        profileLastNameEditText = findViewById(R.id.profileLastNameEditText);
         profilePhoneEditText = findViewById(R.id.profilePhoneEditText);
         profilePhotoEditText = findViewById(R.id.profilePhotoEditText);
 
         // Initializing profile buttons
         saveProfileInfoChangesButton = findViewById(R.id.saveProfileInfoChangesButton);
-        becomeHostButton = findViewById(R.id.becomeHostButton);
+        takeExtraRoleButton = findViewById(R.id.takeExtraRoleButton);
 
         // Initializing bottom bar buttons
         chatButton = findViewById(R.id.chatButton);
@@ -277,9 +394,8 @@ public class ProfileActivity extends AppCompatActivity {
     private void resetWarnVisibility() {
         Log.d(TAG, "resetWarnVisibility: started");
 
-        profileNameWarn.setVisibility(View.GONE);
-        profileEmailWarn.setVisibility(View.GONE);
-        profileAddressWarn.setVisibility(View.GONE);
+        profileFirstNameWarn.setVisibility(View.GONE);
+        profileLastNameWarn.setVisibility(View.GONE);
         profilePhoneWarn.setVisibility(View.GONE);
         profilePhotoWarn.setVisibility(View.GONE);
     }

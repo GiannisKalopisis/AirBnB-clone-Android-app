@@ -54,9 +54,9 @@
 
                 <!-- Info that can change -->
 
-                <!-- Username -->
+                <!-- FirstName -->
                 <TextView
-                    android:id="@+id/profileNameWarn"
+                    android:id="@+id/profileFirstNameWarn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
@@ -66,27 +66,26 @@
                     android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/profileNameViewText"
+                    android:id="@+id/profileFirstNameViewText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left"
                     android:layout_marginStart="20dp"
-                    android:text="@string/username" />
+                    android:text="First name" />
 
                 <EditText
-                    android:id="@+id/profileNameEditText"
+                    android:id="@+id/profileFirstNameEditText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="20dp"
                     android:ems="10"
-                    android:hint="@string/username"
+                    android:hint="First name"
                     android:inputType="text"
                     android:importantForAutofill="no" />
 
-
-                <!-- Email -->
+                <!-- LastName -->
                 <TextView
-                    android:id="@+id/profileEmailWarn"
+                    android:id="@+id/profileLastNameWarn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
@@ -96,50 +95,20 @@
                     android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/profileEmailViewText"
+                    android:id="@+id/profileLastNameViewText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left"
                     android:layout_marginStart="20dp"
-                    android:text="@string/email" />
+                    android:text="Last name" />
 
                 <EditText
-                    android:id="@+id/profileEmailEditText"
+                    android:id="@+id/profileLastNameEditText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="20dp"
                     android:ems="10"
-                    android:hint="@string/test_gmail_com"
-                    android:inputType="text"
-                    android:importantForAutofill="no" />
-
-
-                <!-- Address -->
-                <TextView
-                    android:id="@+id/profileAddressWarn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_gravity="left"
-                    android:text="@string/warning"
-                    android:textColor="@android:color/holo_red_light"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/profileAddressViewText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
-                    android:layout_marginStart="20dp"
-                    android:text="@string/address" />
-
-                <EditText
-                    android:id="@+id/profileAddressEditText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    android:ems="10"
-                    android:hint="@string/athens_str_95"
+                    android:hint="Last name"
                     android:inputType="text"
                     android:importantForAutofill="no" />
 
@@ -212,7 +181,7 @@
                     android:visibility="gone" />
 
                 <Button
-                    android:id="@+id/becomeHostButton"
+                    android:id="@+id/takeExtraRoleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/become_a_host" />
