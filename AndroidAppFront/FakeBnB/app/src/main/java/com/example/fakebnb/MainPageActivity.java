@@ -418,7 +418,14 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                Intent profile_intent = new Intent(MainPageActivity.this, ProfileActivity.class);
+                profile_intent.putExtra("user_id", userId);
+                profile_intent.putExtra("user_jwt", jwtToken);
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                profile_intent.putStringArrayListExtra("user_roles", roleList);
                 startActivity(profile_intent);
             }
         });
