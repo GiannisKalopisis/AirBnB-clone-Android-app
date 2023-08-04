@@ -436,10 +436,20 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 Log.d(TAG, "onClick: pressed role button");
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
-                // for debugging purposes go to Host page directly
-                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                AndroidUtil.passUserModelAsIntent(host_main_page_intent, new UserModel("Sakis Karpas"));
-                startActivity(host_main_page_intent);
+                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                    // to be at this activity he has the user role
+                    Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                    host_main_page_intent.putExtra("user_id", userId);
+                    host_main_page_intent.putExtra("user_jwt", jwtToken);
+                    ArrayList<String> roleList = new ArrayList<>();
+                    for (RoleName role : roles) {
+                        roleList.add(role.toString());
+                    }
+                    host_main_page_intent.putExtra("user_roles", roleList);
+                    startActivity(host_main_page_intent);
+                } else {
+                    Toast.makeText(MainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
