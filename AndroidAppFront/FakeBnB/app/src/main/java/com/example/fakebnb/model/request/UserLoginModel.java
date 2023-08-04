@@ -1,4 +1,4 @@
-package com.example.fakebnb.model;
+package com.example.fakebnb.model.request;
 
 public class UserLoginModel {
 

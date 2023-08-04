@@ -1,6 +1,8 @@
-package com.example.fakebnb.model;
+package com.example.fakebnb.model.request;
 
 import com.example.fakebnb.enums.RoleName;
+
+import java.util.Set;
 
 public class UserRegisterModel {
 
@@ -10,7 +12,8 @@ public class UserRegisterModel {
     private String password;
     private String email;
     private String phone;
-    private RoleName roleName;
+    private Set<RoleName> roleNames;
+
 
     public String getFirstName() {
         return firstName;
@@ -60,24 +63,11 @@ public class UserRegisterModel {
         this.phone = phone;
     }
 
-    public RoleName getRoleName() {
-        return roleName;
+    public Set<RoleName> getRoleNames() {
+        return roleNames;
     }
 
-    public void setRoleName(RoleName roleName) {
-        this.roleName = roleName;
-    }
-
-    @Override
-    public String toString() {
-        return "UserRegisterModel{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", roleName=" + roleName +
-                '}';
+    public void setRoleNames(Set<RoleName> roleNames) {
+        this.roleNames = roleNames;
     }
 }
