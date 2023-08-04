@@ -15,11 +15,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.response.SignInResponse;
-import com.example.fakebnb.model.UserLoginModel;
+import com.example.fakebnb.model.request.UserLoginModel;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,35 +60,79 @@ public class LoginActivity extends AppCompatActivity {
             userLoginModel.setUsername(usernameEditText.getText().toString());
             userLoginModel.setPassword(passwordEditText.getText().toString());
 
-            RestClient restClient = new RestClient();
+            RestClient restClient = new RestClient(null);
             UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
             userRegAPI.singInUser(userLoginModel)
-                    .enqueue(new Callback<SignInResponse>() {
-                        @Override
-                        public void onResponse(@NonNull Call<SignInResponse> call, @NonNull Response<SignInResponse> response) {
-                            if (response.isSuccessful()) {
-                                SignInResponse signInResponse = response.body();
-                                if (signInResponse != null) {
-                                    Log.d(TAG, "onResponse: toString: " + signInResponse.toString());
-                                    Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                .enqueue(new Callback<SignInResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SignInResponse> call, @NonNull Response<SignInResponse> response) {
+                        if (response.isSuccessful()) {
+                            SignInResponse signInResponse = response.body();
+                            if (signInResponse != null) {
+                                Log.d(TAG, "onResponse: toString: " + signInResponse);
+                                SignInResponse.UserData userData = signInResponse.getObject();
+                                // TODO: has to check if is host or user and redirect to the right page
+                                Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+
+                                // has both roles, so login as USER
+                                if (userData.getRoleNames().contains(RoleName.ROLE_USER) && userData.getRoleNames().contains(RoleName.ROLE_HOST)) {
                                     Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
+                                    main_page_intent.putExtra("user_id", userData.getId());
+                                    main_page_intent.putExtra("user_jwt", userData.getJwtToken());
+                                    ArrayList<String> roleList = new ArrayList<>();
+                                    for (RoleName role : userData.getRoleNames()) {
+                                        roleList.add(role.toString());
+                                    }
+                                    main_page_intent.putStringArrayListExtra("user_roles", roleList);
                                     startActivity(main_page_intent);
-                                } else {
-                                    Toast.makeText(LoginActivity.this, "111 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                                }
+                                // has only user role, so login as USER
+                                else if (userData.getRoleNames().contains(RoleName.ROLE_USER)) {
+                                    Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
+                                    main_page_intent.putExtra("user_id", userData.getId());
+                                    main_page_intent.putExtra("user_jwt", userData.getJwtToken());
+                                    ArrayList<String> roleList = new ArrayList<>();
+                                    for (RoleName role : userData.getRoleNames()) {
+                                        roleList.add(role.toString());
+                                    }
+                                    main_page_intent.putStringArrayListExtra("user_roles", roleList);
+                                    startActivity(main_page_intent);
+                                }
+                                // has only host role, so login as HOST
+                                else if (userData.getRoleNames().contains(RoleName.ROLE_HOST)) {
+                                    Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                                    host_main_page_intent.putExtra("user_id", userData.getId());
+                                    host_main_page_intent.putExtra("user_jwt", userData.getJwtToken());
+                                    ArrayList<String> roleList = new ArrayList<>();
+                                    for (RoleName role : userData.getRoleNames()) {
+                                        roleList.add(role.toString());
+                                    }
+                                    host_main_page_intent.putExtra("user_roles", roleList);
+                                    startActivity(host_main_page_intent);
+                                }
+                                // Error at roles
+                                else {
+                                    Toast.makeText(LoginActivity.this, "Couldn't login. Wrong user type.", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                Toast.makeText(LoginActivity.this, "222 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                                resetWarnVisibility();
+                                Toast.makeText(LoginActivity.this, "111 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
                             }
+                        } else {
+                            resetWarnVisibility();
+                            Toast.makeText(LoginActivity.this, "222 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
                         }
+                    }
 
-                        @Override
-                        public void onFailure(@NonNull Call<SignInResponse> call, @NonNull Throwable t) {
-                            Toast.makeText(LoginActivity.this, "333 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
-                            Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, "Error in SignIn occurred!", t);
-                            Log.d(TAG, "onFailure: " + t.getMessage());
-                        }
-                    });
+                    @Override
+                    public void onFailure(@NonNull Call<SignInResponse> call, @NonNull Throwable t) {
+                        resetWarnVisibility();
+                        Toast.makeText(LoginActivity.this, "333 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                        Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, "Error in SignIn occurred!", t);
+                        Log.d(TAG, "onFailure: " + t.getMessage());
+                    }
+                });
         }
     }
 

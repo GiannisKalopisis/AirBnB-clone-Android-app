@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,7 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.fakebnb.enums.RoleName;
-import com.example.fakebnb.model.UserRegisterModel;
+import com.example.fakebnb.model.request.UserRegisterModel;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 
@@ -27,7 +26,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,7 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
-                RestClient restClient = new RestClient();
+                RestClient restClient = new RestClient(null);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
                 userRegAPI.registerUser(userRegisterModel)
@@ -143,7 +144,9 @@ public class RegisterActivity extends AppCompatActivity {
         userRegisterModel.setLastName(lastNameEditText.getText().toString());
         userRegisterModel.setEmail(emailEditText.getText().toString());
         userRegisterModel.setPhone(phoneNumberEditText.getText().toString());
-        userRegisterModel.setRoleName(roleGroup.getCheckedRadioButtonId() == R.id.userRoleCheckBox ? RoleName.ROLE_USER : RoleName.ROLE_HOST);
+        Set<RoleName> roles = new HashSet<>();
+        roles.add(roleGroup.getCheckedRadioButtonId() == R.id.userRoleCheckBox ? RoleName.ROLE_USER : RoleName.ROLE_HOST);
+        userRegisterModel.setRoleNames(roles);
 
         Log.d(TAG, "setUserRegisterModel: toString: " + userRegisterModel);
         Log.d(TAG, "setUserRegisterModel: Finished");
