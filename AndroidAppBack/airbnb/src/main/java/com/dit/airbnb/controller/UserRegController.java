@@ -35,7 +35,7 @@ public class UserRegController {
 
 
     @PutMapping("/user/{userId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_USER, ROLE_HOST')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> updateUserReg(@PathVariable(value = "userId") Long userId,
                                            @Valid @RequestBody UserRegUpdateRequest userRegUpdateRequest,
                                            @Valid @CurrentUser UserDetailsImpl currentUser) {
@@ -43,7 +43,7 @@ public class UserRegController {
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_USER, ROLE_HOST')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getUserReg(@PathVariable(value = "userId") Long userId,
                                         @Valid @CurrentUser UserDetailsImpl currentUser) {
         return userRegService.getUserRegById(userId, currentUser);
