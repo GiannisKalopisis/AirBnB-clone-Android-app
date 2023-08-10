@@ -64,8 +64,15 @@ public class ReservationDoneActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
-                Intent home_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(home_intent);
+                Intent main_page_intent = new Intent(ReservationDoneActivity.this, MainPageActivity.class);
+                main_page_intent.putExtra("user_id", userId);
+                main_page_intent.putExtra("user_jwt", jwtToken);
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                main_page_intent.putStringArrayListExtra("user_roles", roleList);
+                startActivity(main_page_intent);
             }
         });
     }
