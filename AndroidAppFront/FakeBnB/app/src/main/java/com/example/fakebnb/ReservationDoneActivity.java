@@ -60,40 +60,5 @@ public class ReservationDoneActivity extends AppCompatActivity {
         Log.d(TAG, "initViews: started");
 
         reservationDoneHomeButton = findViewById(R.id.reservationDoneHomeButton);
-
-        // Initializing bottom bar buttons
-        chatButton = findViewById(R.id.chatButton);
-        profileButton = findViewById(R.id.profileButton);
-        roleButton = findViewById(R.id.roleButton);
-    }
-
-
-    private void bottomBarClickListeners() {
-        Log.d(TAG, "bottomBarClickListeners: started");
-
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(getApplicationContext(), ChatActivity.class);
-                startActivity(chat_intent);
-            }
-        });
-
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(getApplicationContext(), ProfileActivity.class);
-                startActivity(profile_intent);
-            }
-        });
-
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }
