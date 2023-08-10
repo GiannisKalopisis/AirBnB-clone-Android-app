@@ -38,6 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
+    private RoleName currentRole;
     private UserRegResponse.UserRegData userRegData;
 
     // warning text fields
@@ -66,6 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (intent != null) {
             userId = intent.getSerializableExtra("user_id", Long.class);
             jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            currentRole = RoleName.valueOf(intent.getStringExtra("user_current_role"));
             ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
             if (roleList != null) {
                 roles = new HashSet<>();

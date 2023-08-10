@@ -12,9 +12,20 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.fakebnb.enums.RoleName;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 public class WriteReviewActivity extends AppCompatActivity {
 
     private static final String TAG = "WriteReviewPage";
+
+    // user intent data
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
 
     private EditText reviewText;
     private RatingBar ratingBar;
@@ -28,6 +39,19 @@ public class WriteReviewActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_review);
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
 
         initView();
         bottomBarClickListeners();

@@ -10,9 +10,20 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.fakebnb.enums.RoleName;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 public class ChatActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatActivity";
+
+    private Long userId;
+    private String jwtToken;
+    private RoleName currentRole;
+    private Set<RoleName> roles;
 
     // bottom bar buttons
     private Button chatButton, profileButton, roleButton;
@@ -21,6 +32,20 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            currentRole = RoleName.valueOf(intent.getStringExtra("user_current_role"));
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
 
         initView();
         bottomBarClickListener();

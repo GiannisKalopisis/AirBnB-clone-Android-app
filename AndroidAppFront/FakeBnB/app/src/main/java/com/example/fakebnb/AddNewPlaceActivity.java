@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.fakebnb.enums.RoleName;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,13 +37,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class AddNewPlaceActivity extends AppCompatActivity {
 
     private static final String TAG = "AddNewPlaceActivity";
+
+    // User variables for main page layout
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
 
     private TextView addPlaceWarningAddress, addPlaceWarningDates, addPlaceWarningMaxVisitors,
             addPlaceWarningMinPrice, addPlaceWarningExtraCost, addPlaceWarningRentType,
@@ -78,6 +87,19 @@ public class AddNewPlaceActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_place);
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
 
         initView();
         bottomBarClickListeners();

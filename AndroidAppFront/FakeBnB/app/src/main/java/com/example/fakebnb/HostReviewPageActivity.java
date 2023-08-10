@@ -15,13 +15,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.adapter.HostReviewAdapter;
+import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.HostReviewModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class HostReviewPageActivity extends AppCompatActivity {
 
     private static final String TAG = "HostReviewPageActivity";
+
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
 
     // do it hard coded, then do it with the database and add image
     private TextView hostReviewUsernameView, hostReviewEmailView, hostReviewPhoneView;
@@ -36,6 +43,20 @@ public class HostReviewPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_host_review_page);
 
         initView();
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
+
         bottomBarClickListeners();
         getTopInfo();
         // getReviews();
