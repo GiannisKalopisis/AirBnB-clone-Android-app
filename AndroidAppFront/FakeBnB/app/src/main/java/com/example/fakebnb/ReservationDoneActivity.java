@@ -10,23 +10,44 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.fakebnb.enums.RoleName;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 public class ReservationDoneActivity extends AppCompatActivity {
 
     private static final String TAG = "ReservationDoneActivity";
+
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
 
     private String image_url;
 
     private Button reservationDoneHomeButton;
 
-    private Button chatButton, profileButton, roleButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reservation_done);
 
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
+
         initView();
-        bottomBarClickListeners();
 
         getAndRenderImage();
 
@@ -43,8 +64,15 @@ public class ReservationDoneActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
-                Intent home_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(home_intent);
+                Intent main_page_intent = new Intent(ReservationDoneActivity.this, MainPageActivity.class);
+                main_page_intent.putExtra("user_id", userId);
+                main_page_intent.putExtra("user_jwt", jwtToken);
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                main_page_intent.putStringArrayListExtra("user_roles", roleList);
+                startActivity(main_page_intent);
             }
         });
     }
@@ -60,40 +88,5 @@ public class ReservationDoneActivity extends AppCompatActivity {
         Log.d(TAG, "initViews: started");
 
         reservationDoneHomeButton = findViewById(R.id.reservationDoneHomeButton);
-
-        // Initializing bottom bar buttons
-        chatButton = findViewById(R.id.chatButton);
-        profileButton = findViewById(R.id.profileButton);
-        roleButton = findViewById(R.id.roleButton);
-    }
-
-
-    private void bottomBarClickListeners() {
-        Log.d(TAG, "bottomBarClickListeners: started");
-
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(getApplicationContext(), ChatActivity.class);
-                startActivity(chat_intent);
-            }
-        });
-
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(getApplicationContext(), ProfileActivity.class);
-                startActivity(profile_intent);
-            }
-        });
-
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }

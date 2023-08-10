@@ -382,35 +382,16 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-//                Intent chat_intent = new Intent(getApplicationContext(), ChatActivity.class);
-//                startActivity(chat_intent);
-
-                // TODO: ONLY FOR TESTING PURPOSES. NEEDS TO BE REMOVED
-
-//                go to reservation done page
-//                Intent reservation_done_intent = new Intent(getApplicationContext(), ReservationDoneActivity.class);
-//                startActivity(reservation_done_intent);
-
-//                go to write review page
-//                Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewPage.class);
-//                startActivity(write_review_intent);
-
-//                go to add new place page
-//                Intent add_new_place_intent = new Intent(getApplicationContext(), AddNewPlaceActivity.class);
-//                startActivity(add_new_place_intent);
-
-//                go to modify rental page
-                Intent modify_rental_intent = new Intent(getApplicationContext(), PlaceModificationPageActivity.class);
-                startActivity(modify_rental_intent);
-
-//                go to rent room page
-//                Intent rent_room_intent = new Intent(getApplicationContext(), RentRoomPage.class);
-//                startActivity(rent_room_intent);
-
-//                go to chat page
-//                Intent individual_chat_intent = new Intent(getApplicationContext(), IndividualChatPage.class);
-//                AndroidUtil.passUserModelAsIntent(individual_chat_intent, new UserModel("Sakis Karpas"));
-//                startActivity(individual_chat_intent);
+                Intent chat_intent = new Intent(MainPageActivity.this, ChatActivity.class);
+                chat_intent.putExtra("user_id", userId);
+                chat_intent.putExtra("user_jwt", jwtToken);
+                chat_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                chat_intent.putExtra("user_roles", roleList);
+                startActivity(chat_intent);
             }
         });
 
@@ -421,6 +402,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 Intent profile_intent = new Intent(MainPageActivity.this, ProfileActivity.class);
                 profile_intent.putExtra("user_id", userId);
                 profile_intent.putExtra("user_jwt", jwtToken);
+                profile_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
                 ArrayList<String> roleList = new ArrayList<>();
                 for (RoleName role : roles) {
                     roleList.add(role.toString());
@@ -438,7 +420,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
                 if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                     // to be at this activity he has the user role
-                    Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                    Intent host_main_page_intent = new Intent(MainPageActivity.this, HostMainPageActivity.class);
                     host_main_page_intent.putExtra("user_id", userId);
                     host_main_page_intent.putExtra("user_jwt", jwtToken);
                     ArrayList<String> roleList = new ArrayList<>();

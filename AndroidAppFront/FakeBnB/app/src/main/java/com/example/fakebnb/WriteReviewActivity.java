@@ -12,9 +12,20 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.fakebnb.enums.RoleName;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 public class WriteReviewActivity extends AppCompatActivity {
 
     private static final String TAG = "WriteReviewPage";
+
+    // user intent data
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
 
     private EditText reviewText;
     private RatingBar ratingBar;
@@ -28,6 +39,19 @@ public class WriteReviewActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_review);
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
 
         initView();
         bottomBarClickListeners();
@@ -72,12 +96,21 @@ public class WriteReviewActivity extends AppCompatActivity {
 
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
+        // only user_role can be here
 
         chatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(getApplicationContext(), ChatActivity.class);
+                Intent chat_intent = new Intent(WriteReviewActivity.this, ChatActivity.class);
+                chat_intent.putExtra("user_id", userId);
+                chat_intent.putExtra("user_jwt", jwtToken);
+                chat_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                chat_intent.putExtra("user_roles", roleList);
                 startActivity(chat_intent);
             }
         });
@@ -86,7 +119,15 @@ public class WriteReviewActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                Intent profile_intent = new Intent(WriteReviewActivity.this, ProfileActivity.class);
+                profile_intent.putExtra("user_id", userId);
+                profile_intent.putExtra("user_jwt", jwtToken);
+                profile_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                profile_intent.putStringArrayListExtra("user_roles", roleList);
                 startActivity(profile_intent);
             }
         });
@@ -94,7 +135,23 @@ public class WriteReviewActivity extends AppCompatActivity {
         roleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "onClick: pressed role button");
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
+
+                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                    // to be at this activity he has the user role
+                    Intent host_main_page_intent = new Intent(WriteReviewActivity.this, HostMainPageActivity.class);
+                    host_main_page_intent.putExtra("user_id", userId);
+                    host_main_page_intent.putExtra("user_jwt", jwtToken);
+                    ArrayList<String> roleList = new ArrayList<>();
+                    for (RoleName role : roles) {
+                        roleList.add(role.toString());
+                    }
+                    host_main_page_intent.putExtra("user_roles", roleList);
+                    startActivity(host_main_page_intent);
+                } else {
+                    Toast.makeText(WriteReviewActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

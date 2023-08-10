@@ -38,6 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
+    private RoleName currentRole;
     private UserRegResponse.UserRegData userRegData;
 
     // warning text fields
@@ -66,6 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (intent != null) {
             userId = intent.getSerializableExtra("user_id", Long.class);
             jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            currentRole = RoleName.valueOf(intent.getStringExtra("user_current_role"));
             ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
             if (roleList != null) {
                 roles = new HashSet<>();
@@ -408,7 +410,15 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View view) {
                 resetWarnVisibility();
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(getApplicationContext(), ChatActivity.class);
+                Intent chat_intent = new Intent(ProfileActivity.this, ChatActivity.class);
+                chat_intent.putExtra("user_id", userId);
+                chat_intent.putExtra("user_jwt", jwtToken);
+                chat_intent.putExtra("user_current_role", currentRole.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                chat_intent.putExtra("user_roles", roleList);
                 startActivity(chat_intent);
             }
         });
@@ -418,7 +428,15 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View view) {
                 resetWarnVisibility();
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                Intent profile_intent = new Intent(ProfileActivity.this, ProfileActivity.class);
+                profile_intent.putExtra("user_id", userId);
+                profile_intent.putExtra("user_jwt", jwtToken);
+                profile_intent.putExtra("user_current_role", currentRole.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                profile_intent.putStringArrayListExtra("user_roles", roleList);
                 startActivity(profile_intent);
             }
         });
@@ -426,11 +444,35 @@ public class ProfileActivity extends AppCompatActivity {
         roleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                resetWarnVisibility();
+                Log.d(TAG, "onClick: pressed role button");
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
-                // TODO: NEED TO CHANGE AND NOT GO TO HOST_REVIEW_PAGE. ONLY FOR TESTING PURPOSE!!!
-                Intent profile_intent = new Intent(getApplicationContext(), HostReviewPageActivity.class);
-                startActivity(profile_intent);
+
+                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                    resetWarnVisibility();
+                    if (currentRole == RoleName.ROLE_USER) {
+                        Intent host_main_page_intent = new Intent(ProfileActivity.this, HostMainPageActivity.class);
+                        host_main_page_intent.putExtra("user_id", userId);
+                        host_main_page_intent.putExtra("user_jwt", jwtToken);
+                        ArrayList<String> roleList = new ArrayList<>();
+                        for (RoleName role : roles) {
+                            roleList.add(role.toString());
+                        }
+                        host_main_page_intent.putExtra("user_roles", roleList);
+                        startActivity(host_main_page_intent);
+                    } else if (currentRole == RoleName.ROLE_HOST) {
+                        Intent main_page_intent = new Intent(ProfileActivity.this, MainPageActivity.class);
+                        main_page_intent.putExtra("user_id", userId);
+                        main_page_intent.putExtra("user_jwt", jwtToken);
+                        ArrayList<String> roleList = new ArrayList<>();
+                        for (RoleName role : roles) {
+                            roleList.add(role.toString());
+                        }
+                        main_page_intent.putExtra("user_roles", roleList);
+                        startActivity(main_page_intent);
+                    }
+                } else {
+                    Toast.makeText(ProfileActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

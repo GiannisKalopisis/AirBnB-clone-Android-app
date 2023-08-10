@@ -25,6 +25,7 @@ import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.fakebnb.adapter.RulesAdapter;
+import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.RentRoomModel;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -37,13 +38,20 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 
 public class RentRoomPage extends AppCompatActivity {
 
     private static final String TAG = "RentRoomPage";
+
+    // user intent data
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
 
     private TextView rentRoomPersonsValue, rentRoomBedsValue, rentRoomBathroomsValue,
             rentRoomBedroomsValue, rentRoomPriceValue, rentRoomExtraPriceValue, rentRoomFinalPriceValue,
@@ -67,6 +75,19 @@ public class RentRoomPage extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rent_room);
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
 
         checkGoogleAPIAvailability();
 
@@ -310,12 +331,21 @@ public class RentRoomPage extends AppCompatActivity {
 
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
+        // only user_role can be here
 
         chatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(getApplicationContext(), ChatActivity.class);
+                Intent chat_intent = new Intent(RentRoomPage.this, ChatActivity.class);
+                chat_intent.putExtra("user_id", userId);
+                chat_intent.putExtra("user_jwt", jwtToken);
+                chat_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                chat_intent.putExtra("user_roles", roleList);
                 startActivity(chat_intent);
             }
         });
@@ -324,7 +354,15 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                Intent profile_intent = new Intent(RentRoomPage.this, ProfileActivity.class);
+                profile_intent.putExtra("user_id", userId);
+                profile_intent.putExtra("user_jwt", jwtToken);
+                profile_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                profile_intent.putStringArrayListExtra("user_roles", roleList);
                 startActivity(profile_intent);
             }
         });
@@ -332,10 +370,23 @@ public class RentRoomPage extends AppCompatActivity {
         roleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "onClick: pressed role button");
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
-                // TODO: NEED TO CHANGE AND NOT GO TO HOST_REVIEW_PAGE. ONLY FOR TESTING PURPOSE!!!
-                Intent profile_intent = new Intent(getApplicationContext(), HostReviewPageActivity.class);
-                startActivity(profile_intent);
+
+                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                    // to be at this activity he has the user role
+                    Intent host_main_page_intent = new Intent(RentRoomPage.this, HostMainPageActivity.class);
+                    host_main_page_intent.putExtra("user_id", userId);
+                    host_main_page_intent.putExtra("user_jwt", jwtToken);
+                    ArrayList<String> roleList = new ArrayList<>();
+                    for (RoleName role : roles) {
+                        roleList.add(role.toString());
+                    }
+                    host_main_page_intent.putExtra("user_roles", roleList);
+                    startActivity(host_main_page_intent);
+                } else {
+                    Toast.makeText(RentRoomPage.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

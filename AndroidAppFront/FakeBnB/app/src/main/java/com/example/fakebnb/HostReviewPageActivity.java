@@ -15,13 +15,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.adapter.HostReviewAdapter;
+import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.HostReviewModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class HostReviewPageActivity extends AppCompatActivity {
 
     private static final String TAG = "HostReviewPageActivity";
+
+    private Long userId;
+    private String jwtToken;
+    private Set<RoleName> roles;
 
     // do it hard coded, then do it with the database and add image
     private TextView hostReviewUsernameView, hostReviewEmailView, hostReviewPhoneView;
@@ -36,6 +43,20 @@ public class HostReviewPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_host_review_page);
 
         initView();
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            userId = intent.getSerializableExtra("user_id", Long.class);
+            jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
+            if (roleList != null) {
+                roles = new HashSet<>();
+                for (String role : roleList) {
+                    roles.add(RoleName.valueOf(role));
+                }
+            }
+        }
+
         bottomBarClickListeners();
         getTopInfo();
         // getReviews();
@@ -91,12 +112,21 @@ public class HostReviewPageActivity extends AppCompatActivity {
 
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
+        // only role_user can be here
 
         chatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(getApplicationContext(), ChatActivity.class);
+                Intent chat_intent = new Intent(HostReviewPageActivity.this, ChatActivity.class);
+                chat_intent.putExtra("user_id", userId);
+                chat_intent.putExtra("user_jwt", jwtToken);
+                chat_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                chat_intent.putExtra("user_roles", roleList);
                 startActivity(chat_intent);
             }
         });
@@ -105,7 +135,15 @@ public class HostReviewPageActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(getApplicationContext(), ProfileActivity.class);
+                Intent profile_intent = new Intent(HostReviewPageActivity.this, ProfileActivity.class);
+                profile_intent.putExtra("user_id", userId);
+                profile_intent.putExtra("user_jwt", jwtToken);
+                profile_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                profile_intent.putStringArrayListExtra("user_roles", roleList);
                 startActivity(profile_intent);
             }
         });
@@ -113,7 +151,21 @@ public class HostReviewPageActivity extends AppCompatActivity {
         roleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
+                // only user can be at this page so go to main Host page
+                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                    // to be at this activity he has the user role
+                    Intent host_main_page_intent = new Intent(HostReviewPageActivity.this, HostMainPageActivity.class);
+                    host_main_page_intent.putExtra("user_id", userId);
+                    host_main_page_intent.putExtra("user_jwt", jwtToken);
+                    ArrayList<String> roleList = new ArrayList<>();
+                    for (RoleName role : roles) {
+                        roleList.add(role.toString());
+                    }
+                    host_main_page_intent.putExtra("user_roles", roleList);
+                    startActivity(host_main_page_intent);
+                } else {
+                    Toast.makeText(HostReviewPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
