@@ -31,7 +31,7 @@ public class ApartmentService {
     public ResponseEntity<?> createApartment(UserDetailsImpl currentUser, ApartmentRequest apartmentRequest) {
         Long userId = currentUser.getId();
         UserReg userReg = userRegRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+                .orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", userId));
 
         Apartment apartment = new Apartment(apartmentRequest);
 

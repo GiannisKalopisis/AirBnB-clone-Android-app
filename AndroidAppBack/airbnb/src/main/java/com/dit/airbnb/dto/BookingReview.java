@@ -28,8 +28,8 @@ public class BookingReview {
     @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_reg_creator_id")
-    private UserReg userRegCreator;
+    @JoinColumn(name = "creator_user_reg_id")
+    private UserReg creatorUserReg;
 
     @Getter
     @JsonIgnore
@@ -37,11 +37,4 @@ public class BookingReview {
     @JoinColumn(name = "booking_id")
     private Booking booking;
 
-    public void setUserRegCreator(UserReg userRegCreator) {
-        this.userRegCreator = userRegCreator;
-    }
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
-    }
 }

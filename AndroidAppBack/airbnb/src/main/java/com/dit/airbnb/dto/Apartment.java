@@ -146,4 +146,5 @@ public class Apartment {
     public void setImages(Set<Image> images) {
         this.images = images;
     }
+
 }

@@ -3,6 +3,11 @@ package com.dit.airbnb.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -18,13 +23,32 @@ public class Chat {
     @Column(name = "id")
     private Long id;
 
+    // USER
     @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_reg_id")
-    private UserReg userReg;
+    @JoinColumn(name = "first_sender_user_reg_id")
+    private UserReg firstSenderUserReg;
 
-    public void setUserReg(UserReg userReg) {
-        this.userReg = userReg;
+    // HOST
+    @Getter
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "first_receiver_user_reg_id")
+    private UserReg firstReceiverUserReg;
+
+    @CreatedDate
+    @Column(name = "creation_time")
+    private Timestamp creationTime;
+
+    @Getter
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chat", cascade = CascadeType.ALL)
+    private Set<Message> messages = new HashSet<>();
+
+    public Chat(UserReg firstSenderUserReg, UserReg firstReceiverUserReg) {
+        this.firstSenderUserReg = firstSenderUserReg;
+        this.firstReceiverUserReg = firstReceiverUserReg;
     }
+
 }

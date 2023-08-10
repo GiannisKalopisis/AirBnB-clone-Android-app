@@ -13,8 +13,7 @@ public class AuthorizationService {
 
     public void isHostOfTheApartment(Long hostId, Long apartmentId) {
         if (!apartmentRepository.findIfApartmentExists(apartmentId, hostId)) {
-            throw new NotAuthorizedException("Not authorized to update the apartment with id = " + apartmentId + ", not the owner"
-            );
+            throw new NotAuthorizedException("Not authorized to update the apartment with id = " + apartmentId + ", not the owner");
         }
     }
 }

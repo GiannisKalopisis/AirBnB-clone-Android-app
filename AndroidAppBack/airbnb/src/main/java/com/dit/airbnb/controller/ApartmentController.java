@@ -14,19 +14,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/app")
 public class ApartmentController {
 
     @Autowired
     private ApartmentService apartmentService;
 
-    @PostMapping( "/app/apartment")
+    @PostMapping( "/apartment")
     @PreAuthorize("hasAuthority('ROLE_HOST')")
     public ResponseEntity<?> createApartment(@Valid @RequestBody ApartmentRequest apartmentRequest,
                                              @Valid @CurrentUser UserDetailsImpl currentUser) {
         return apartmentService.createApartment(currentUser, apartmentRequest);
     }
 
-    @PutMapping("/app/apartment/{apartmentId}")
+    @PutMapping("/apartment/{apartmentId}")
     @PreAuthorize("hasAuthority('ROLE_HOST')")
     public ResponseEntity<?> updateApartment(@PathVariable(value = "apartmentId") Long apartmentId,
                                              @Valid @RequestBody ApartmentRequest apartmentRequest,
@@ -34,14 +35,11 @@ public class ApartmentController {
         return apartmentService.updateApartmentById(apartmentId, currentUser, apartmentRequest);
     }
 
-    @GetMapping("/app/apartment/{apartmentId}")
+    @GetMapping("/apartment/{apartmentId}")
     @PreAuthorize("hasAuthority('ROLE_HOST')")
     public ResponseEntity<?> getApartmentInfo(@PathVariable(value = "apartmentId") Long apartmentId,
                                               @Valid @CurrentUser UserDetailsImpl currentUser) {
         return apartmentService.getApartmentById(apartmentId, currentUser);
     }
-
-
-
 
 }

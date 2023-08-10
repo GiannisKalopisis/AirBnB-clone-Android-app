@@ -2,14 +2,13 @@ package com.dit.airbnb.response;
 
 import com.dit.airbnb.dto.enums.RoleName;
 import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @Builder
 @AllArgsConstructor
 public class SignInResponse {

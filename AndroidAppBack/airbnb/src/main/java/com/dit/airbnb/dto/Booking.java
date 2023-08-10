@@ -60,4 +60,5 @@ public class Booking {
     public void setUserReg(UserReg userReg) {
         this.userReg = userReg;
     }
+
 }

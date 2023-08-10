@@ -60,25 +60,27 @@ public class UserReg {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userReg", cascade = CascadeType.ALL)
     private Set<Booking> bookings = new HashSet<>();
 
+    // here is the "user role" user, the user started the conversion
     @Getter
     @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userReg", cascade = CascadeType.ALL)
-    private Set<Chat> chats = new HashSet<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "firstSenderUserReg", cascade = CascadeType.ALL)
+    private Set<Chat> firstSenderChats = new HashSet<>();
+
+    // here is the "host role" user, the user received
+    @Getter
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "firstReceiverUserReg", cascade = CascadeType.ALL)
+    private Set<Chat> firstReceiverChats = new HashSet<>();
 
     @Getter
     @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userRegCreator", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "creatorUserReg", cascade = CascadeType.ALL)
     private Set<BookingReview> bookingReviews = new HashSet<>();
 
     @Getter
     @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userRegSender", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "senderUserReg", cascade = CascadeType.ALL)
     private Set<Message> sentMessages = new HashSet<>();
-
-    @Getter
-    @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userRegReceiver", cascade = CascadeType.ALL)
-    private Set<Message> receivedMessages = new HashSet<>();
 
     @Getter
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -102,38 +104,6 @@ public class UserReg {
         this.email = signUpRequest.getEmail();
         this.password = signUpRequest.getPassword();
         this.phone = signUpRequest.getPhone();
-    }
-
-    public void setApartments(Set<Apartment> apartments) {
-        this.apartments = apartments;
-    }
-
-    public void setBookings(Set<Booking> bookings) {
-        this.bookings = bookings;
-    }
-
-    public void setChats(Set<Chat> chats) {
-        this.chats = chats;
-    }
-
-    public void setBookingReviews(Set<BookingReview> bookingReviews) {
-        this.bookingReviews = bookingReviews;
-    }
-
-    public void setSentMessages(Set<Message> sentMessages) {
-        this.sentMessages = sentMessages;
-    }
-
-    public void setReceivedMessages(Set<Message> receivedMessages) {
-        this.receivedMessages = receivedMessages;
-    }
-
-    public void setImage(Image image) {
-        this.image = image;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
     }
 
     @Override

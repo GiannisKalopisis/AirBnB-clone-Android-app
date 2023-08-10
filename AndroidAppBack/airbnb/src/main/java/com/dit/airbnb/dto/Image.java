@@ -32,11 +32,5 @@ public class Image {
     @JoinColumn(name = "apartment_id")
     private Apartment apartment;
 
-    public void setUserReg(UserReg userReg) {
-        this.userReg = userReg;
-    }
 
-    public void setApartment(Apartment apartment) {
-        this.apartment = apartment;
-    }
 }

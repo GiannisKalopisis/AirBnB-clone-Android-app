@@ -20,17 +20,11 @@ public class Message {
     @Column(name = "id")
     private Long id;
 
-    @Getter
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_id")
-    private Chat chat;
+    @Column(name = "content")
+    private String content;
 
     @Column(name = "seen")
     private Boolean seen;
-
-    @Column(name = "message")
-    private String message;
 
     @Column(name = "timeSent")
     private Timestamp timeSent;
@@ -38,28 +32,23 @@ public class Message {
     @Column(name = "isLastMessage")
     private Boolean isLastMessage;
 
+    public Message(String content) {
+        this.content = content;
+        this.seen = false;
+        this.isLastMessage = true;
+    }
+
     // external tables
     @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_reg_sender_id")
-    private UserReg userRegSender;
+    @JoinColumn(name = "chat_id")
+    private Chat chat;
 
     @Getter
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_reg_receiver_id")
-    private UserReg userRegReceiver;
+    @JoinColumn(name = "sender_user_reg_id")
+    private UserReg senderUserReg;
 
-    public void setChat(Chat chat) {
-        this.chat = chat;
-    }
-
-    public void setUserRegSender(UserReg userRegSender) {
-        this.userRegSender = userRegSender;
-    }
-
-    public void setUserRegReceiver(UserReg userRegReceiver) {
-        this.userRegReceiver = userRegReceiver;
-    }
 }

@@ -2,14 +2,13 @@ package com.dit.airbnb.response;
 
 import com.dit.airbnb.dto.enums.RentalType;
 import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Data
+@Setter
+@Getter
 @Builder
 @AllArgsConstructor
 public class ApartmentResponse {
