@@ -1,6 +1,7 @@
 package com.dit.airbnb.dto;
 
 
+import com.dit.airbnb.csv_dto.UserRegCSV;
 import com.dit.airbnb.request.user_reg.SignUpRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -104,6 +105,19 @@ public class UserReg {
         this.email = signUpRequest.getEmail();
         this.password = signUpRequest.getPassword();
         this.phone = signUpRequest.getPhone();
+    }
+
+    public UserReg(UserRegCSV userRegCSV) {
+        this.firstName = userRegCSV.getFirstName();
+        this.lastName = userRegCSV.getLastName();
+        this.username = userRegCSV.getUsername();
+        this.email = userRegCSV.getEmail();
+        this.password = userRegCSV.getPassword();
+        this.phone = userRegCSV.getPhone();
+    }
+
+    public void addRole(Role role) {
+        roles.add(role);
     }
 
     @Override
