@@ -105,10 +105,10 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
         addButtonClickListener();
 
         ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
-        hostRentals.add(new HostRentalMainPageModel("Amalfi1 coast rooms", "Αθήνα", 4.5f));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi2 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi3 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi4 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi1 coast rooms", "Αθήνα", 4.5f, 1L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi2 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 2L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi3 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 3L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi4 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 4L));
 
         HostMainPageRentalAdapter adapter = new HostMainPageRentalAdapter(this, hostRentals);
         hostRentalsRecyclerView.setAdapter(adapter);
@@ -120,7 +120,14 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
             @Override
             public void onClick(View view) {
                 Toast.makeText(HostMainPageActivity.this, "Add place button pressed", Toast.LENGTH_SHORT).show();
-                Intent add_new_place_intent = new Intent(getApplicationContext(), AddNewPlaceActivity.class);
+                Intent add_new_place_intent = new Intent(HostMainPageActivity.this, AddNewPlaceActivity.class);
+                add_new_place_intent.putExtra("user_id", userId);
+                add_new_place_intent.putExtra("user_jwt", jwtToken);
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                add_new_place_intent.putExtra("user_roles", roleList);
                 startActivity(add_new_place_intent);
             }
         });
@@ -240,10 +247,17 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     }
 
     @Override
-    public void onItemClick(int position) {
-        Intent intent = new Intent(this, PlaceModificationPageActivity.class);
-
-        intent.putExtra("host_rental_id", position);
-        startActivity(intent);
+    public void onItemClick(long rentalId) {
+        // DEBUG ONLY: send rental_id just for checking
+        Intent place_modification_intent = new Intent(HostMainPageActivity.this, PlaceModificationPageActivity.class);
+        place_modification_intent.putExtra("user_id", userId);
+        place_modification_intent.putExtra("user_jwt", jwtToken);
+        ArrayList<String> roleList = new ArrayList<>();
+        for (RoleName role : roles) {
+            roleList.add(role.toString());
+        }
+        place_modification_intent.putExtra("user_roles", roleList);
+        place_modification_intent.putExtra("rental_id", rentalId);
+        startActivity(place_modification_intent);
     }
 }
