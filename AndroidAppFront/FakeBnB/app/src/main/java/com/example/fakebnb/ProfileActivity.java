@@ -1,26 +1,38 @@
 package com.example.fakebnb;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.UserRegUpdateRequest;
 import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
+import com.example.fakebnb.utils.RealPathUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -45,7 +57,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView profileUserUsernameView, profileUserEmailView;
     private TextView profileFirstNameWarn, profileLastNameWarn, profilePhoneWarn, profilePhotoWarn;
     // editable text
-    private EditText profileFirstNameEditText, profileLastNameEditText, profilePhoneEditText, profilePhotoEditText;
+    private EditText profileFirstNameEditText, profileLastNameEditText, profilePhoneEditText;
     // Linear View buttons
     private Button saveProfileInfoChangesButton, takeExtraRoleButton;
 
@@ -53,6 +65,19 @@ public class ProfileActivity extends AppCompatActivity {
     private Button chatButton, profileButton, roleButton;
 
     private final boolean isAlreadyHost = false;
+
+    /**
+     * Image TEST
+     */
+    private ImageView imageView;
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private String imagePath;
+    private Bitmap imageBitmap;
+    private Button selectImageButton;
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_MEDIA_IMAGES
+    };
 
 
     @Override
@@ -117,6 +142,53 @@ public class ProfileActivity extends AppCompatActivity {
         setButtonSaveClickListener();
 
         setTakeRoleButton();
+
+        imageClickListener();
+        setImagePickerLauncher();
+    }
+
+    /**
+     * Image picker launcher for SINGLE IMAGE
+     */
+    private void setImagePickerLauncher() {
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        // At this point, you have the URI of the selected image
+                        Toast.makeText(this, "URI: " + imageUri, Toast.LENGTH_SHORT).show();
+                        // You can now proceed to convert the image URI to a byte array or a File object and send it to the backend.
+                        imagePath = RealPathUtil.getRealPath(ProfileActivity.this, imageUri);
+                        Toast.makeText(this, "imagePath: " + imagePath, Toast.LENGTH_SHORT).show();
+                        imageBitmap = BitmapFactory.decodeFile(imagePath);
+                        imageView.setImageBitmap(imageBitmap);
+                    }
+                }
+        );
+    }
+
+    /**
+     * Same listener for single and multiple images(Recycler view)
+     */
+    private void imageClickListener() {
+        Log.d(TAG, "imageClickListener: Started");
+
+        selectImageButton.setOnClickListener(view -> {
+
+            if (ActivityCompat.checkSelfPermission(ProfileActivity.this, Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        ProfileActivity.this,
+                        PERMISSIONS_STORAGE,
+                        REQUEST_EXTERNAL_STORAGE
+                );
+            }
+
+            Toast.makeText(ProfileActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            imagePickerLauncher.launch(intent);
+        });
     }
 
     @SuppressLint("SetTextI18n")
@@ -128,9 +200,6 @@ public class ProfileActivity extends AppCompatActivity {
         profileFirstNameEditText.setText(userRegData.getFirstName());
         profileLastNameEditText.setText(userRegData.getLastName());
         profilePhoneEditText.setText(userRegData.getPhone());
-
-        // get from backend
-        profilePhotoEditText.setText("photo_profile_path.png");
     }
 
     @SuppressLint("SetTextI18n")
@@ -342,7 +411,7 @@ public class ProfileActivity extends AppCompatActivity {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                if (!profilePhotoEditText.getText().toString().isEmpty()) {
+                if (!(imageBitmap == null)) {
                     profilePhotoWarn.setVisibility(View.GONE);
                 }
             }
@@ -352,8 +421,7 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-//                Toast.makeText(ProfileActivity.this, "Photo text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
-                if (profilePhotoEditText.getText().toString().isEmpty()) {
+                if (imageBitmap == null) {
                     profilePhotoWarn.setVisibility(View.VISIBLE);
                     saveProfileInfoChangesButton.setVisibility(View.GONE);
                 } else {
@@ -361,7 +429,6 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
         };
-        profilePhotoEditText.addTextChangedListener(textWatcher);
     }
 
     private void initView() {
@@ -381,7 +448,13 @@ public class ProfileActivity extends AppCompatActivity {
         profileFirstNameEditText = findViewById(R.id.profileFirstNameEditText);
         profileLastNameEditText = findViewById(R.id.profileLastNameEditText);
         profilePhoneEditText = findViewById(R.id.profilePhoneEditText);
-        profilePhotoEditText = findViewById(R.id.profilePhotoEditText);
+//        profilePhotoEditText = findViewById(R.id.profilePhotoEditText);
+
+        /**
+         * PHOTO ONLY
+         */
+        imageView = findViewById(R.id.imageView);
+        selectImageButton = findViewById(R.id.selectImageButton);
 
         // Initializing profile buttons
         saveProfileInfoChangesButton = findViewById(R.id.saveProfileInfoChangesButton);

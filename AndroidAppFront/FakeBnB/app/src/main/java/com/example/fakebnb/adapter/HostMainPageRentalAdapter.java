@@ -54,7 +54,7 @@ public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPage
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView descriptionTextView, areaTextView;
         private RatingBar ratingStars;
@@ -72,7 +72,8 @@ public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPage
                     if (hostMainPageRecyclerViewInterface != null){
                         int clickedPosition = getAdapterPosition();
                         if (clickedPosition != RecyclerView.NO_POSITION) {
-                            hostMainPageRecyclerViewInterface.onItemClick(clickedPosition);
+                            long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
+                            hostMainPageRecyclerViewInterface.onItemClick(rentalId);
                         }
                     }
                 }

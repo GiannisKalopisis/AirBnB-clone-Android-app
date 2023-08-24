@@ -59,8 +59,8 @@
                     android:id="@+id/profileFirstNameWarn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
                     android:layout_gravity="left"
+                    android:layout_marginStart="20dp"
                     android:text="@string/warning"
                     android:textColor="@android:color/holo_red_light"
                     android:visibility="gone" />
@@ -80,16 +80,16 @@
                     android:layout_margin="20dp"
                     android:ems="10"
                     android:hint="First name"
-                    android:inputType="text"
-                    android:importantForAutofill="no" />
+                    android:importantForAutofill="no"
+                    android:inputType="text" />
 
                 <!-- LastName -->
                 <TextView
                     android:id="@+id/profileLastNameWarn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
                     android:layout_gravity="left"
+                    android:layout_marginStart="20dp"
                     android:text="@string/warning"
                     android:textColor="@android:color/holo_red_light"
                     android:visibility="gone" />
@@ -109,8 +109,8 @@
                     android:layout_margin="20dp"
                     android:ems="10"
                     android:hint="Last name"
-                    android:inputType="text"
-                    android:importantForAutofill="no" />
+                    android:importantForAutofill="no"
+                    android:inputType="text" />
 
 
                 <!-- Phone -->
@@ -118,8 +118,8 @@
                     android:id="@+id/profilePhoneWarn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
                     android:layout_gravity="left"
+                    android:layout_marginStart="20dp"
                     android:text="@string/warning"
                     android:textColor="@android:color/holo_red_light"
                     android:visibility="gone" />
@@ -139,8 +139,8 @@
                     android:layout_margin="20dp"
                     android:ems="10"
                     android:hint="@string/_6987548536"
-                    android:inputType="text"
-                    android:importantForAutofill="no" />
+                    android:importantForAutofill="no"
+                    android:inputType="text" />
 
 
                 <!-- Photo -->
@@ -161,15 +161,36 @@
                     android:layout_marginStart="20dp"
                     android:text="@string/photo" />
 
-                <EditText
-                    android:id="@+id/profilePhotoEditText"
-                    android:layout_width="wrap_content"
+<!--                <EditText-->
+<!--                    android:id="@+id/profilePhotoEditText"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_margin="20dp"-->
+<!--                    android:ems="10"-->
+<!--                    android:hint="@string/photo_path_png"-->
+<!--                    android:importantForAutofill="no"-->
+<!--                    android:inputType="text" />-->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="20dp"
-                    android:ems="10"
-                    android:hint="@string/photo_path_png"
-                    android:inputType="text"
-                    android:importantForAutofill="no" />
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:layout_margin="10dp">
+
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:scaleType="fitCenter"
+                        android:src="@mipmap/ic_launcher"
+                        />
+
+                    <Button
+                        android:id="@+id/selectImageButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select Image"/>
+                </LinearLayout>
 
 
                 <!-- Buttons -->
