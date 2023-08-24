@@ -1,6 +1,7 @@
 package com.dit.airbnb.request.apartment;
 
 import com.dit.airbnb.dto.enums.RentalType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +19,10 @@ public class ApartmentRequest {
 
     private String district;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     private Date availableStartDate;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     private Date availableEndDate;
 
     private Integer maxVisitors;

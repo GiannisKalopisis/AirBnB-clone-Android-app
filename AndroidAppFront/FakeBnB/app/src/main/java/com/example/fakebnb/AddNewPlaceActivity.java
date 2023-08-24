@@ -2,12 +2,17 @@ package com.example.fakebnb;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -15,18 +20,31 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.Callbacks.AddApartmentCallback;
+import com.example.fakebnb.adapter.ImageAdapter;
+import com.example.fakebnb.enums.RentalType;
 import com.example.fakebnb.enums.RoleName;
+import com.example.fakebnb.model.request.ApartmentRequest;
+import com.example.fakebnb.model.response.ApartmentResponse;
+import com.example.fakebnb.rest.ApartmentAPI;
+import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.RealPathUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,12 +55,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AddNewPlaceActivity extends AppCompatActivity {
 
@@ -195,6 +222,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         }
         return locationLatLng;
     }
+
+
+    /**
+     * Text Watchers
+     */
 
     private void setTextWatchers() {
         setTextWatcherAddress();
@@ -534,7 +566,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                             @Override
                             public void onDateSet(DatePicker view, int year,
                                                   int monthOfYear, int dayOfMonth) {
-                                startDateEditText.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
+                                startDateEditText.setText(formattedDate);
                             }
                         },
                         year, month, day);
@@ -556,16 +589,16 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
                 final Calendar c = Calendar.getInstance();
 
-                // Get the selected check-in date from checkInDate TextView and parse it to Calendar.
+                // Get the selected check-in date from startDateEditText and parse it to Calendar.
                 String checkInDateText = startDateEditText.getText().toString();
-                String[] checkInDateParts = checkInDateText.split("-");
-                int checkInDay = Integer.parseInt(checkInDateParts[0]);
-                int checkInMonth = Integer.parseInt(checkInDateParts[1]) - 1; // Months are 0-based in Calendar.
-                int checkInYear = Integer.parseInt(checkInDateParts[2]);
-                c.set(checkInYear, checkInMonth, checkInDay);
-
-                // Add one day to the check-in date to get the minimum date for checkOutDate.
-                c.add(Calendar.DAY_OF_MONTH, 1);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                try {
+                    Date checkInDate = dateFormat.parse(checkInDateText);
+                    c.setTime(Objects.requireNonNull(checkInDate));
+                    c.add(Calendar.DAY_OF_MONTH, 1);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
                 int year = c.get(Calendar.YEAR);
                 int month = c.get(Calendar.MONTH);
@@ -579,7 +612,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                             @Override
                             public void onDateSet(DatePicker view, int year,
                                                   int monthOfYear, int dayOfMonth) {
-                                endDateEditText.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
+                                endDateEditText.setText(formattedDate);
                             }
                         },
                         year, month, day);
@@ -596,118 +630,169 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!validateFields()) {
-                    Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(view.getContext(), "222 Please fill all the fields", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 Toast.makeText(view.getContext(), "Pressed ADD PLACE BUTTON", Toast.LENGTH_SHORT).show();
 
-                // data fields
-                String address, startDate, endDate, rentalType, rules, description, photoUpload;
-                int maxVisitors, beds, bedrooms, bathrooms, livingRooms;
-                float minPrice, extraCost, area;
-
-                // read the data and send to the database
-                address = addPlaceAddressEditText.getText().toString();
-                startDate = startDateEditText.getText().toString();
-                endDate = endDateEditText.getText().toString();
-                String tempMaxVisitors = addPlaceMaxVisitorsEditText.getText().toString();
-                try {
-                    maxVisitors = Integer.parseInt(tempMaxVisitors);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(view.getContext(), "Max visitors must be a number", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                String tempMinPrice = addPlaceMinPriceEditText.getText().toString();
-                try {
-                    minPrice = Float.parseFloat(tempMinPrice);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(view.getContext(), "Min price must be a number", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                String tempExtraCost = addPlaceExtraCostEditText.getText().toString();
-                try {
-                    extraCost = Float.parseFloat(tempExtraCost);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(view.getContext(), "Extra cost must be a number", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                int checkedRadioButtonId = addPlaceRentalTypeRadioGroup.getCheckedRadioButtonId();
-                if (checkedRadioButtonId != -1) {
-                    checkedRadioButton = findViewById(checkedRadioButtonId);
-                    rentalType = checkedRadioButton.getText().toString();
-                } else {
-                    Toast.makeText(view.getContext(), "Please select a rental type", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                photoUpload = addPlacePhotoUploadEditText.getText().toString();
-                rules = addPlaceRulesEditText.getText().toString();
-                description = addPlaceDescriptionEditText.getText().toString();
-                String tempBeds = addPlaceBedsEditText.getText().toString();
-                try {
-                    beds = Integer.parseInt(tempBeds);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(view.getContext(), "Beds must be a number", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                String tempBedrooms = addPlaceBedroomsEditText.getText().toString();
-                try {
-                    bedrooms = Integer.parseInt(tempBedrooms);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(view.getContext(), "Bedrooms must be a number", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                String tempBathrooms = addPlaceBathroomsEditText.getText().toString();
-                try {
-                    bathrooms = Integer.parseInt(tempBathrooms);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(view.getContext(), "Bathrooms must be a number", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                String tempLivingRooms = addPlaceLivingRoomsEditText.getText().toString();
-                try {
-                    livingRooms = Integer.parseInt(tempLivingRooms);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(view.getContext(), "Living rooms must be a number", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                String tempArea = addPlaceAreaEditText.getText().toString();
-                try {
-                    area = Float.parseFloat(tempArea);
-                } catch (NumberFormatException e) {
-                    Toast.makeText(view.getContext(), "Area must be a number", Toast.LENGTH_SHORT).show();
+                ApartmentRequest apartmentRequest = setApartmentRequestData(view);
+                if (apartmentRequest == null) {
+                    Toast.makeText(view.getContext(), "111 Please fill all the fields correctly", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                sendDataToDatabase(address, startDate, endDate, maxVisitors, minPrice, extraCost, rentalType,
-                        photoUpload, rules, description, beds, bedrooms, bathrooms,
-                        livingRooms, area);
+                sendDataToDatabase(apartmentRequest, new AddApartmentCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(view.getContext(), "Apartment added successfully", Toast.LENGTH_SHORT).show();
+                        Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                        host_main_page_intent.putExtra("user_id", userId);
+                        host_main_page_intent.putExtra("user_jwt", jwtToken);
+                        ArrayList<String> roleList = new ArrayList<>();
+                        for (RoleName role : roles) {
+                            roleList.add(role.toString());
+                        }
+                        host_main_page_intent.putStringArrayListExtra("user_roles", roleList);
+                        startActivity(host_main_page_intent);
+                    }
 
-                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                startActivity(host_main_page_intent);
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(view.getContext(), "Error adding apartment, please try again.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }
 
-    private void sendDataToDatabase(String address, String startDate, String endDate, int maxVisitors, float minPrice,
-                                    float extraCost, String rentalType, String photoUpload,
-                                    String rules, String description, int beds, int bedrooms,
-                                    int bathrooms, int livingRooms, float area) {
-        Log.d(TAG, "onClick: address: " + address);
-        Log.d(TAG, "onClick: startDate: " + startDate);
-        Log.d(TAG, "onClick: endDate: " + endDate);
-        Log.d(TAG, "onClick: maxVisitors: " + maxVisitors);
-        Log.d(TAG, "onClick: minPrice: " + minPrice);
-        Log.d(TAG, "onClick: extraCost: " + extraCost);
-        Log.d(TAG, "onClick: rentalType: " + rentalType);
-        Log.d(TAG, "onClick: photoUpload: " + photoUpload);
-        Log.d(TAG, "onClick: rules: " + rules);
-        Log.d(TAG, "onClick: description: " + description);
-        Log.d(TAG, "onClick: beds: " + beds);
-        Log.d(TAG, "onClick: bedrooms: " + bedrooms);
-        Log.d(TAG, "onClick: bathrooms: " + bathrooms);
-        Log.d(TAG, "onClick: livingRooms: " + livingRooms);
-        Log.d(TAG, "onClick: area: " + area);
+    @Nullable
+    private ApartmentRequest setApartmentRequestData(View view) {
+
+        ApartmentRequest apartmentRequest = new ApartmentRequest();
+
+        // TODO: had to add address field in backend, address can be a concatenation of address, district, city, country
+
+        // country, city, district
+        apartmentRequest.setCountry(addPlaceAddressEditText.getText().toString());
+        apartmentRequest.setCity(addPlaceAddressEditText.getText().toString());
+        apartmentRequest.setDistrict(addPlaceAddressEditText.getText().toString());
+
+        // maxVisitors
+        try {
+            int maxVisitors = Integer.parseInt(addPlaceMaxVisitorsEditText.getText().toString());
+            apartmentRequest.setMaxVisitors(maxVisitors);
+        } catch (NumberFormatException e) {
+            Toast.makeText(view.getContext(), "Max visitors must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        // minRetailPrice
+        try {
+            BigDecimal minPrice = new BigDecimal(addPlaceMinPriceEditText.getText().toString());
+            apartmentRequest.setMinRetailPrice(minPrice);
+        } catch (NumberFormatException e) {
+            Toast.makeText(view.getContext(), "Min price must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        // extraCost of every person
+        try {
+            BigDecimal extraCost = new BigDecimal(addPlaceExtraCostEditText.getText().toString());
+            apartmentRequest.setExtraCostPerPerson(extraCost);
+        } catch (NumberFormatException e) {
+            Toast.makeText(view.getContext(), "Extra cost must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        // TODO: add them to the apartment data model in backend
+        String rules = addPlaceRulesEditText.getText().toString();
+
+        // description, no need to convert
+        apartmentRequest.setDescription(addPlaceDescriptionEditText.getText().toString());
+
+        // number of beds
+        try {
+            short beds = Short.parseShort(addPlaceBedsEditText.getText().toString());
+            apartmentRequest.setNumberOfBeds(beds);
+        } catch (NumberFormatException e) {
+            Toast.makeText(view.getContext(), "Beds must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        // number of bedrooms
+        try {
+            short bedrooms = Short.parseShort(addPlaceBedroomsEditText.getText().toString());
+            apartmentRequest.setNumberOfBedrooms(bedrooms);
+        } catch (NumberFormatException e) {
+            Toast.makeText(view.getContext(), "Bedrooms must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        // number of bathrooms
+        try {
+            short bathrooms = Short.parseShort(addPlaceBathroomsEditText.getText().toString());
+            apartmentRequest.setNumberOfBathrooms(bathrooms);
+        } catch (NumberFormatException e) {
+            Toast.makeText(view.getContext(), "Bathrooms must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        // number of living rooms
+        try {
+            short livingRooms = Short.parseShort(addPlaceLivingRoomsEditText.getText().toString());
+            apartmentRequest.setNumberOfLivingRooms(livingRooms);
+        } catch (NumberFormatException e) {
+            Toast.makeText(view.getContext(), "Living rooms must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        // size of area
+        try {
+            BigDecimal area = new BigDecimal(addPlaceAreaEditText.getText().toString());
+            apartmentRequest.setArea(area);
+        } catch (NumberFormatException e) {
+            Toast.makeText(view.getContext(), "Area must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        apartmentRequest.setAvailableStartDate(startDateEditText.getText().toString());
+        apartmentRequest.setAvailableEndDate(endDateEditText.getText().toString());
+
+        // latitude & longitude of address
+        LatLng location = getLocationFromAddress(addPlaceAddressEditText.getText().toString());
+        apartmentRequest.setGeoLat(new BigDecimal(location.latitude));
+        apartmentRequest.setGeoLong(new BigDecimal(location.longitude));
+
+        // rentalType (ROOM or HOUSE)
+        apartmentRequest.setRentalType(addPlaceRentalTypeRadioGroup.getCheckedRadioButtonId() == R.id.roomTypeRadioButton ? RentalType.RENTAL_ROOM : RentalType.RENTAL_HOUSE);
+
+        return apartmentRequest;
+    }
+
+    private void sendDataToDatabase(ApartmentRequest apartmentRequest, AddApartmentCallback apartmentCallback) {
+        RestClient restClient = new RestClient(jwtToken);
+        ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
+
+        apartmentAPI.createApartment(apartmentRequest)
+                .enqueue(new Callback<ApartmentResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                        if (response.isSuccessful()) {
+                            Log.d(TAG, "Apartment added successfully");
+                            apartmentCallback.onSuccess();
+                        } else {
+                            Log.d(TAG, "Error adding apartment");
+                            apartmentCallback.onFailure("Error adding apartment");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                        Log.d(TAG, "Error adding apartment: " + t.getMessage());
+                        apartmentCallback.onFailure(t.getMessage());
+                    }
+        });
     }
 
     private boolean validateFields() {
