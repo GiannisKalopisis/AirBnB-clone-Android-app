@@ -86,8 +86,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             addPlaceWarningBeds, addPlaceWarningBedrooms, addPlaceWarningBathrooms,
             addPlaceWarningLivingRooms, addPlaceWarningArea;
 
-    private EditText addPlaceAddressEditText, startDateEditText, endDateEditText, addPlaceMaxVisitorsEditText,
-            addPlaceMinPriceEditText, addPlaceExtraCostEditText, addPlacePhotoUploadEditText,
+    private EditText addPlaceAddressEditText, startDateEditText, endDateEditText,
+            addPlaceMaxVisitorsEditText, addPlaceMinPriceEditText, addPlaceExtraCostEditText,
             addPlaceRulesEditText, addPlaceDescriptionEditText, addPlaceBedsEditText,
             addPlaceBedroomsEditText, addPlaceBathroomsEditText, addPlaceLivingRoomsEditText,
             addPlaceAreaEditText;
@@ -108,6 +108,23 @@ public class AddNewPlaceActivity extends AppCompatActivity {
     private boolean isMapReady = false;
     private String addressToShowOnMap;
     private GoogleMap googleMap;
+
+    /**
+     * Variables for IMAGE UPLOAD
+     */
+    private Button selectImageButton;
+    private ImageView imageView;
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private String imagePath;
+    private Bitmap imageBitmap;
+    private List<Bitmap> imageBitmapList;
+    private RecyclerView imagesRecyclerView;
+    private ImageAdapter imageAdapter;
+    // Permissions for accessing the storage
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_MEDIA_IMAGES
+    };
 
 
     @Override
@@ -156,7 +173,67 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
+
+        /**
+         * Variables for MULTIPLE IMAGES
+         */
+        imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
+        imagesRecyclerView = findViewById(R.id.imagesRecyclerView);
+        imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        imageAdapter = new ImageAdapter(imageBitmapList);
+        imagesRecyclerView.setAdapter(imageAdapter);
+
+        imageClickListener();
+        setImagePickerLauncher();
     }
+
+    /**
+     * Multiple images as RecyclerView
+     */
+    private void setImagePickerLauncher() {
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        imagePath = RealPathUtil.getRealPath(AddNewPlaceActivity.this, imageUri);
+                        imageBitmap = BitmapFactory.decodeFile(imagePath);
+
+                        // Add the selected image to the layout
+                        imageBitmapList.add(imageBitmap);
+                        imageAdapter.notifyDataSetChanged();
+                    }
+                }
+        );
+    }
+
+    /**
+     * Same listener for single and multiple images(Recycler view)
+     */
+    private void imageClickListener() {
+        Log.d(TAG, "imageClickListener: Started");
+
+        selectImageButton.setOnClickListener(view -> {
+
+            if (ActivityCompat.checkSelfPermission(AddNewPlaceActivity.this, Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        AddNewPlaceActivity.this,
+                        PERMISSIONS_STORAGE,
+                        REQUEST_EXTERNAL_STORAGE
+                );
+            }
+
+            Toast.makeText(AddNewPlaceActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            imagePickerLauncher.launch(intent);
+        });
+    }
+
+
+    /**
+     * GOOGLE MAPS methods
+     */
 
     private void checkGoogleAPIAvailability() {
         // Check for Google Play Services availability
@@ -235,7 +312,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         setTextWatcherMaxVisitors();
         setTextWatcherMinPrice();
         setTextWatcherExtraCost();
-        setTextWatcherPhotoUpload();
+//        setTextWatcherPhotoUpload();
         setTextWatcherRules();
         setTextWatcherDescription();
         setTextWatcherBeds();
@@ -369,25 +446,25 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceExtraCostEditText.addTextChangedListener(textWatcher);
     }
 
-    private void setTextWatcherPhotoUpload() {
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (addPlacePhotoUploadEditText.getText().toString().isEmpty()) {
-                    addPlaceWarningPhotoUpload.setVisibility(View.VISIBLE);
-                } else {
-                    addPlaceWarningPhotoUpload.setVisibility(View.GONE);
-                }
-            }
-        };
-        addPlacePhotoUploadEditText.addTextChangedListener(textWatcher);
-    }
+//    private void setTextWatcherPhotoUpload() {
+//        TextWatcher textWatcher = new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//                if (addPlacePhotoUploadEditText.getText().toString().isEmpty()) {
+//                    addPlaceWarningPhotoUpload.setVisibility(View.VISIBLE);
+//                } else {
+//                    addPlaceWarningPhotoUpload.setVisibility(View.GONE);
+//                }
+//            }
+//        };
+//        addPlacePhotoUploadEditText.addTextChangedListener(textWatcher);
+//    }
 
     private void setTextWatcherRules() {
         TextWatcher textWatcher = new TextWatcher() {
@@ -821,7 +898,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             addPlaceWarningExtraCost.setVisibility(View.VISIBLE);
             isValid = false;
         }
-        if (addPlacePhotoUploadEditText.getText().toString().isEmpty()) {
+        if (imageBitmapList == null || imageBitmapList.isEmpty()) {
             addPlaceWarningPhotoUpload.setVisibility(View.VISIBLE);
             isValid = false;
         }
@@ -877,13 +954,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // EditTexts
         addPlaceAddressEditText = findViewById(R.id.addPlaceAddressEditText);
-//        addPlaceDatesEditText = findViewById(R.id.addPlaceDatesEditText);
         startDateEditText = findViewById(R.id.startDateEditText);
         endDateEditText = findViewById(R.id.endDateEditText);
         addPlaceMaxVisitorsEditText = findViewById(R.id.addPlaceMaxVisitorsEditText);
         addPlaceMinPriceEditText = findViewById(R.id.addPlaceMinPriceEditText);
         addPlaceExtraCostEditText = findViewById(R.id.addPlaceExtraCostEditText);
-        addPlacePhotoUploadEditText = findViewById(R.id.addPlacePhotoUploadEditText);
         addPlaceRulesEditText = findViewById(R.id.addPlaceRulesEditText);
         addPlaceDescriptionEditText = findViewById(R.id.addPlaceDescriptionEditText);
         addPlaceBedsEditText = findViewById(R.id.addPlaceBedsEditText);
@@ -891,7 +966,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceBathroomsEditText = findViewById(R.id.addPlaceBathroomsEditText);
         addPlaceLivingRoomsEditText = findViewById(R.id.addPlaceLivingRoomsEditText);
         addPlaceAreaEditText = findViewById(R.id.addPlaceAreaEditText);
-
         addPlaceRentalTypeRadioGroup = findViewById(R.id.addPlaceRentalTypeRadioGroup);
 
         // MapView
@@ -899,6 +973,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // Buttons
         addPlaceButton = findViewById(R.id.addPlaceButton);
+
+        /**
+         * PHOTO ONLY
+         */
+        selectImageButton = findViewById(R.id.selectImageButton);
 
         chatButton = findViewById(R.id.chatButton);
         profileButton = findViewById(R.id.profileButton);

@@ -1,32 +1,55 @@
 package com.example.fakebnb;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.adapter.ImageAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.UserRegisterModel;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
+import com.example.fakebnb.utils.RealPathUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
@@ -41,12 +64,30 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
 
     private EditText usernameEditText, passwordEditText, confirmPasswordEditText, firstNameEditText,
-            lastNameEditText, emailEditText, phoneNumberEditText, photoEditText;
+            lastNameEditText, emailEditText, phoneNumberEditText;
     private RadioGroup roleGroup;
-    private Button registerButton;
+    private Button selectImageButton, registerButton;
     private TextView usernameWarn, passwordWarn, confirmPasswordWarn, firstNameWarn, lastNameWarn,
             emailWarn, phoneWarn, roleWarn, photoWarn;
 
+    private ImageView imageView;
+
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private String imagePath;
+    private Bitmap imageBitmap;
+    /**
+     * Variables for MULTIPLE IMAGES
+     */
+//    private List<Bitmap> imageBitmapList;
+//    private RecyclerView imagesRecyclerView;
+//    private ImageAdapter imageAdapter;
+
+
+    // Permissions for accessing the storage
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_MEDIA_IMAGES
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +98,65 @@ public class RegisterActivity extends AppCompatActivity {
 
         initView();
         resetWarnVisibility();
+
+        /**
+         * Variables for MULTIPLE IMAGES
+         */
+//        imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
+//        imagesRecyclerView = findViewById(R.id.imagesRecyclerView);
+//        imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+//        imageAdapter = new ImageAdapter(imageBitmapList);
+//        imagesRecyclerView.setAdapter(imageAdapter);
+
+
         setTextWatchers();
 
         registerButtonOnClickListener();
+        imageClickListener();
+        setImagePickerLauncher();
+
     }
+
+    /**
+     * Image picker launcher for SINGLE IMAGE
+     */
+    private void setImagePickerLauncher() {
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        // At this point, you have the URI of the selected image
+                        Toast.makeText(this, "URI: " + imageUri, Toast.LENGTH_SHORT).show();
+                        // You can now proceed to convert the image URI to a byte array or a File object and send it to the backend.
+                        imagePath = RealPathUtil.getRealPath(RegisterActivity.this, imageUri);
+                        Toast.makeText(this, "imagePath: " + imagePath, Toast.LENGTH_SHORT).show();
+                        imageBitmap = BitmapFactory.decodeFile(imagePath);
+                        imageView.setImageBitmap(imageBitmap);
+                    }
+                }
+        );
+    }
+
+    /**
+     * Multiple images as RecyclerView
+     */
+//    private void setImagePickerLauncher() {
+//        imagePickerLauncher = registerForActivityResult(
+//                new ActivityResultContracts.StartActivityForResult(),
+//                result -> {
+//                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+//                        Uri imageUri = result.getData().getData();
+//                        imagePath = RealPathUtil.getRealPath(RegisterActivity.this, imageUri);
+//                        imageBitmap = BitmapFactory.decodeFile(imagePath);
+//
+//                        // Add the selected image to the layout
+//                        imageBitmapList.add(imageBitmap);
+//                        imageAdapter.notifyDataSetChanged();
+//                    }
+//                }
+//        );
+//    }
 
     private void registerButtonOnClickListener() {
         Log.d(TAG, "registerButtonOnClickListener: Started");
@@ -152,6 +248,10 @@ public class RegisterActivity extends AppCompatActivity {
         Log.d(TAG, "setUserRegisterModel: Finished");
         return userRegisterModel;
     }
+
+    /**
+     * Text Watchers
+     */
 
     private void setTextWatchers() {
         setTextWatcherUsername();
@@ -323,14 +423,14 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (photoEditText.getText().toString().isEmpty()) {
+                if (imageBitmap == null) {
                     photoWarn.setVisibility(View.VISIBLE);
                 } else {
                     photoWarn.setVisibility(View.GONE);
                 }
             }
         };
-        photoEditText.addTextChangedListener(textWatcher);
+//        imageView.addTextChangedListener(textWatcher);
     }
 
     private boolean initRegister() {
@@ -399,7 +499,7 @@ public class RegisterActivity extends AppCompatActivity {
             phoneWarn.setText("Enter your phone number");
             return false;
         }
-        if (photoEditText.getText().toString().isEmpty()) {
+        if (imageBitmap == null) {
             photoWarn.setVisibility(View.VISIBLE);
             photoWarn.setText("Enter your photo");
             return false;
@@ -413,6 +513,29 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Same listener for single and multiple images(Recycler view)
+     */
+    private void imageClickListener() {
+        Log.d(TAG, "imageClickListener: Started");
+
+        selectImageButton.setOnClickListener(view -> {
+
+            if (ActivityCompat.checkSelfPermission(RegisterActivity.this, Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        RegisterActivity.this,
+                        PERMISSIONS_STORAGE,
+                        REQUEST_EXTERNAL_STORAGE
+                );
+            }
+
+            Toast.makeText(RegisterActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            imagePickerLauncher.launch(intent);
+        });
+    }
+
     private void initView() {
         Log.d(TAG, "initViews: started");
         usernameEditText = findViewById(R.id.usernameEditText);
@@ -422,9 +545,14 @@ public class RegisterActivity extends AppCompatActivity {
         lastNameEditText = findViewById(R.id.lastNameEditText);
         emailEditText = findViewById(R.id.emailEditText);
         phoneNumberEditText = findViewById(R.id.phoneNumberEditText);
-        photoEditText = findViewById(R.id.photoEditText);
 
         registerButton = findViewById(R.id.registerButton);
+
+        /**
+         * Necessary for images
+         */
+        selectImageButton = findViewById(R.id.selectImageButton);
+        imageView = findViewById(R.id.imageView);
 
         usernameWarn = findViewById(R.id.usernameWarn);
         passwordWarn = findViewById(R.id.passwordWarn);
