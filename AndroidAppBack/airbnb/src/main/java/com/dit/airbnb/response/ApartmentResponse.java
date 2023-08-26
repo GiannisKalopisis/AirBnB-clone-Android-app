@@ -13,6 +13,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class ApartmentResponse {
 
+    private String address;
+
     private String country;
 
     private String city;
@@ -44,6 +46,8 @@ public class ApartmentResponse {
     private BigDecimal geoLat;
 
     private BigDecimal geoLong;
+
+    private String rules;
 
     @Enumerated
     private RentalType rentalType;

@@ -1,9 +1,7 @@
 package com.dit.airbnb.csv_dto;
 
-import com.dit.airbnb.dto.enums.RentalType;
 import com.opencsv.bean.CsvBindByName;
-import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
+import com.opencsv.bean.CsvDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +17,10 @@ import java.util.Date;
 public class ApartmentCSV {
 
     @CsvBindByName(column = "hostId")
-    private Integer hostId;
+    private Long hostId;
+
+    @CsvBindByName(column = "address")
+    private String address;
 
     @CsvBindByName(column = "country")
     private String country;
@@ -30,9 +31,11 @@ public class ApartmentCSV {
     @CsvBindByName(column = "district")
     private String district;
 
+    @CsvDate(value = "yyyy-MM-dd")
     @CsvBindByName(column = "availableStartDate")
     private Date availableStartDate;
 
+    @CsvDate(value = "yyyy-MM-dd")
     @CsvBindByName(column = "availableEndDate")
     private Date availableEndDate;
 
@@ -68,6 +71,9 @@ public class ApartmentCSV {
 
     @CsvBindByName(column = "geoLong")
     private BigDecimal geoLong;
+
+    @CsvBindByName(column = "rules")
+    private String rules;
 
     @CsvBindByName(column = "rentalType")
     private String rentalType;

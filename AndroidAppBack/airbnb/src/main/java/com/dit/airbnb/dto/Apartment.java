@@ -1,6 +1,7 @@
 package com.dit.airbnb.dto;
 
 
+import com.dit.airbnb.csv_dto.ApartmentCSV;
 import com.dit.airbnb.dto.enums.RentalType;
 import com.dit.airbnb.request.apartment.ApartmentRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,6 +26,9 @@ public class Apartment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @Column(name = "address")
+    private String address;
 
     @Column(name = "country")
     private String country;
@@ -74,6 +78,9 @@ public class Apartment {
     @Column(name = "geo_long",  precision = 10, scale = 6)
     private BigDecimal geoLong;
 
+    @Column(name = "rules")
+    private String rules;
+
     @Enumerated
     @Column(name = "rental_type")
     private RentalType rentalType;
@@ -96,6 +103,7 @@ public class Apartment {
     private Set<Image> images;
 
     public Apartment(ApartmentRequest apartmentRequest) {
+        this.address = apartmentRequest.getAddress();
         this.country = apartmentRequest.getCountry();
         this.city = apartmentRequest.getCity();
         this.district = apartmentRequest.getDistrict();
@@ -115,7 +123,30 @@ public class Apartment {
         this.rentalType = apartmentRequest.getRentalType();
     }
 
+    public Apartment(ApartmentCSV apartmentCSV) {
+        this.country = apartmentCSV.getCountry();
+        this.city = apartmentCSV.getCity();
+        this.district = apartmentCSV.getDistrict();
+        this.availableStartDate = apartmentCSV.getAvailableStartDate();
+        this.availableEndDate = apartmentCSV.getAvailableEndDate();
+        this.maxVisitors = apartmentCSV.getMaxVisitors();
+        this.minRetailPrice = apartmentCSV.getMinRetailPrice();
+        this.extraCostPerPerson = apartmentCSV.getExtraCostPerPerson();
+        this.description = apartmentCSV.getDescription();
+        this.numberOfBeds = apartmentCSV.getNumberOfBeds();
+        this.numberOfBedrooms = apartmentCSV.getNumberOfBedrooms();
+        this.numberOfBathrooms = apartmentCSV.getNumberOfBathrooms();
+        this.numberOfLivingRooms = apartmentCSV.getNumberOfLivingRooms();
+        this.area = apartmentCSV.getArea();
+        this.geoLat= apartmentCSV.getGeoLat();
+        this.geoLong = apartmentCSV.getGeoLong();
+        this.rentalType = apartmentCSV.getRentalType().equals("RENTAL_ROOM") ? RentalType.RENTAL_ROOM : RentalType.RENTAL_HOUSE;
+        this.address = apartmentCSV.getAddress();
+        this.rules = apartmentCSV.getRules();
+    }
+
     public void updateApartment(ApartmentRequest apartmentRequest) {
+        if (apartmentRequest.getAddress() != null) this.address = apartmentRequest.getAddress();
         if (apartmentRequest.getCountry() != null) this.country = apartmentRequest.getCountry();
         if (apartmentRequest.getCity() != null) this.city = apartmentRequest.getCity();
         if (apartmentRequest.getDistrict() != null) this.district = apartmentRequest.getDistrict();

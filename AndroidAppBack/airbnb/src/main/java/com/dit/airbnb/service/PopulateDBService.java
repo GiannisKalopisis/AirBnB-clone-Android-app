@@ -1,11 +1,15 @@
 package com.dit.airbnb.service;
 
 import com.dit.airbnb.csv_dto.ApartmentCSV;
+import com.dit.airbnb.csv_dto.BookingCSV;
 import com.dit.airbnb.csv_dto.UserRegCSV;
+import com.dit.airbnb.dto.Apartment;
+import com.dit.airbnb.dto.Booking;
 import com.dit.airbnb.dto.Role;
 import com.dit.airbnb.dto.UserReg;
 import com.dit.airbnb.dto.enums.RoleName;
 import com.dit.airbnb.exception.AppException;
+import com.dit.airbnb.exception.ResourceNotFoundException;
 import com.dit.airbnb.repository.*;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -18,6 +22,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Set;
 
 @Service
 public class PopulateDBService {
@@ -113,7 +118,61 @@ public class PopulateDBService {
                     .withIgnoreLeadingWhiteSpace(true).build();
 
             for (ApartmentCSV apartmentCSV : csvToBean) {
-                System.out.println(apartmentCSV.getDescription() + apartmentCSV.getDistrict() + apartmentCSV.getHostId());
+
+                UserReg hostUserReg = userRegRepository.findById(apartmentCSV.getHostId())
+                        .orElseThrow(() -> new ResourceNotFoundException("HostUserReg", "id", apartmentCSV.getHostId()));
+
+                Set<Role> roles = hostUserReg.getRoles();
+                boolean foundFlag = false;
+                for (Role role: roles) {
+                    if (role.getName().equals(RoleName.ROLE_HOST)) {
+                        foundFlag = true;
+                        break;
+                    }
+                }
+                if (!foundFlag) {
+                    continue;
+                }
+
+                Apartment apartment = new Apartment(apartmentCSV);
+                apartment.setUserRegHost(hostUserReg);
+                apartmentRepository.save(apartment);
+            }
+        }
+    }
+
+    @Transactional
+    public void populateBooking() throws IOException, AppException {
+
+        try (Reader reader = Files.newBufferedReader(Paths.get(BOOKING_DATA_FILE_PATH))) {
+            CsvToBean<BookingCSV> csvToBean = new CsvToBeanBuilder(reader)
+                    .withType(BookingCSV.class)
+                    .withIgnoreLeadingWhiteSpace(true).build();
+
+            for (BookingCSV bookingCSV : csvToBean) {
+
+                UserReg userReg = userRegRepository.findById(bookingCSV.getUserId())
+                        .orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", bookingCSV.getUserId()));
+
+                Apartment apartment = apartmentRepository.findById(bookingCSV.getApartmentId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", bookingCSV.getApartmentId()));
+
+                Set<Role> roles = userReg.getRoles();
+                boolean foundFlag = false;
+                for (Role role : roles) {
+                    if (role.getName().equals(RoleName.ROLE_USER)) {
+                        foundFlag = true;
+                        break;
+                    }
+                }
+                if (!foundFlag) {
+                    continue;
+                }
+
+                Booking booking = new Booking(bookingCSV);
+                booking.setUserReg(userReg);
+                booking.setApartment(apartment);
+                bookingRepository.save(booking);
             }
         }
     }

@@ -26,7 +26,8 @@ public class AirbnbApplication {
         public void run(String... args) throws Exception {
             populateDBService.populateStaticRoles();
             populateDBService.populateUsersReg();
-            // populateDBService.populateApartments();
+            populateDBService.populateApartments();
+            populateDBService.populateBooking();
         }
     }
 

@@ -66,11 +66,11 @@ public class ApartmentService {
         authorizationService.isHostOfTheApartment(currentUser.getId(), apartmentId);
 
         ApartmentResponse apartmentResponse = new ApartmentResponse(
-                apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
+                apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
                 apartment.getAvailableEndDate(), apartment.getMaxVisitors(), apartment.getMinRetailPrice(),
                 apartment.getExtraCostPerPerson(), apartment.getDescription(), apartment.getNumberOfBeds(),
                 apartment.getNumberOfBedrooms(), apartment.getNumberOfBathrooms(), apartment.getNumberOfLivingRooms(),
-                apartment.getArea(), apartment.getGeoLat(), apartment.getGeoLong(), apartment.getRentalType());
+                apartment.getArea(), apartment.getGeoLat(), apartment.getGeoLong(), apartment.getRules(), apartment.getRentalType());
 
         return ResponseEntity.ok().body(new ApiResponse(true, "getApartmentById", apartmentResponse));
     }

@@ -1,5 +1,6 @@
 package com.dit.airbnb.dto;
 
+import com.dit.airbnb.csv_dto.BookingCSV;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,6 +31,12 @@ public class Booking {
 
     @Column(name = "is_reviewed")
     private Boolean isReviewed;
+
+    public Booking(BookingCSV bookingCSV) {
+        this.checkInDate = bookingCSV.getCheckInDate();
+        this.checkOutDate = bookingCSV.getCheckOutDate();
+        this.isReviewed = bookingCSV.getIsReviewed();
+    }
 
     // external tables
     @Getter
