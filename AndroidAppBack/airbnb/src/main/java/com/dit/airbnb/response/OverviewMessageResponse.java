@@ -9,10 +9,14 @@ import lombok.Setter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MessageResponse {
+public class OverviewMessageResponse {
+
+    private Long chatId;
 
     private String username;
 
-    private String content;
+    private String contentOfLastMessage;
+
+    private Boolean seen;
 
 }

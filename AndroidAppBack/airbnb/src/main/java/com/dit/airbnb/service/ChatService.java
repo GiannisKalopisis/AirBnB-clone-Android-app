@@ -11,6 +11,7 @@ import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.chat.MessageRequest;
 import com.dit.airbnb.request.chat.OverviewMessageRequest;
 import com.dit.airbnb.response.MessageResponse;
+import com.dit.airbnb.response.OverviewMessageResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.response.generic.PagedResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
@@ -99,7 +100,7 @@ public class ChatService {
             messagePage = messageRepository.findByUserRegIdForHost(userId, PageRequest.of(page, size, Sort.by("timeSent").descending()));
         }
 
-        PagedResponse<MessageResponse> overviewMessageResponsePagedResponse = createMessagePagedResponse(messagePage);
+        PagedResponse<OverviewMessageResponse> overviewMessageResponsePagedResponse = createOverviewMessagePagedResponse(messagePage);
 
         return ResponseEntity.ok(new ApiResponse(true, "getOverviewMessagesByRegUserId succeed", overviewMessageResponsePagedResponse));
 
@@ -118,6 +119,23 @@ public class ChatService {
     }
 
     // constructs paged response
+    private PagedResponse<OverviewMessageResponse> createOverviewMessagePagedResponse(Page<Message> messagePage) {
+        if (messagePage.getNumberOfElements() == 0) {
+            return new PagedResponse<>(Collections.emptyList(), messagePage.getNumber(),
+                    messagePage.getSize(), messagePage.getTotalElements(),
+                    messagePage.getTotalPages(), messagePage.isLast());
+        }
+
+        List<OverviewMessageResponse> messageResponses = new ArrayList<>();
+        for (Message message : messagePage) {
+            messageResponses.add(new OverviewMessageResponse(message.getChat().getId(), message.getSenderUserReg().getUsername(), message.getContent(), message.getSeen()));
+        }
+
+        return new PagedResponse<>(messageResponses, messagePage.getNumber(),
+                messagePage.getSize(), messagePage.getTotalElements(),
+                messagePage.getTotalPages(), messagePage.isLast());
+    }
+
     private PagedResponse<MessageResponse> createMessagePagedResponse(Page<Message> messagePage) {
         if (messagePage.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), messagePage.getNumber(),
@@ -127,7 +145,7 @@ public class ChatService {
 
         List<MessageResponse> messageResponses = new ArrayList<>();
         for (Message message : messagePage) {
-            messageResponses.add(new MessageResponse(message.getChat().getId(), message.getSenderUserReg().getUsername(), message.getContent(), message.getSeen()));
+            messageResponses.add(new MessageResponse(message.getSenderUserReg().getUsername(), message.getContent()));
         }
 
         return new PagedResponse<>(messageResponses, messagePage.getNumber(),
