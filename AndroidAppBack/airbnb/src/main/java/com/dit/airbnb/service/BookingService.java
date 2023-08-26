@@ -42,11 +42,12 @@ public class BookingService {
         Booking booking = Booking.builder().checkInDate(bookingRequest.getCheckInDate()).checkOutDate(bookingRequest.getCheckOutDate()).userReg(userReg).build();
 
         booking.setApartment(apartment);
+        booking.setUserReg(userReg);
         bookingRepository.save(booking);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/{bookingId}")
-                .buildAndExpand(userReg.getId()).toUri();
+                .buildAndExpand(booking.getId()).toUri();
 
         return ResponseEntity.created(uri).body(new ApiResponse(true, "createBooking succeed", booking));
     }
