@@ -11,6 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MessageResponse {
 
+    private Long chatId;
+
     private String username;
 
     private String contentOfLastMessage;

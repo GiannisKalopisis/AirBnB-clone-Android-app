@@ -127,7 +127,7 @@ public class ChatService {
 
         List<MessageResponse> messageResponses = new ArrayList<>();
         for (Message message : messagePage) {
-            messageResponses.add(new MessageResponse(message.getSenderUserReg().getUsername(), message.getContent(), message.getSeen()));
+            messageResponses.add(new MessageResponse(message.getChat().getId(), message.getSenderUserReg().getUsername(), message.getContent(), message.getSeen()));
         }
 
         return new PagedResponse<>(messageResponses, messagePage.getNumber(),
