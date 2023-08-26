@@ -37,7 +37,7 @@ public class ChatController {
 
     @GetMapping(path = "/chat/{chatId}", params = {"page", "size"})
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
-    public ResponseEntity<?> getOverviewMessagesByRegUserId(@RequestParam(value = "page", defaultValue = PaginationConstants.DEFAULT_PAGE) int page,
+    public ResponseEntity<?> getMessagesByChatId(@RequestParam(value = "page", defaultValue = PaginationConstants.DEFAULT_PAGE) int page,
                                                             @RequestParam(value = "size", defaultValue = PaginationConstants.DEFAULT_SIZE) int size,
                                                             @PathVariable(value = "chatId") Long chatId,
                                                             @Valid @CurrentUser UserDetailsImpl currentUser) {
