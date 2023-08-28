@@ -153,25 +153,30 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceButtonClickListener();
 
         checkGoogleAPIAvailability();
+        addPlaceMapView.onCreate(savedInstanceState);
+
+        checkGoogleAPIAvailability();
 
         addPlaceMapView.onCreate(savedInstanceState);
-        addPlaceMapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull GoogleMap map) {
-                googleMap = map; // Store the GoogleMap object in the global variable
-                isMapReady = true; // Mark the map as ready
-                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                googleMap.getUiSettings().setZoomControlsEnabled(true);
-                // Check if an address is available and show it on the map
-                if (addressToShowOnMap != null) {
-                    showAddressOnMap(addressToShowOnMap);
-                }
-            }
-        });
 
         // Check for location permissions and request if not granted
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            // Location permission is granted, proceed with showing the map
+            addPlaceMapView.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(@NonNull GoogleMap map) {
+                    googleMap = map; // Store the GoogleMap object in the global variable
+                    isMapReady = true; // Mark the map as ready
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    googleMap.getUiSettings().setZoomControlsEnabled(true);
+                    // Check if an address is available and show it on the map
+                    if (addressToShowOnMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
+                    }
+                }
+            });
         }
 
         /**
@@ -186,6 +191,31 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         imageClickListener();
         setImagePickerLauncher();
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Location permission granted, initialize the map
+                addPlaceMapView.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(@NonNull GoogleMap map) {
+                        googleMap = map;
+                        isMapReady = true;
+                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        googleMap.getUiSettings().setZoomControlsEnabled(true);
+                        if (addressToShowOnMap != null) {
+                            showAddressOnMap(addressToShowOnMap);
+                        }
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Not rendering map", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
     /**
      * Multiple images as RecyclerView
