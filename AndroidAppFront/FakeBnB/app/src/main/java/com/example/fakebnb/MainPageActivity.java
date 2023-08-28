@@ -36,11 +36,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fakebnb.adapter.MainPageRentalAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.RentalMainPageModel;
-import com.example.fakebnb.model.UserModel;
 import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
-import com.example.fakebnb.utils.AndroidUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -437,10 +435,16 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     }
 
     @Override
-    public void onItemClick(int position) {
-        Intent intent = new Intent(this, RentRoomPage.class);
-
-        intent.putExtra("rental_id", position);
-        startActivity(intent);
+    public void onItemClick(long rentalId) {
+        Intent rent_room_intent = new Intent(MainPageActivity.this, RentRoomPage.class);
+        rent_room_intent.putExtra("user_id", userId);
+        rent_room_intent.putExtra("user_jwt", jwtToken);
+        ArrayList<String> roleList = new ArrayList<>();
+        for (RoleName role : roles) {
+            roleList.add(role.toString());
+        }
+        rent_room_intent.putExtra("user_roles", roleList);
+        rent_room_intent.putExtra("rental_id", rentalId);
+        startActivity(rent_room_intent);
     }
 }
