@@ -76,7 +76,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".IndividualChatPage"
+            android:name=".IndividualChatActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.example.fakebnb.INDIVIDUAL_CHAT_PAGE" />

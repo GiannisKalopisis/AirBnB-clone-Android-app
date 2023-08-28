@@ -30,4 +30,5 @@
     <string name="submit_review">Submit Review</string>
     <string name="add_new_place_text">Add a new place to FakeBnB</string>
     <string name="add_new_place">Add new place</string>
+    <string name="delete_place">Delete place</string>
 </resources>
