@@ -74,7 +74,7 @@ public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAd
                     if (mainPageRecyclerViewInterface != null){
                         int clickedPosition = getAdapterPosition();
                         if (clickedPosition != RecyclerView.NO_POSITION) {
-                            long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
+                            Long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
                             mainPageRecyclerViewInterface.onItemClick(rentalId);
                         }
                     }

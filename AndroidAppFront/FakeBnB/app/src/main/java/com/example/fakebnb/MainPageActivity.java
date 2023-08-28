@@ -493,7 +493,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     }
 
     @Override
-    public void onItemClick(long rentalId) {
+    public void onItemClick(Long rentalId) {
         Intent rent_room_intent = new Intent(MainPageActivity.this, RentRoomPage.class);
         rent_room_intent.putExtra("user_id", userId);
         rent_room_intent.putExtra("user_jwt", jwtToken);
