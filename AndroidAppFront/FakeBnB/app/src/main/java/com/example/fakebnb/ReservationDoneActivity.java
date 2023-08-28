@@ -23,6 +23,7 @@ public class ReservationDoneActivity extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
+    private Long apartmentId;
 
     private String image_url;
 
@@ -45,6 +46,7 @@ public class ReservationDoneActivity extends AppCompatActivity {
                     roles.add(RoleName.valueOf(role));
                 }
             }
+            apartmentId = intent.getSerializableExtra("apartment_id", Long.class);
         }
 
         initView();
@@ -79,14 +81,11 @@ public class ReservationDoneActivity extends AppCompatActivity {
 
     private void getAndRenderImage() {
         Log.d(TAG, "getData: started");
-
-        // get image from backend
-        // set image to image_url
+        //TODO: API to only 1 get image of the rental from backend (not all images)
     }
 
     private void initView() {
         Log.d(TAG, "initViews: started");
-
         reservationDoneHomeButton = findViewById(R.id.reservationDoneHomeButton);
     }
 }
