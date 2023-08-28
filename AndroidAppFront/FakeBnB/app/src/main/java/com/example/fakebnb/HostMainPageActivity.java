@@ -51,6 +51,13 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     private RecyclerView hostRentalsRecyclerView;
     private Button chatButton, profileButton, roleButton, addRentalButton;
 
+    // Pagination variables
+    private ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
+    private HostMainPageRentalAdapter rentalAdapter = new HostMainPageRentalAdapter(this, hostRentals);
+    private boolean isLoading = false;
+    private int currentPage = 1; // Keeps track of the current page
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,16 +111,68 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
         bottomBarClickListeners();
         addButtonClickListener();
 
-        ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
         hostRentals.add(new HostRentalMainPageModel("Amalfi1 coast rooms", "Αθήνα", 4.5f, 1L));
         hostRentals.add(new HostRentalMainPageModel("Amalfi2 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 2L));
         hostRentals.add(new HostRentalMainPageModel("Amalfi3 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 3L));
         hostRentals.add(new HostRentalMainPageModel("Amalfi4 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 4L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi5 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 5L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi6 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 6L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi7 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 7L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi8 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 8L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi9 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 9L));
+        hostRentals.add(new HostRentalMainPageModel("Amalfi10 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 10L));
 
-        HostMainPageRentalAdapter adapter = new HostMainPageRentalAdapter(this, hostRentals);
-        hostRentalsRecyclerView.setAdapter(adapter);
+        hostRentalsRecyclerView.setAdapter(rentalAdapter);
         hostRentalsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        hostRentalsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) hostRentalsRecyclerView.getLayoutManager();
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                        && firstVisibleItemPosition >= 0) {
+                    // Load more data when the user is near the end of the list
+                    Toast.makeText(HostMainPageActivity.this, "LoadingPage: " + currentPage, Toast.LENGTH_SHORT).show();
+                    loadMoreData();
+                }
+            }
+        });
+        // Initially load the first batch of data
+        loadMoreData();
     }
+
+    /**
+     * Pagination methods
+     */
+
+    private void loadMoreData() {
+        isLoading = true;
+
+        // Simulate fetching data from backend
+        ArrayList<HostRentalMainPageModel> newData = fetchDataFromBackend(currentPage);
+
+        hostRentals.addAll(newData);
+        rentalAdapter.notifyDataSetChanged();
+
+        isLoading = false;
+        currentPage++;
+    }
+
+    private ArrayList<HostRentalMainPageModel> fetchDataFromBackend(int page) {
+        // Simulate fetching data from backend based on the page number
+        ArrayList<HostRentalMainPageModel> newData = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            newData.add(new HostRentalMainPageModel("Amalfi" + (i + page * 10) + " coast rooms", "Αθήνα", 4.5f, (long) (i + page * 10L)));
+        }
+        return newData;
+    }
+
 
     private void addButtonClickListener() {
         addRentalButton.setOnClickListener(new View.OnClickListener() {
