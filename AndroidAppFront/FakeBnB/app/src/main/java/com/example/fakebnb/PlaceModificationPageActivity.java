@@ -23,9 +23,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.fakebnb.enums.RentalType;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.HostRoomModel;
-import com.example.fakebnb.model.RentRoomModel;
+import com.example.fakebnb.model.request.ApartmentRequest;
+import com.example.fakebnb.model.response.ApartmentResponse;
+import com.example.fakebnb.rest.ApartmentAPI;
+import com.example.fakebnb.rest.RestClient;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,11 +40,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PlaceModificationPageActivity extends AppCompatActivity {
 
@@ -49,6 +58,9 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
+    private Long rentalId;
+    private ApartmentResponse.ApartmentData apartmentData;
+
 
     // warning TextView messages
     private TextView modifyPlaceWarningAddress, modifyPlaceWarningDates,
@@ -91,6 +103,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         if (intent != null) {
             userId = intent.getSerializableExtra("user_id", Long.class);
             jwtToken = intent.getSerializableExtra("user_jwt", String.class);
+            rentalId = intent.getSerializableExtra("rental_id", Long.class);
             ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
             if (roleList != null) {
                 roles = new HashSet<>();
@@ -101,37 +114,111 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         }
 
         bottomBarClickListeners();
-        setTextWatchers();
         resetWarnVisibility();
-        getDataFromDatabase();
-        setDataToViews();
-        modificationButtonsClickListener();
-        savePlaceChangesButton.setVisibility(View.GONE);
 
+        RestClient restClient = new RestClient(jwtToken);
+        ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
 
-        checkGoogleAPIAvailability();
+        apartmentAPI.getApartmentInfo(rentalId)
+                .enqueue(new Callback<ApartmentResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
 
-        modifyPlaceMapView.onCreate(savedInstanceState);
-        modifyPlaceMapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull GoogleMap map) {
-                googleMap = map; // Store the GoogleMap object in the global variable
-                isMapReady = true; // Mark the map as ready
-                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                googleMap.getUiSettings().setZoomControlsEnabled(true);
-                // Check if an address is available and show it on the map
-                if (addressToShowOnMap != null) {
-                    showAddressOnMap(addressToShowOnMap);
-                }
-            }
-        });
+                        int statusCode = response.code();
+                        Log.d("API_CALL", "GetApartmentInfo status code: " + statusCode);
 
-        // Check for location permissions and request if not granted
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        }
+                        if (response.isSuccessful()) {
+                            ApartmentResponse apartmentResponse = response.body();
+                            if (apartmentResponse != null) {
+                                Log.d("API_CALL", "GetApartmentInfo successful");
+                                apartmentData = apartmentResponse.getObject();
 
+                                /*
+                                  Rest of initialization after the fetching of data from database
+                                 */
+                                setDataToViews();
+                                setTextWatchers();
+                                modificationButtonsClickListener();
+                                savePlaceChangesButton.setVisibility(View.GONE);
+
+                                checkGoogleAPIAvailability();
+                                modifyPlaceMapView.onCreate(savedInstanceState);
+                                modifyPlaceMapView.getMapAsync(new OnMapReadyCallback() {
+                                    @Override
+                                    public void onMapReady(@NonNull GoogleMap map) {
+                                        googleMap = map; // Store the GoogleMap object in the global variable
+                                        isMapReady = true; // Mark the map as ready
+                                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                        googleMap.getUiSettings().setZoomControlsEnabled(true);
+                                        // Check if an address is available and show it on the map
+                                        if (addressToShowOnMap != null) {
+                                            showAddressOnMap(addressToShowOnMap);
+                                        }
+                                    }
+                                });
+
+                                // Check for location permissions and request if not granted
+                                if (ContextCompat.checkSelfPermission(PlaceModificationPageActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                    ActivityCompat.requestPermissions(PlaceModificationPageActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+                                }
+
+                            } else {
+                                // Handle unsuccessful response
+                                Toast.makeText(PlaceModificationPageActivity.this, "Couldn't get info of apartment.", Toast.LENGTH_SHORT).show();
+                                Log.d("API_CALL", "GetApartmentInfo failed");
+
+                                Intent host_main_page_intent = new Intent(PlaceModificationPageActivity.this, HostMainPageActivity.class);
+                                host_main_page_intent.putExtra("user_id", userId);
+                                host_main_page_intent.putExtra("user_jwt", jwtToken);
+                                ArrayList<String> roleList = new ArrayList<>();
+                                for (RoleName role : roles) {
+                                    roleList.add(role.toString());
+                                }
+                                host_main_page_intent.putExtra("user_roles", roleList);
+                                startActivity(host_main_page_intent);
+                            }
+                        } else {
+                            // Handle unsuccessful response
+                            Toast.makeText(PlaceModificationPageActivity.this, "Couldn't get info of apartment.", Toast.LENGTH_SHORT).show();
+                            Log.d("API_CALL", "GetApartmentInfo failed");
+
+                            Intent host_main_page_intent = new Intent(PlaceModificationPageActivity.this, HostMainPageActivity.class);
+                            host_main_page_intent.putExtra("user_id", userId);
+                            host_main_page_intent.putExtra("user_jwt", jwtToken);
+                            ArrayList<String> roleList = new ArrayList<>();
+                            for (RoleName role : roles) {
+                                roleList.add(role.toString());
+                            }
+                            host_main_page_intent.putExtra("user_roles", roleList);
+                            startActivity(host_main_page_intent);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+
+                        // Handle failure
+                        Toast.makeText(PlaceModificationPageActivity.this,
+                                "Failed to communicate with server. Couldn't get info of apartment.",
+                                Toast.LENGTH_SHORT).show();
+                        Log.e("API_CALL", "Error: " + t.getMessage());
+
+                        Intent host_main_page_intent = new Intent(PlaceModificationPageActivity.this, HostMainPageActivity.class);
+                        host_main_page_intent.putExtra("user_id", userId);
+                        host_main_page_intent.putExtra("user_jwt", jwtToken);
+                        ArrayList<String> roleList = new ArrayList<>();
+                        for (RoleName role : roles) {
+                            roleList.add(role.toString());
+                        }
+                        host_main_page_intent.putExtra("user_roles", roleList);
+                        startActivity(host_main_page_intent);
+                    }
+                });
     }
+
+    /**
+     * GOOGLE MAP METHODS
+     */
 
     // Map methods
     private void checkGoogleAPIAvailability() {
@@ -201,21 +288,25 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * DATA MANIPULATION METHODS
+     */
+
     private void setDataToViews() {
-        modifyPlaceAddress.setText(hostRoomModel.getAddress());
-        modifyPlaceStartDate.setText(hostRoomModel.getStartDate());
-        modifyPlaceEndDate.setText(hostRoomModel.getEndDate());
-        modifyPlaceMaxVisitors.setText(String.valueOf(hostRoomModel.getMaxVisitors()));
-        modifyPlaceMinPrice.setText(String.valueOf(hostRoomModel.getMinPrice()));
-        modifyPlaceExtraCost.setText(String.valueOf(hostRoomModel.getExtraCost()));
-        modifyPlacePhotoUpload.setText(hostRoomModel.getPhotoUpload());
-        modifyPlaceRules.setText(hostRoomModel.getRules());
-        modifyPlaceDescription.setText(hostRoomModel.getDescription());
-        modifyPlaceBeds.setText(String.valueOf(hostRoomModel.getBeds()));
-        modifyPlaceBedrooms.setText(String.valueOf(hostRoomModel.getBedrooms()));
-        modifyPlaceBathrooms.setText(String.valueOf(hostRoomModel.getBathrooms()));
-        modifyPlaceLivingRooms.setText(String.valueOf(hostRoomModel.getLivingRooms()));
-        modifyPlaceArea.setText(String.valueOf(hostRoomModel.getArea()));
+        modifyPlaceAddress.setText(apartmentData.getCountry());
+        modifyPlaceStartDate.setText(apartmentData.getAvailableStartDate().toString());
+        modifyPlaceEndDate.setText(apartmentData.getAvailableEndDate().toString());
+        modifyPlaceMaxVisitors.setText(apartmentData.getMaxVisitors());
+        modifyPlaceMinPrice.setText(String.valueOf(apartmentData.getMinRetailPrice()));
+        modifyPlaceExtraCost.setText(String.valueOf(apartmentData.getExtraCostPerPerson()));
+        modifyPlacePhotoUpload.setText("photo.png");
+        modifyPlaceRules.setText("Has to add rules");
+        modifyPlaceDescription.setText(apartmentData.getDescription());
+        modifyPlaceBeds.setText(apartmentData.getNumberOfBeds());
+        modifyPlaceBedrooms.setText(apartmentData.getNumberOfBedrooms());
+        modifyPlaceBathrooms.setText(apartmentData.getNumberOfBathrooms());
+        modifyPlaceLivingRooms.setText(apartmentData.getNumberOfLivingRooms());
+        modifyPlaceArea.setText(String.valueOf(apartmentData.getArea()));
     }
 
     private void getDataFromDatabase() {
@@ -227,29 +318,33 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 4, 4, 3, 2, 1, 150, 25, 70);
     }
 
-    private void sendDataToDatabase(String address, String startDate, String endDate,
-                                    int maxVisitors, float minPrice, float extraCost,
-                                    String rentalType, String photoUpload, String rules,
-                                    String description, int beds, int bedrooms, int bathrooms,
-                                    int livingRooms, float area) {
-        Log.d(TAG, "onClick: address: " + address);
-        Log.d(TAG, "onClick: startDate: " + startDate);
-        Log.d(TAG, "onClick: endDate: " + endDate);
-        Log.d(TAG, "onClick: maxVisitors: " + maxVisitors);
-        Log.d(TAG, "onClick: minPrice: " + minPrice);
-        Log.d(TAG, "onClick: extraCost: " + extraCost);
-        Log.d(TAG, "onClick: rentalType: " + rentalType);
-        Log.d(TAG, "onClick: photoUpload: " + photoUpload);
-        Log.d(TAG, "onClick: rules: " + rules);
-        Log.d(TAG, "onClick: description: " + description);
-        Log.d(TAG, "onClick: beds: " + beds);
-        Log.d(TAG, "onClick: bedrooms: " + bedrooms);
-        Log.d(TAG, "onClick: bathrooms: " + bathrooms);
-        Log.d(TAG, "onClick: livingRooms: " + livingRooms);
-        Log.d(TAG, "onClick: area: " + area);
+    private ApartmentRequest setUpdateApartmentValues() {
+        ApartmentRequest apartmentRequest = new ApartmentRequest();
+        apartmentRequest.setCountry(modifyPlaceAddress.getText().toString());
+        apartmentRequest.setCity(modifyPlaceAddress.getText().toString());
+        apartmentRequest.setDistrict(modifyPlaceAddress.getText().toString());
+//        CONVERT THE DATES CORRECTLY!!!
+        apartmentRequest.setAvailableStartDate(modifyPlaceStartDate.getText().toString());
+        apartmentRequest.setAvailableEndDate(modifyPlaceEndDate.getText().toString());
+        apartmentRequest.setMaxVisitors(Integer.parseInt(modifyPlaceMaxVisitors.getText().toString()));
+        apartmentRequest.setMinRetailPrice(new BigDecimal(modifyPlaceMinPrice.getText().toString()));
+        apartmentRequest.setExtraCostPerPerson(new BigDecimal(modifyPlaceExtraCost.getText().toString()));
+        apartmentRequest.setDescription(modifyPlaceDescription.getText().toString());
+        apartmentRequest.setNumberOfBeds(Short.parseShort(modifyPlaceBeds.getText().toString()));
+        apartmentRequest.setNumberOfBedrooms(Short.parseShort(modifyPlaceBedrooms.getText().toString()));
+        apartmentRequest.setNumberOfBathrooms(Short.parseShort(modifyPlaceBathrooms.getText().toString()));
+        apartmentRequest.setNumberOfLivingRooms(Short.parseShort(modifyPlaceLivingRooms.getText().toString()));
+        apartmentRequest.setArea(new BigDecimal(modifyPlaceArea.getText().toString()));
+        LatLng location = getLocationFromAddress(modifyPlaceAddress.getText().toString());
+        apartmentRequest.setGeoLat(new BigDecimal(location.latitude));
+        apartmentRequest.setGeoLong(new BigDecimal(location.longitude));
+        apartmentRequest.setRentalType(modifyPlaceRentalTypeRadioGroup.getCheckedRadioButtonId() == R.id.roomTypeRadioButton ? RentalType.RENTAL_ROOM : RentalType.RENTAL_HOUSE);
+        return apartmentRequest;
     }
 
-
+    /**
+     * TEXT WATCHERS
+     */
     private void setTextWatchers() {
         Log.d(TAG, "setTextWatchers: started");
 
@@ -708,33 +803,55 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
     private void modificationButtonsClickListener() {
         Log.d(TAG, "modificationButtonsClickListener: started");
-        savePlaceChangesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // check if all fields are filled
-                // send data to backend
-                // not able to press the button if any field is not correctly filled
-                resetWarnVisibility();
-                sendDataToDatabase(modifyPlaceAddress.getText().toString(),
-                        modifyPlaceStartDate.getText().toString(),
-                        modifyPlaceEndDate.getText().toString(),
-                        Integer.parseInt(modifyPlaceMaxVisitors.getText().toString()),
-                        Float.parseFloat(modifyPlaceMinPrice.getText().toString()),
-                        Float.parseFloat(modifyPlaceExtraCost.getText().toString()),
-                        ((RadioButton) findViewById(modifyPlaceRentalTypeRadioGroup.getCheckedRadioButtonId())).getText().toString(),
-                        modifyPlacePhotoUpload.getText().toString(),
-                        modifyPlaceRules.getText().toString(),
-                        modifyPlaceDescription.getText().toString(),
-                        Integer.parseInt(modifyPlaceBeds.getText().toString()),
-                        Integer.parseInt(modifyPlaceBedrooms.getText().toString()),
-                        Integer.parseInt(modifyPlaceBathrooms.getText().toString()),
-                        Integer.parseInt(modifyPlaceLivingRooms.getText().toString()),
-                        Float.parseFloat(modifyPlaceArea.getText().toString()));
-                Toast.makeText(PlaceModificationPageActivity.this, "Rental modified correctly", Toast.LENGTH_SHORT).show();
-                // onBackPressed(); // -> not pressed the back. Have to remake the host main page
-                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                startActivity(host_main_page_intent);
-            }
+
+
+        savePlaceChangesButton.setOnClickListener(view -> {
+            resetWarnVisibility();
+
+            ApartmentRequest apartmentRequest = setUpdateApartmentValues();
+            RestClient restClient = new RestClient(jwtToken);
+            ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
+
+            apartmentAPI.updateApartment(rentalId, apartmentRequest).enqueue(new Callback<ApartmentResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                    if (response.isSuccessful()) {
+                        // Handle successful response
+                        ApartmentResponse apartmentResponse = response.body();
+                        if (apartmentResponse != null) {
+                            Log.d("API_CALL", "UpdateApartment successful");
+                            Toast.makeText(PlaceModificationPageActivity.this, "Rental modified correctly", Toast.LENGTH_SHORT).show();
+                            // onBackPressed(); // -> not pressed the back. Have to remake the host main page
+                            Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                            host_main_page_intent.putExtra("user_id", userId);
+                            host_main_page_intent.putExtra("user_jwt", jwtToken);
+                            ArrayList<String> roleList = new ArrayList<>();
+                            for (RoleName role : roles) {
+                                roleList.add(role.toString());
+                            }
+                            host_main_page_intent.putExtra("user_roles", roleList);
+                            startActivity(host_main_page_intent);
+                        } else {
+                            // Handle unsuccessful response
+                            Toast.makeText(PlaceModificationPageActivity.this, "Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                            Log.d("API_CALL", "UpdateApartment failed");
+                        }
+                    } else {
+                        // Handle unsuccessful response
+                        Toast.makeText(PlaceModificationPageActivity.this, "Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                        Log.d("API_CALL", "UpdateApartment failed");
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                    // Handle failure
+                    Toast.makeText(PlaceModificationPageActivity.this,
+                            "Failed to communicate with server. Couldn't update apartment.",
+                            Toast.LENGTH_SHORT).show();
+                    Log.e("API_CALL", "Error: " + t.getMessage());
+                }
+            });
         });
 
         deletePlaceButton.setOnClickListener(new View.OnClickListener() {
