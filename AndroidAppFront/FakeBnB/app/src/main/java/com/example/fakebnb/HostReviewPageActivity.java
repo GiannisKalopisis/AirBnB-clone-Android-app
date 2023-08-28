@@ -29,6 +29,7 @@ public class HostReviewPageActivity extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
+    private Long hostId;
 
     // do it hard coded, then do it with the database and add image
     private TextView hostReviewUsernameView, hostReviewEmailView, hostReviewPhoneView;
@@ -55,6 +56,7 @@ public class HostReviewPageActivity extends AppCompatActivity {
                     roles.add(RoleName.valueOf(role));
                 }
             }
+            hostId = intent.getSerializableExtra("host_id", Long.class);
         }
 
         bottomBarClickListeners();
