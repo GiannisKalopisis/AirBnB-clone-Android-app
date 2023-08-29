@@ -1,5 +1,6 @@
 package com.dit.airbnb.dto;
 
+import com.dit.airbnb.csv_dto.BookingReviewCSV;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,5 +37,10 @@ public class BookingReview {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
     private Booking booking;
+
+    public BookingReview(BookingReviewCSV bookingReviewCSV) {
+        this.rating = bookingReviewCSV.getRating();
+        this.description = bookingReviewCSV.getDescription();
+    }
 
 }

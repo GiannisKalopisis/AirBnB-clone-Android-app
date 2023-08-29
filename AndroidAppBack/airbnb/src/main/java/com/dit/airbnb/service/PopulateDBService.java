@@ -1,9 +1,6 @@
 package com.dit.airbnb.service;
 
-import com.dit.airbnb.csv_dto.ApartmentCSV;
-import com.dit.airbnb.csv_dto.BookingCSV;
-import com.dit.airbnb.csv_dto.MessageCSV;
-import com.dit.airbnb.csv_dto.UserRegCSV;
+import com.dit.airbnb.csv_dto.*;
 import com.dit.airbnb.dto.*;
 import com.dit.airbnb.dto.enums.RoleName;
 import com.dit.airbnb.exception.AppException;
@@ -177,6 +174,34 @@ public class PopulateDBService {
     }
 
     @Transactional
+    public void populateBookingReview() throws IOException, AppException {
+
+        try (Reader reader = Files.newBufferedReader(Paths.get(BOOKING_REVIEW_DATA_FILE_PATH))) {
+            CsvToBean<BookingReviewCSV> csvToBean = new CsvToBeanBuilder(reader)
+                    .withType(BookingReviewCSV.class)
+                    .withIgnoreLeadingWhiteSpace(true).build();
+
+                for (BookingReviewCSV bookingReviewCSV: csvToBean) {
+
+                    UserReg reviewer = userRegRepository.findById(bookingReviewCSV.getReviewerId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Reviewer", "id", bookingReviewCSV.getReviewerId()));
+
+                    Booking booking = bookingRepository.findById(bookingReviewCSV.getBookingId())
+                            .orElseThrow(() -> new ResourceNotFoundException("BookingReview", "id", bookingReviewCSV.getBookingId()));
+
+
+                    BookingReview bookingReview = new BookingReview(bookingReviewCSV);
+                    bookingReview.setCreatorUserReg(reviewer);
+                    bookingReview.setBooking(booking);
+
+                    bookingReviewRepository.save(bookingReview);
+                }
+
+        }
+
+    }
+
+    @Transactional
     public void populateMessages() throws IOException, AppException {
 
         try (Reader reader = Files.newBufferedReader(Paths.get(MESSAGE_DATA_FILE_PATH))) {
@@ -219,9 +244,9 @@ public class PopulateDBService {
                 message.setSenderUserReg(sender);
                 message.setChat(chat.get());
                 messageRepository.save(message);
-
-                System.out.println(message);
             }
         }
     }
+
+
 }

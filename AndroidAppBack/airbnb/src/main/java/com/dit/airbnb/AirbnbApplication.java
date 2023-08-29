@@ -28,6 +28,7 @@ public class AirbnbApplication {
             populateDBService.populateUsersReg();
             populateDBService.populateApartments();
             populateDBService.populateBooking();
+            populateDBService.populateBookingReview();
             populateDBService.populateMessages();
         }
     }
