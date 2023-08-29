@@ -190,17 +190,18 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
         chatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(ChatActivity.this, ChatActivity.class);
-                chat_intent.putExtra("user_id", userId);
-                chat_intent.putExtra("user_jwt", jwtToken);
-                chat_intent.putExtra("user_current_role", currentRole.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                chat_intent.putExtra("user_roles", roleList);
-                startActivity(chat_intent);
+                Toast.makeText(ChatActivity.this, "Already in Chat page", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+//                Intent chat_intent = new Intent(ChatActivity.this, ChatActivity.class);
+//                chat_intent.putExtra("user_id", userId);
+//                chat_intent.putExtra("user_jwt", jwtToken);
+//                chat_intent.putExtra("user_current_role", currentRole.toString());
+//                ArrayList<String> roleList = new ArrayList<>();
+//                for (RoleName role : roles) {
+//                    roleList.add(role.toString());
+//                }
+//                chat_intent.putExtra("user_roles", roleList);
+//                startActivity(chat_intent);
             }
         });
 
