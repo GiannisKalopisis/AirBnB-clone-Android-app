@@ -131,7 +131,24 @@ public class IndividualChatActivity extends AppCompatActivity {
         messageModel.add(new MessageModel("user1", "Bye!"));
         messageModel.add(new MessageModel("user2", "Bye!"));
         messageModel.add(new MessageModel("user1", "Bye!"));
+        messageModel.add(new MessageModel("user1", "Bye!"));
+        messageModel.add(new MessageModel("user1", "Bye!"));
+        messageModel.add(new MessageModel("user1", "Bye!"));
+        messageModel.add(new MessageModel("user1", "Bye!"));
+        messageModel.add(new MessageModel("user1", "Bye!"));
+        messageModel.add(new MessageModel("user1", "Bye!"));
 
+
+
+        // Initially load the first batch of data
+//        loadOlderData();
+        loadOlderDataOnScroll();
+    }
+
+    /**
+     * Load older data when scrolling up
+     */
+    private void loadOlderDataOnScroll() {
         chat_recycler_view.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -147,9 +164,6 @@ public class IndividualChatActivity extends AppCompatActivity {
                 lastVisibleItem = firstVisibleItem;
             }
         });
-
-        // Initially load the first batch of data
-        loadOlderData();
     }
 
     private void loadOlderData() {
@@ -178,6 +192,7 @@ public class IndividualChatActivity extends AppCompatActivity {
 
     private ArrayList<MessageModel> fetchOlderMessagesFromBackend(int page) {
         // Simulate fetching newer data from backend based on the page number
+        // TODO: convert it to API call
         ArrayList<MessageModel> newerData = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             newerData.add(new MessageModel("user" + i % 2, "Newer Item " + (i + page * 10)));
@@ -198,11 +213,22 @@ public class IndividualChatActivity extends AppCompatActivity {
         handler.removeCallbacks(getMessagesCallRunnable);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        currentPage = 1;
+        loadOlderData();
+        handler.postDelayed(getMessagesCallRunnable, delay);
+    }
+
     private final Runnable getMessagesCallRunnable = new Runnable() {
         @Override
         public void run() {
-            // Perform your API call here
-            // Update the conversation if necessary
+            /*
+                1) Take the newest message from the conversation
+                2) Get all the newest messages after that message
+                3) Update the beginning of the conversation with the new messages
+             */
 
             // Schedule the next API call
             handler.postDelayed(this, delay);
@@ -250,6 +276,7 @@ public class IndividualChatActivity extends AppCompatActivity {
                 if (messageRequest == null) {
                     return;
                 }
+                // TODO: get the newer messages like run() method
                 sendMessageToUser(messageRequest);
             }
         });
