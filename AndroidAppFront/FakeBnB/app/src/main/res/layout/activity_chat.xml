@@ -11,7 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/ChatTopFrame">
 
         <!-- Text view -->
         <TextView
@@ -38,10 +39,18 @@
 
     </LinearLayout>
 
-
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ChatTopFrame"
+        android:layout_above="@+id/bottom_menu"
+        android:padding="10dp"
+        android:id="@+id/chatRecyclerView"
+        />
 
     <include
         layout="@layout/bottom_menu"
+        android:id="@+id/bottom_menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

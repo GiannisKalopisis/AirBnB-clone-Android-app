@@ -29,7 +29,7 @@
         android:theme="@style/Theme.FakeBnB">
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyCouG7zHIUa4h5rrYaH2ajP4nlWmz98jhg" />
+            android:value="AIzaSyC0OwXb73Pouk-FgaG8aYOz3svohlPpfYw" />
         <activity
             android:name=".MainActivity"
             android:exported="true" >
@@ -76,7 +76,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".IndividualChatPage"
+            android:name=".IndividualChatActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.example.fakebnb.INDIVIDUAL_CHAT_PAGE" />

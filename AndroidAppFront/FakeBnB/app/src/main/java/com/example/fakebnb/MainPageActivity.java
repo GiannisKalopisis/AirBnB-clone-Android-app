@@ -36,11 +36,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fakebnb.adapter.MainPageRentalAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.RentalMainPageModel;
-import com.example.fakebnb.model.UserModel;
 import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
-import com.example.fakebnb.utils.AndroidUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,6 +71,12 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     private RadioGroup rentalTypeGroup;
     private Spinner numGuestsSpinner;
     private Button searchFieldsButton;
+
+    // pagination
+    private ArrayList<RentalMainPageModel> rentals = new ArrayList<>();
+    private MainPageRentalAdapter rentalAdapter = new MainPageRentalAdapter(this, rentals);
+    private boolean isLoading = false;
+    private int currentPage = 1; // Keeps track of the current page
 
 
     @Override
@@ -131,23 +135,75 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
         onDatesClicked();
 
-        ArrayList<RentalMainPageModel> rentals = new ArrayList<>();
-        rentals.add(new RentalMainPageModel("Amalfi1 coast rooms", "Αθήνα", "€ 50", 4.5f));
-        rentals.add(new RentalMainPageModel("Amalfi2 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f));
-        rentals.add(new RentalMainPageModel("Amalfi3 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f));
-        rentals.add(new RentalMainPageModel("Amalfi4 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f));
-        rentals.add(new RentalMainPageModel("Amalfi5 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f));
-        rentals.add(new RentalMainPageModel("Amalfi6 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f));
-        rentals.add(new RentalMainPageModel("Amalfi7 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f));
-        rentals.add(new RentalMainPageModel("Amalfi8 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f));
 
-        MainPageRentalAdapter adapter = new MainPageRentalAdapter(this, rentals);
-        rentalsRecyclerView.setAdapter(adapter);
+        rentals.add(new RentalMainPageModel("Amalfi1 coast rooms", "Αθήνα", "€ 50", 4.5f, 1L));
+        rentals.add(new RentalMainPageModel("Amalfi2 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 2L));
+        rentals.add(new RentalMainPageModel("Amalfi3 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 3L));
+        rentals.add(new RentalMainPageModel("Amalfi4 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 4L));
+        rentals.add(new RentalMainPageModel("Amalfi5 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 5L));
+        rentals.add(new RentalMainPageModel("Amalfi6 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 6L));
+        rentals.add(new RentalMainPageModel("Amalfi7 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 7L));
+        rentals.add(new RentalMainPageModel("Amalfi8 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 8L));
+        rentals.add(new RentalMainPageModel("Amalfi9 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 9L));
+        rentals.add(new RentalMainPageModel("Amalfi10 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 10L));
+
+        rentalsRecyclerView.setAdapter(rentalAdapter);
         rentalsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        rentalsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) rentalsRecyclerView.getLayoutManager();
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                        && firstVisibleItemPosition >= 0) {
+                    // Load more data when the user is near the end of the list
+                    Toast.makeText(MainPageActivity.this, "LoadingPage: " + currentPage, Toast.LENGTH_SHORT).show();
+                    loadMoreData();
+                }
+            }
+        });
+        // Initially load the first batch of data
+        loadMoreData();
 
         setGuestNumSpinnerValues();
         searchFieldsButtonListener();
     }
+
+    /**
+     * Pagination methods
+     */
+
+    private void loadMoreData() {
+        isLoading = true;
+
+        // Simulate fetching data from backend
+        ArrayList<RentalMainPageModel> newData = fetchDataFromBackend(currentPage);
+
+        rentals.addAll(newData);
+        rentalAdapter.notifyDataSetChanged();
+
+        isLoading = false;
+        currentPage++;
+    }
+
+    private ArrayList<RentalMainPageModel> fetchDataFromBackend(int page) {
+        // Simulate fetching data from backend based on the page number
+        ArrayList<RentalMainPageModel> newData = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            newData.add(new RentalMainPageModel("Amalfi" + (i + page * 10) + " coast rooms with a long description that might take up two lines",
+                    "Αθήνα",
+                    "€ 50",
+                    4.5f, (i + page * 10L)));
+        }
+        return newData;
+    }
+
 
     private void setGuestNumSpinnerValues() {
         String[] arraySpinner = new String[] {
@@ -437,10 +493,16 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     }
 
     @Override
-    public void onItemClick(int position) {
-        Intent intent = new Intent(this, RentRoomPage.class);
-
-        intent.putExtra("rental_id", position);
-        startActivity(intent);
+    public void onItemClick(Long rentalId) {
+        Intent rent_room_intent = new Intent(MainPageActivity.this, RentRoomPage.class);
+        rent_room_intent.putExtra("user_id", userId);
+        rent_room_intent.putExtra("user_jwt", jwtToken);
+        ArrayList<String> roleList = new ArrayList<>();
+        for (RoleName role : roles) {
+            roleList.add(role.toString());
+        }
+        rent_room_intent.putExtra("user_roles", roleList);
+        rent_room_intent.putExtra("rental_id", rentalId);
+        startActivity(rent_room_intent);
     }
 }

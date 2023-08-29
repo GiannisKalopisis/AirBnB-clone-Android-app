@@ -2,14 +2,24 @@ package com.example.fakebnb.model;
 
 public class RentalMainPageModel {
 
+    private long rentalId;
     private String description, area, price;
     private float rating;
 
-    public RentalMainPageModel(String description, String area, String price, float rating) {
+    public RentalMainPageModel(String description, String area, String price, float rating, long rentalId) {
         this.description = description;
         this.area = area;
         this.price = price;
         this.rating = rating;
+        this.rentalId = rentalId;
+    }
+
+    public long getRentalId() {
+        return rentalId;
+    }
+
+    public void setRentalId(long rentalId) {
+        this.rentalId = rentalId;
     }
 
     public String getDescription() {

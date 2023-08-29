@@ -127,10 +127,10 @@ public class RegisterActivity extends AppCompatActivity {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Uri imageUri = result.getData().getData();
                         // At this point, you have the URI of the selected image
-                        Toast.makeText(this, "URI: " + imageUri, Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, "URI: " + imageUri, Toast.LENGTH_SHORT).show();
                         // You can now proceed to convert the image URI to a byte array or a File object and send it to the backend.
                         imagePath = RealPathUtil.getRealPath(RegisterActivity.this, imageUri);
-                        Toast.makeText(this, "imagePath: " + imagePath, Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, "imagePath: " + imagePath, Toast.LENGTH_SHORT).show();
                         imageBitmap = BitmapFactory.decodeFile(imagePath);
                         imageView.setImageBitmap(imageBitmap);
                     }
@@ -528,12 +528,28 @@ public class RegisterActivity extends AppCompatActivity {
                         PERMISSIONS_STORAGE,
                         REQUEST_EXTERNAL_STORAGE
                 );
+            } else {
+                Toast.makeText(RegisterActivity.this, "1 Select Image", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                imagePickerLauncher.launch(intent);
             }
-
-            Toast.makeText(RegisterActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            imagePickerLauncher.launch(intent);
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(RegisterActivity.this, "2 Select Image", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                imagePickerLauncher.launch(intent);
+            } else {
+                Toast.makeText(this, "Access to images is necessary", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+            }
+        }
     }
 
     private void initView() {
