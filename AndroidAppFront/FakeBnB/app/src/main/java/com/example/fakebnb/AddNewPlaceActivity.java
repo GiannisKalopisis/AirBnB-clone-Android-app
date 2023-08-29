@@ -120,6 +120,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
     private List<Bitmap> imageBitmapList;
     private RecyclerView imagesRecyclerView;
     private ImageAdapter imageAdapter;
+
     // Permissions for accessing the storage
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -213,6 +214,23 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Not rendering map", Toast.LENGTH_SHORT).show();
             }
+        } else if (requestCode == REQUEST_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(AddNewPlaceActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                imagePickerLauncher.launch(intent);
+            } else {
+                Toast.makeText(this, "Access to images is necessary", Toast.LENGTH_SHORT).show();
+                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                host_main_page_intent.putExtra("user_id", userId);
+                host_main_page_intent.putExtra("user_jwt", jwtToken);
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                host_main_page_intent.putExtra("user_roles", roleList);
+                startActivity(host_main_page_intent);
+            }
         }
     }
 
@@ -252,11 +270,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                         PERMISSIONS_STORAGE,
                         REQUEST_EXTERNAL_STORAGE
                 );
+            } else {
+                Toast.makeText(AddNewPlaceActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                imagePickerLauncher.launch(intent);
             }
-
-            Toast.makeText(AddNewPlaceActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            imagePickerLauncher.launch(intent);
         });
     }
 
