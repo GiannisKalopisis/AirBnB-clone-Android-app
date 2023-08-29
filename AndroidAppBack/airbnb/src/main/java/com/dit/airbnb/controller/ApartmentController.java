@@ -36,7 +36,7 @@ public class ApartmentController {
     }
 
     @GetMapping("/apartment/{apartmentId}")
-    @PreAuthorize("hasAuthority('ROLE_HOST')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getApartmentInfo(@PathVariable(value = "apartmentId") Long apartmentId,
                                               @Valid @CurrentUser UserDetailsImpl currentUser) {
         return apartmentService.getApartmentById(apartmentId, currentUser);

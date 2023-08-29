@@ -66,7 +66,7 @@ public class ApartmentService {
         authorizationService.isHostOfTheApartment(currentUser.getId(), apartmentId);
 
         ApartmentResponse apartmentResponse = new ApartmentResponse(
-                apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
+                apartment.getAmenities(), apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
                 apartment.getAvailableEndDate(), apartment.getMaxVisitors(), apartment.getMinRetailPrice(),
                 apartment.getExtraCostPerPerson(), apartment.getDescription(), apartment.getNumberOfBeds(),
                 apartment.getNumberOfBedrooms(), apartment.getNumberOfBathrooms(), apartment.getNumberOfLivingRooms(),

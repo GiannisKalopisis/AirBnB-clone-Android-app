@@ -13,6 +13,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class ApartmentResponse {
 
+    private String amenities;
+
     private String address;
 
     private String country;
