@@ -72,7 +72,6 @@ public class LoginActivity extends AppCompatActivity {
                             if (signInResponse != null) {
                                 Log.d(TAG, "onResponse: toString: " + signInResponse);
                                 SignInResponse.UserData userData = signInResponse.getObject();
-                                // TODO: has to check if is host or user and redirect to the right page
                                 Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
 
                                 // has both roles, so login as USER

@@ -2,6 +2,7 @@ package com.example.fakebnb;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,21 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.adapter.ChatRecyclerAdapter;
 import com.example.fakebnb.enums.RoleName;
-import com.example.fakebnb.model.MessageModel;
 import com.example.fakebnb.model.OverviewChatModel;
-import com.example.fakebnb.model.request.OverviewMessageRequest;
 import com.example.fakebnb.model.response.OverviewChatResponse;
-import com.example.fakebnb.model.response.MessageResponse;
-import com.example.fakebnb.rest.ChatAPI;
-import com.example.fakebnb.rest.RestClient;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewInterface {
 
@@ -53,6 +45,10 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
     private ChatRecyclerAdapter chatRecyclerAdapter = new ChatRecyclerAdapter(this, overviewChatModel);
     private boolean isLoading = false;
     private int currentPage = 1; // Keeps track of the current page
+
+    // polling variables
+    private final Handler handler = new Handler();
+    private final int delay = 3000; // 3 seconds
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -118,15 +114,58 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
         overviewChatModel.add(new OverviewChatModel(8L, "username8", "contentOfLastMessage8", false));
         overviewChatModel.add(new OverviewChatModel(9L, "username9", "contentOfLastMessage9", true));
         overviewChatModel.add(new OverviewChatModel(10L, "username10", "contentOfLastMessage10", false));
-//        overviewChatModel.add(new OverviewChatModel(11L, "username11", "contentOfLastMessage11", true));
-//        overviewChatModel.add(new OverviewChatModel(12L, "username12", "contentOfLastMessage12", false));
-//        overviewChatModel.add(new OverviewChatModel(13L, "username13", "contentOfLastMessage13", true));
-//        overviewChatModel.add(new OverviewChatModel(14L, "username14", "contentOfLastMessage14", false));
-//        overviewChatModel.add(new OverviewChatModel(15L, "username15", "contentOfLastMessage15", true));
 
         chatRecyclerView.setAdapter(chatRecyclerAdapter);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Initially load the first batch of data
+//        loadMoreData();
+        loadOlderChatOnScroll();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        currentPage = 1;
+        loadMoreChats();
+        handler.postDelayed(getMessagesCallRunnable, delay);
+    }
+
+
+    /**
+     * Runnable checker for new chats
+     */
+    private final Runnable getMessagesCallRunnable = new Runnable() {
+        @Override
+        public void run() {
+            /*
+                1) Take the newest chatId from the conversation
+                2) Get all the newest chats after that chatId
+                3) Update the beginning of the chat list
+             */
+
+            // Schedule the next API call
+            handler.postDelayed(this, delay);
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacks(getMessagesCallRunnable);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        handler.removeCallbacks(getMessagesCallRunnable);
+    }
+
+
+    /**
+     * Load older chat when the user scrolls to the bottom of the list
+     */
+    private void loadOlderChatOnScroll() {
         chatRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -140,15 +179,13 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
                 if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                         && firstVisibleItemPosition >= 0) {
                     // Load more data when the user is near the end of the list
-                    loadMoreData();
+                    loadMoreChats();
                 }
             }
         });
-        // Initially load the first batch of data
-        loadMoreData();
     }
 
-    private void loadMoreData() {
+    private void loadMoreChats() {
         isLoading = true;
 
         // Simulate fetching data from backend
@@ -163,6 +200,7 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
 
     private ArrayList<OverviewChatModel> fetchDataFromBackend(int page) {
         // Simulate fetching data from backend based on the page number
+        // TODO: convert it to API call
         ArrayList<OverviewChatModel> newData = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             newData.add(new OverviewChatModel((i + page * 10L),
@@ -190,17 +228,18 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
         chatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(ChatActivity.this, ChatActivity.class);
-                chat_intent.putExtra("user_id", userId);
-                chat_intent.putExtra("user_jwt", jwtToken);
-                chat_intent.putExtra("user_current_role", currentRole.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                chat_intent.putExtra("user_roles", roleList);
-                startActivity(chat_intent);
+                Toast.makeText(ChatActivity.this, "Already in Chat page", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+//                Intent chat_intent = new Intent(ChatActivity.this, ChatActivity.class);
+//                chat_intent.putExtra("user_id", userId);
+//                chat_intent.putExtra("user_jwt", jwtToken);
+//                chat_intent.putExtra("user_current_role", currentRole.toString());
+//                ArrayList<String> roleList = new ArrayList<>();
+//                for (RoleName role : roles) {
+//                    roleList.add(role.toString());
+//                }
+//                chat_intent.putExtra("user_roles", roleList);
+//                startActivity(chat_intent);
             }
         });
 

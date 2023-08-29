@@ -183,12 +183,37 @@ public class ProfileActivity extends AppCompatActivity {
                         PERMISSIONS_STORAGE,
                         REQUEST_EXTERNAL_STORAGE
                 );
+            } else {
+                Toast.makeText(ProfileActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                imagePickerLauncher.launch(intent);
             }
-
-            Toast.makeText(ProfileActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            imagePickerLauncher.launch(intent);
         });
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(ProfileActivity.this, "2 Select Image", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                imagePickerLauncher.launch(intent);
+            } else {
+                Toast.makeText(this, "Access to images is necessary", Toast.LENGTH_SHORT).show();
+                // TODO: go to user main page
+                Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
+                main_page_intent.putExtra("user_id", userId);
+                main_page_intent.putExtra("user_jwt", jwtToken);
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                main_page_intent.putStringArrayListExtra("user_roles", roleList);
+                startActivity(main_page_intent);
+            }
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -499,18 +524,19 @@ public class ProfileActivity extends AppCompatActivity {
         profileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                resetWarnVisibility();
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(ProfileActivity.this, ProfileActivity.class);
-                profile_intent.putExtra("user_id", userId);
-                profile_intent.putExtra("user_jwt", jwtToken);
-                profile_intent.putExtra("user_current_role", currentRole.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                profile_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(profile_intent);
+                Toast.makeText(ProfileActivity.this, "Already in Profile page", Toast.LENGTH_SHORT).show();
+//                resetWarnVisibility();
+//                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+//                Intent profile_intent = new Intent(ProfileActivity.this, ProfileActivity.class);
+//                profile_intent.putExtra("user_id", userId);
+//                profile_intent.putExtra("user_jwt", jwtToken);
+//                profile_intent.putExtra("user_current_role", currentRole.toString());
+//                ArrayList<String> roleList = new ArrayList<>();
+//                for (RoleName role : roles) {
+//                    roleList.add(role.toString());
+//                }
+//                profile_intent.putStringArrayListExtra("user_roles", roleList);
+//                startActivity(profile_intent);
             }
         });
 
