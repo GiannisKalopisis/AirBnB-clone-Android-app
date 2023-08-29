@@ -2,6 +2,7 @@ package com.dit.airbnb.csv_dto;
 
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,9 @@ public class ApartmentCSV {
 
     @CsvBindByName(column = "hostId")
     private Long hostId;
+
+    @CsvBindByName(column = "amenities")
+    private String amenities;
 
     @CsvBindByName(column = "address")
     private String address;
