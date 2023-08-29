@@ -12,11 +12,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MessageCSV {
 
-    @CsvBindByName(column = "senderUsername")
-    private String senderUsername;
+    @CsvBindByName(column = "senderId")
+    private Long senderId;
 
-    @CsvBindByName(column = "receiverUsername")
-    private String receiverUsername;
+    @CsvBindByName(column = "receiverId")
+    private Long receiverId;
 
     @CsvBindByName(column = "content")
     private String content;

@@ -2,11 +2,9 @@ package com.dit.airbnb.service;
 
 import com.dit.airbnb.csv_dto.ApartmentCSV;
 import com.dit.airbnb.csv_dto.BookingCSV;
+import com.dit.airbnb.csv_dto.MessageCSV;
 import com.dit.airbnb.csv_dto.UserRegCSV;
-import com.dit.airbnb.dto.Apartment;
-import com.dit.airbnb.dto.Booking;
-import com.dit.airbnb.dto.Role;
-import com.dit.airbnb.dto.UserReg;
+import com.dit.airbnb.dto.*;
 import com.dit.airbnb.dto.enums.RoleName;
 import com.dit.airbnb.exception.AppException;
 import com.dit.airbnb.exception.ResourceNotFoundException;
@@ -22,6 +20,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -173,6 +172,55 @@ public class PopulateDBService {
                 booking.setUserReg(userReg);
                 booking.setApartment(apartment);
                 bookingRepository.save(booking);
+            }
+        }
+    }
+
+    @Transactional
+    public void populateMessages() throws IOException, AppException {
+
+        try (Reader reader = Files.newBufferedReader(Paths.get(MESSAGE_DATA_FILE_PATH))) {
+            CsvToBean<MessageCSV> csvToBean = new CsvToBeanBuilder(reader)
+                    .withType(MessageCSV.class)
+                    .withIgnoreLeadingWhiteSpace(true).build();
+
+            for (MessageCSV messageCSV : csvToBean) {
+
+                UserReg sender = userRegRepository.findById(messageCSV.getSenderId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Sender", "id", messageCSV.getSenderId()));
+
+                UserReg receiver = userRegRepository.findById(messageCSV.getReceiverId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Receiver", "id", messageCSV.getReceiverId()));
+
+                boolean isUser = false;
+                for (Role role: sender.getRoles()) {
+                    if (role.getName().equals(RoleName.ROLE_USER)) {
+                        isUser = true;
+                        break;
+                    }
+                }
+                Long chatFirstSenderUserRegId = isUser ? sender.getId() : receiver.getId();
+                Long chatFirstReceiverUserRegId = isUser ? receiver.getId() : sender.getId();
+                Optional<Chat> chat = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(chatFirstSenderUserRegId, chatFirstReceiverUserRegId);
+                if (chat.isEmpty()) {
+                    chat = Optional.of(new Chat(sender, receiver));
+                    chatRepository.save(chat.get());
+                }
+
+                Optional<Message> optionalLastMessage = messageRepository.findLastMessageWithSendUserIdAndReceiverUserId(chatFirstSenderUserRegId,chatFirstReceiverUserRegId);
+                if (optionalLastMessage.isPresent()) {
+                    Message lastMessage = optionalLastMessage.get();
+                    lastMessage.setIsLastMessage(false);
+                    lastMessage.setSeen(true);
+                    messageRepository.save(lastMessage);
+                }
+
+                Message message = new Message(messageCSV);
+                message.setSenderUserReg(sender);
+                message.setChat(chat.get());
+                messageRepository.save(message);
+
+                System.out.println(message);
             }
         }
     }

@@ -1,8 +1,10 @@
 package com.dit.airbnb.dto;
 
+import com.dit.airbnb.csv_dto.MessageCSV;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.sql.Timestamp;
 
@@ -26,14 +28,26 @@ public class Message {
     @Column(name = "seen")
     private Boolean seen;
 
-    @Column(name = "timeSent")
+    @CreatedDate
     private Timestamp timeSent;
 
     @Column(name = "isLastMessage")
     private Boolean isLastMessage;
 
+    @PrePersist
+    public void createSentTime() {
+        timeSent = new Timestamp(System.currentTimeMillis());
+    }
+
+
     public Message(String content) {
         this.content = content;
+        this.seen = false;
+        this.isLastMessage = true;
+    }
+
+    public Message(MessageCSV messageCSV) {
+        this.content = messageCSV.getContent();
         this.seen = false;
         this.isLastMessage = true;
     }

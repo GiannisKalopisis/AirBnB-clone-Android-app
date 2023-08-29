@@ -37,7 +37,6 @@ public class Chat {
     @JoinColumn(name = "first_receiver_user_reg_id")
     private UserReg firstReceiverUserReg;
 
-    @CreatedDate
     @Column(name = "creation_time")
     private Timestamp creationTime;
 
@@ -45,6 +44,11 @@ public class Chat {
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "chat", cascade = CascadeType.ALL)
     private Set<Message> messages = new HashSet<>();
+
+    @PrePersist
+    public void createCreationTime() {
+        creationTime = new Timestamp(System.currentTimeMillis());
+    }
 
     public Chat(UserReg firstSenderUserReg, UserReg firstReceiverUserReg) {
         this.firstSenderUserReg = firstSenderUserReg;
