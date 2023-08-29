@@ -27,6 +27,9 @@ public class Apartment {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "amenities")
+    private String amenities;
+
     @Column(name = "address")
     private String address;
 
@@ -103,6 +106,7 @@ public class Apartment {
     private Set<Image> images;
 
     public Apartment(ApartmentRequest apartmentRequest) {
+        this.amenities = apartmentRequest.getAmenities();
         this.address = apartmentRequest.getAddress();
         this.country = apartmentRequest.getCountry();
         this.city = apartmentRequest.getCity();
@@ -124,6 +128,7 @@ public class Apartment {
     }
 
     public Apartment(ApartmentCSV apartmentCSV) {
+        this.amenities = apartmentCSV.getAmenities();
         this.country = apartmentCSV.getCountry();
         this.city = apartmentCSV.getCity();
         this.district = apartmentCSV.getDistrict();
@@ -146,6 +151,7 @@ public class Apartment {
     }
 
     public void updateApartment(ApartmentRequest apartmentRequest) {
+        if (apartmentRequest.getAmenities() != null) this.amenities = apartmentRequest.getAmenities();
         if (apartmentRequest.getAddress() != null) this.address = apartmentRequest.getAddress();
         if (apartmentRequest.getCountry() != null) this.country = apartmentRequest.getCountry();
         if (apartmentRequest.getCity() != null) this.city = apartmentRequest.getCity();
