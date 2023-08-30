@@ -7,6 +7,7 @@ import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.apartment.ApartmentRequest;
 import com.dit.airbnb.response.ApartmentResponse;
+import com.dit.airbnb.response.UserRegResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,4 +86,15 @@ public class ApartmentService {
 
     }
 
+    getHostIdByApartmentId
+
+    public ResponseEntity<?> getHostIdByApartmentId(Long apartmentId) {
+
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
+
+        UserReg host = apartment.getUserRegHost();
+
+        return ResponseEntity.ok().body(new ApiResponse(true, "getHostIdByApartmentId", UserRegResponse.builder().id(host.getId()).phone(host.getPhone()).email(host.getEmail()).username(host.getUsername()).firstName(host.getFirstName()).lastName(host.getLastName()).build()));
+
+    }
 }

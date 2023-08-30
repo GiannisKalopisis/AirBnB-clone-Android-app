@@ -48,4 +48,11 @@ public class ApartmentController {
                                              @Valid @CurrentUser UserDetailsImpl currentUser) {
         return apartmentService.deleteApartmentById(apartmentId, currentUser);
     }
+
+    @GetMapping("/apartment/{apartmentId}/host")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
+    public ResponseEntity<?> getHostId(@PathVariable(value = "apartmentId") Long apartmentId,
+                                       @Valid @CurrentUser UserDetailsImpl currentUser) {
+        return apartmentService.getHostIdByApartmentId(apartmentId, currentUser);
+    }
 }
