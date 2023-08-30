@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,19 +18,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fakebnb.adapter.HostReviewAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.HostReviewModel;
+import com.example.fakebnb.model.response.UserRegResponse;
+import com.example.fakebnb.rest.BookingAPI;
+import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.rest.UserRegAPI;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class HostReviewPageActivity extends AppCompatActivity {
 
     private static final String TAG = "HostReviewPageActivity";
 
-    private Long userId;
+    private Long userId, hostId;
     private String jwtToken;
     private Set<RoleName> roles;
-    private Long hostId;
+    private UserRegResponse.UserRegData userRegData;
 
     // do it hard coded, then do it with the database and add image
     private TextView hostReviewUsernameView, hostReviewEmailView, hostReviewPhoneView;
@@ -37,6 +46,7 @@ public class HostReviewPageActivity extends AppCompatActivity {
     private RecyclerView reviewsRecyclerView;
 
     private Button chatButton, profileButton, roleButton;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,18 +87,51 @@ public class HostReviewPageActivity extends AppCompatActivity {
         HostReviewAdapter adapter = new HostReviewAdapter(reviews);
         reviewsRecyclerView.setAdapter(adapter);
         reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
     }
 
     @SuppressLint("SetTextI18n")
     private void getTopInfo() {
-        //TODO: get the data from backend -> image, username, email, phone
-        //TODO: render the data to frontend
+        //TODO: get the data from backend -> image
+        RestClient restClient = new RestClient(jwtToken);
+        UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
-        // all this get from backend
-        hostReviewUsernameView.setText("Jane_Doe");
-        hostReviewEmailView.setText("jane_doe@gmail.com");
-        hostReviewPhoneView.setText("1234567890");
+        userRegAPI.getUserReg(hostId).enqueue(new Callback<UserRegResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<UserRegResponse> call, @NonNull Response<UserRegResponse> response) {
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        userRegData = response.body().getObject();
+                        hostReviewUsernameView.setText(userRegData.getUsername());
+                        hostReviewEmailView.setText(userRegData.getEmail());
+                        hostReviewPhoneView.setText(userRegData.getPhone());
+                    } else {
+                        Toast.makeText(HostReviewPageActivity.this, "Error getting user info", Toast.LENGTH_SHORT).show();
+                        goToMainPage();
+                    }
+                } else {
+                    Toast.makeText(HostReviewPageActivity.this, "Error getting user info", Toast.LENGTH_SHORT).show();
+                    goToMainPage();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<UserRegResponse> call, @NonNull Throwable t) {
+                Toast.makeText(HostReviewPageActivity.this, "Failed to connect to server and get user info", Toast.LENGTH_SHORT).show();
+                goToMainPage();
+            }
+        });
+    }
+
+    private void goToMainPage() {
+        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
+        main_page_intent.putExtra("user_id", userId);
+        main_page_intent.putExtra("user_jwt", jwtToken);
+        ArrayList<String> roleList = new ArrayList<>();
+        for (RoleName role : roles) {
+            roleList.add(role.toString());
+        }
+        main_page_intent.putStringArrayListExtra("user_roles", roleList);
+        startActivity(main_page_intent);
     }
 
     private void getReviews() {

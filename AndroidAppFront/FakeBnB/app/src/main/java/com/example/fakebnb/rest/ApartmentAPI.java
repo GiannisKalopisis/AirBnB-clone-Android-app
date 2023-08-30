@@ -27,6 +27,6 @@ public interface ApartmentAPI {
     @DELETE("/app/apartment/{apartmentId}")
     Call<ApartmentResponse> deleteApartment(@Path("apartmentId") Long apartmentId);
 
-    @GET("/app/apartment/{apartmentId}")
+    @GET("/app/apartment/{apartmentId}/host")
     Call<UserRegResponse> getHostId(@Path("apartmentId") Long apartmentId);
 }

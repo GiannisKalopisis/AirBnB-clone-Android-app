@@ -29,6 +29,7 @@ import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.BookingRequest;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.BookingResponse;
+import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.BookingAPI;
 import com.example.fakebnb.rest.RestClient;
@@ -49,7 +50,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class RentRoomPage extends AppCompatActivity {
@@ -60,8 +63,9 @@ public class RentRoomPage extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
-    private Long apartmentId;
+    private Long apartmentId, hostId;
     private ApartmentResponse.ApartmentData apartmentData = null;
+    private UserRegResponse.UserRegData host = null;
 
     private TextView rentRoomPersonsValue, rentRoomBedsValue, rentRoomBathroomsValue,
             rentRoomBedroomsValue, rentRoomPriceValue, rentRoomExtraPriceValue, rentRoomFinalPriceValue,
@@ -78,7 +82,6 @@ public class RentRoomPage extends AppCompatActivity {
 
     private Button seeHostButton, contactHostButton, makeReservationButton, writeReviewButton;
     private Button chatButton, profileButton, roleButton;
-//    private RentRoomModel info;
 
     private boolean userStayedAtRental = false;
     private TextView rentRoomReviewTitle;
@@ -133,6 +136,34 @@ public class RentRoomPage extends AppCompatActivity {
         RestClient restClient = new RestClient(jwtToken);
         ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
 
+        // GET HOST ID
+        apartmentAPI.getHostId(apartmentId)
+                .enqueue(new Callback<UserRegResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserRegResponse> call, @NonNull Response<UserRegResponse> response) {
+                        if (response.isSuccessful()) {
+                            if (response.body() != null) {
+                                Log.d(TAG, "onResponse: HOST ID: " + response.body().getObject().getId());
+                                host = response.body().getObject();
+                                hostId = response.body().getObject().getId();
+                            } else {
+                                Toast.makeText(RentRoomPage.this, "Could not get host of apartment", Toast.LENGTH_SHORT).show();
+                                goToMainPage();
+                            }
+                        } else {
+                            Toast.makeText(RentRoomPage.this, "Could not get host of apartment", Toast.LENGTH_SHORT).show();
+                            goToMainPage();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UserRegResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(RentRoomPage.this, "Failed to connect to server and get host of apartment", Toast.LENGTH_SHORT).show();
+                        goToMainPage();
+                    }
+                });
+
+        // GET APARTMENT INFO
         apartmentAPI.getApartmentInfo(apartmentId)
                 .enqueue(new Callback<ApartmentResponse>() {
                     @Override
@@ -194,72 +225,6 @@ public class RentRoomPage extends AppCompatActivity {
                 apartmentData.getCity() + ", " +
                 apartmentData.getCountry();
     }
-
-    /**
-     * API calls methods
-     */
-
-//    private void fetchApartmentInfo(long apartmentId, ApartmentAPI apartmentAPI, @Nullable Bundle savedInstanceState) {
-//        apartmentAPI.getApartmentInfo(apartmentId)
-//                .enqueue(new Callback<ApartmentResponse>() {
-//                    @Override
-//                    public void onResponse(@NonNull retrofit2.Call<ApartmentResponse> call, @NonNull retrofit2.Response<ApartmentResponse> response) {
-//                        handleResponse(response, apartmentAPI, savedInstanceState);
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull retrofit2.Call<ApartmentResponse> call, @NonNull Throwable t) {
-//                        showToast("Failed to connect to server");
-//                        finish();
-//                    }
-//                });
-//    }
-
-//    private void handleResponse(retrofit2.Response<ApartmentResponse> response, ApartmentAPI apartmentAPI, @Nullable Bundle savedInstanceState) {
-//        if (response.isSuccessful()) {
-//            if (response.body() != null) {
-//                apartmentData = response.body().getObject();
-//
-//                Log.d(TAG, "handleResponse: INTO HANDLE");
-//                checkGoogleAPIAvailability();
-//                rentRoomMapView.onCreate(savedInstanceState);
-//
-//                // Check for location permissions and request if not granted
-//                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-//                } else {
-//                    rentRoomMapView.getMapAsync(new OnMapReadyCallback() {
-//                        @Override
-//                        public void onMapReady(@NonNull GoogleMap googleMap) {
-//                            isMapReady = true; // Mark the map as ready
-//                            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-//                            googleMap.getUiSettings().setZoomControlsEnabled(true);
-//                            // Check if an address is available and show it on the map
-//                            if (info != null) {
-//                                showAddressOnMap(googleMap, info.getAddress());
-//                            }
-//                        }
-//                    });
-//                }
-//
-//                // Proceed with initializing the MapView and displaying the map
-//                initView();
-//                bottomBarClickListeners();
-//
-//                renderFetchedData();
-//                buttonClickListener();
-//                createSlider();
-//                fetchApartmentImages(apartmentId, apartmentAPI);
-//                fetchHostImage(apartmentData.getId(), apartmentAPI);
-//            } else {
-//                showToast("Could not get rental info");
-//                finish();
-//            }
-//        } else {
-//            showToast("Could not get rental info");
-//            finish();
-//        }
-//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -613,7 +578,6 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: get the host id from the API
-                long hostId = 1L;
 
                 Toast.makeText(view.getContext(), "Pressed SEE HOST BUTTON", Toast.LENGTH_SHORT).show();
                 Intent see_host_intent = new Intent(getApplicationContext(), HostReviewPageActivity.class);
