@@ -21,24 +21,27 @@
             android:layout_width="262dp"
             android:layout_height="56dp"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="50dp"
+            android:layout_marginBottom="30dp"
             android:text="@string/your_reserv"
             android:textSize="24sp"
             android:gravity="center"
             android:textStyle="bold"/>
 
-        <ImageView
-            android:id="@+id/reservationDoneImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
-            app:srcCompat="@drawable/ic_launcher_background" />
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:id="@+id/animation_view"
+            app:lottie_rawRes="@raw/doneanimation"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"/>
+
 
         <TextView
             android:id="@+id/reservationDoneText"
             android:layout_width="262dp"
             android:layout_height="56dp"
             android:layout_marginBottom="50dp"
+            android:layout_marginTop="50dp"
             android:text="@string/press_below_"
             android:gravity="center"
             android:textSize="24sp"/>
@@ -49,11 +52,5 @@
             android:layout_height="wrap_content"
             android:text="@string/home_page" />
     </LinearLayout>
-
-<!--    <include-->
-<!--        layout="@layout/bottom_menu"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginBottom="0dp"/>-->
 
 </LinearLayout>

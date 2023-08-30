@@ -5,16 +5,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.example.fakebnb.enums.RoleName;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
 
 public class ReservationDoneActivity extends AppCompatActivity {
 
@@ -25,7 +28,7 @@ public class ReservationDoneActivity extends AppCompatActivity {
     private Set<RoleName> roles;
     private Long apartmentId;
 
-    private String image_url;
+    private ImageView gifImageView;
 
     private Button reservationDoneHomeButton;
 
@@ -81,11 +84,13 @@ public class ReservationDoneActivity extends AppCompatActivity {
 
     private void getAndRenderImage() {
         Log.d(TAG, "getData: started");
-        //TODO: API to only 1 get image of the rental from backend (not all images)
+        LottieAnimationView animationView = findViewById(R.id.animation_view);
+        animationView.playAnimation();
     }
 
     private void initView() {
         Log.d(TAG, "initViews: started");
         reservationDoneHomeButton = findViewById(R.id.reservationDoneHomeButton);
+//        gifImageView = findViewById(R.id.reservationDoneImage);
     }
 }
