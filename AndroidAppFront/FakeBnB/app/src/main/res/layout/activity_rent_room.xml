@@ -350,7 +350,7 @@
                         android:layout_weight="0.5"
                         android:textSize="15sp"
                         android:textColor="#777777"
-                        android:text="Area"
+                        android:text="District"
                         android:layout_marginStart="20dp"/>
 
                 </LinearLayout>
@@ -371,7 +371,58 @@
                         android:text="Santa Monica Boulevard " />
 
                     <TextView
-                        android:id="@+id/rentRoomAreaValue"
+                        android:id="@+id/rentRoomDistrictValue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:layout_marginStart="20dp"
+                        android:text="Los Angeles" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/testInfo"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:textSize="15sp"
+                        android:textColor="#777777"
+                        android:text="City"
+                        android:layout_marginStart="20dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:textSize="15sp"
+                        android:textColor="#777777"
+                        android:text="Country"
+                        android:layout_marginStart="20dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/testInfo"
+                    android:layout_marginTop="5dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/rentRoomCityValue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:layout_marginStart="20dp"
+                        android:text="Santa Monica Boulevard" />
+
+                    <TextView
+                        android:id="@+id/rentRoomCountryValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
@@ -397,21 +448,21 @@
 
                 </LinearLayout>
 
-                <LinearLayout
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="5dp"-->
+<!--                    android:orientation="horizontal">-->
+
+                <com.google.android.gms.maps.MapView
+                    android:id="@+id/rentRoomMapView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="200dp"
                     android:layout_marginTop="5dp"
-                    android:orientation="horizontal">
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"/>
 
-                    <com.google.android.gms.maps.MapView
-                        android:id="@+id/rentRoomMapView"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginEnd="20dp"/>
-
-                </LinearLayout>
+<!--                </LinearLayout>-->
 
                 <!-- AMENITIES -->
                 <TextView

@@ -67,6 +67,90 @@
                     android:layout_margin="20dp"
                     android:background="@drawable/edittext_border" />
 
+                <!-- District -->
+                <TextView
+                    android:id="@+id/addPlaceWarningDistrict"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/district"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceDistrictEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- City -->
+                <TextView
+                    android:id="@+id/addPlaceWarningCity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/city"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceCityEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- Country -->
+                <TextView
+                    android:id="@+id/addPlaceWarningCountry"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/country"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceCountryEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
                 <com.google.android.gms.maps.MapView
                     android:id="@+id/addPlaceMapView"
                     android:layout_width="match_parent"
@@ -338,6 +422,34 @@
 
                 <EditText
                     android:id="@+id/addPlaceRulesEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:background="@drawable/edittext_border" />
+
+                <!-- Amenities -->
+                <TextView
+                    android:id="@+id/addPlaceWarningAmenities"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/warning"
+                    android:textColor="@android:color/holo_red_light"
+                    android:visibility="visible"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:paddingStart="20dp"
+                    android:text="Amenities"
+                    android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/addPlaceAmenitiesEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="20dp"

@@ -43,8 +43,11 @@ public class ApartmentResponse implements Serializable {
 
     public class ApartmentData implements Serializable {
 
-        @SerializedName("id")
-        private Long id;
+        @SerializedName("amenities")
+        private String amenities;
+
+        @SerializedName("address")
+        private String address;
 
         @SerializedName("country")
         private String country;
@@ -94,15 +97,26 @@ public class ApartmentResponse implements Serializable {
         @SerializedName("geoLong")
         private BigDecimal geoLong;
 
+        @SerializedName("rules")
+        private String rules;
+
         @SerializedName("rentalType")
         private RentalType rentalType;
 
-        public Long getId() {
-            return id;
+        public String getAmenities() {
+            return amenities;
         }
 
-        public void setId(Long id) {
-            this.id = id;
+        public void setAmenities(String amenities) {
+            this.amenities = amenities;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
         }
 
         public String getCountry() {
@@ -231,6 +245,14 @@ public class ApartmentResponse implements Serializable {
 
         public void setGeoLong(BigDecimal geoLong) {
             this.geoLong = geoLong;
+        }
+
+        public String getRules() {
+            return rules;
+        }
+
+        public void setRules(String rules) {
+            this.rules = rules;
         }
 
         public RentalType getRentalType() {
