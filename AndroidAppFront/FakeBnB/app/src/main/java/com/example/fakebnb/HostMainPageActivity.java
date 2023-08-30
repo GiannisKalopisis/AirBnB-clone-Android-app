@@ -306,7 +306,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     }
 
     @Override
-    public void onItemClick(long rentalId) {
+    public void onItemClick(Long rentalId) {
         // DEBUG ONLY: send rental_id just for checking
         Intent place_modification_intent = new Intent(HostMainPageActivity.this, PlaceModificationPageActivity.class);
         place_modification_intent.putExtra("user_id", userId);
