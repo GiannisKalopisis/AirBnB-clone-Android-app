@@ -73,4 +73,16 @@ public class ApartmentService {
         return ResponseEntity.ok().body(new ApiResponse(true, "getApartmentById", apartmentResponse));
     }
 
+    public ResponseEntity<?> deleteApartmentById(Long apartmentId, UserDetailsImpl currentUser) {
+
+        authorizationService.isHostOfTheApartment(currentUser.getId(), apartmentId);
+
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
+
+        apartmentRepository.delete(apartment);
+
+        return ResponseEntity.ok().body(new ApiResponse(true, "deleteApartmentById", apartment));
+
+    }
+
 }

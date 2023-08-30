@@ -42,4 +42,10 @@ public class ApartmentController {
         return apartmentService.getApartmentById(apartmentId, currentUser);
     }
 
+    @DeleteMapping("/apartment/{apartmentId}")
+    @PreAuthorize("hasAuthority('ROLE_HOST')")
+    public ResponseEntity<?> deleteApartment(@PathVariable(value = "apartmentId") Long apartmentId,
+                                             @Valid @CurrentUser UserDetailsImpl currentUser) {
+        return apartmentService.deleteApartmentById(apartmentId, currentUser);
+    }
 }
