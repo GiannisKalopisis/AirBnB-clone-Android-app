@@ -53,6 +53,6 @@ public class ApartmentController {
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getHostId(@PathVariable(value = "apartmentId") Long apartmentId,
                                        @Valid @CurrentUser UserDetailsImpl currentUser) {
-        return apartmentService.getHostIdByApartmentId(apartmentId, currentUser);
+        return apartmentService.getHostIdByApartmentId(apartmentId);
     }
 }

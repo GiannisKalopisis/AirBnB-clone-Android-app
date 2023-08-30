@@ -86,8 +86,6 @@ public class ApartmentService {
 
     }
 
-    getHostIdByApartmentId
-
     public ResponseEntity<?> getHostIdByApartmentId(Long apartmentId) {
 
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
