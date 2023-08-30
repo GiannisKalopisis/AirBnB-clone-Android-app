@@ -1,6 +1,5 @@
 package com.example.fakebnb.model;
 
-import java.time.LocalTime;
 
 public class MessageModel {
 
