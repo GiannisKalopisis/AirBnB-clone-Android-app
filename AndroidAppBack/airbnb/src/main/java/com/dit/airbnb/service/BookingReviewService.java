@@ -66,6 +66,15 @@ public class BookingReviewService {
         return ResponseEntity.created(uri).body(new ApiResponse(true, "createBookingReview succeed", bookingReview));
     }
 
+    public ResponseEntity<?> ableToReview(UserDetailsImpl currentUser, Long apartmentId) {
+        Long reviewerId = currentUser.getId();
+        UserReg reviewer = userRegRepository.findById(reviewerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reviewer", "id", reviewerId));
 
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id",apartmentId));
 
+        List<Booking> bookingList = bookingRepository.findBookingByReviewerIdAndApartmentId(reviewerId, apartmentId);
+
+        return ResponseEntity.ok(new ApiResponse(true, "ableToReview succeed", !bookingList.isEmpty()));
+    }
 }
