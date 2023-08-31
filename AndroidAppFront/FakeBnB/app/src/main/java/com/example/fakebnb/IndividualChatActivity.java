@@ -2,7 +2,6 @@ package com.example.fakebnb;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -19,16 +18,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fakebnb.adapter.MessageRecyclerAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.MessageModel;
-import com.example.fakebnb.model.UserModel;
 import com.example.fakebnb.model.request.MessageRequest;
 import com.example.fakebnb.model.response.MessageResponse;
 import com.example.fakebnb.rest.ChatAPI;
 import com.example.fakebnb.rest.RestClient;
-import com.example.fakebnb.utils.AndroidUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -40,10 +38,9 @@ public class IndividualChatActivity extends AppCompatActivity {
 
     private static final String TAG = "IndividualChatPage";
 
-    private UserModel otherUser;
     private EditText chat_message_input;
     private ImageButton message_send_btn, back_btn;
-    private TextView other_username;
+    private TextView receiver_username;
     private RecyclerView chat_recycler_view;
 
 
@@ -51,24 +48,23 @@ public class IndividualChatActivity extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
-    private Long otherUserId;
+    private Long receiverId;
     private Long chatId;
-
-    // polling variables
-    private final Handler handler = new Handler();
-    private final int delay = 3000; // 3 seconds
 
     // pagination
     private ArrayList<MessageModel> messageModel = new ArrayList<>();
-    private MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter(messageModel, "user1", "user2");
+    private MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter("michasgeo", "kalopisis");
 //    private boolean isLoading = false;
-    private int currentPage = 1; // Keeps track of the current page
+    private int currentPage = 0; // Keeps track of the current page
+    private int size = 20; // The number of items fetched per page
     private int lastVisibleItem = 0;
     private boolean isLoading = false;
+    private List<MessageModel> messageResponseList = new ArrayList<>();
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        // TODO: a call to take the senderID(userID),sencerUsername,receiverID,receiverUsername
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_individual_chat);
 
@@ -88,60 +84,16 @@ public class IndividualChatActivity extends AppCompatActivity {
 
         initView();
 
-        // get UserModel from intent
-        otherUser = AndroidUtil.getUserModelFromIntent(getIntent());
-
-        other_username.setText("Test Username");
+        receiver_username.setText("Test Username");
         backButtonOnClickListener();
         messageSendOnClickListener();
-
-        Toast.makeText(this, "UserID: " + userId+"\nChatID: " + chatId, Toast.LENGTH_SHORT).show();
-
-        /**
-         * GET messages every 3 seconds
-         */
-        // To start the polling
-//        handler.postDelayed(getMessagesCallRunnable, delay);
-
-        // Dummy data for testing
-        messageModel.add(new MessageModel("user1", "Hello"));
-        messageModel.add(new MessageModel("user2", "Hi"));
-        messageModel.add(new MessageModel("user1", "How are you?"));
-        messageModel.add(new MessageModel("user2", "I'm fine, thanks!"));
-        messageModel.add(new MessageModel("user2", "What about you?"));
-        messageModel.add(new MessageModel("user1", "I'm fine too!"));
-        messageModel.add(new MessageModel("user1", "What are you doing?"));
-        messageModel.add(new MessageModel("user2", "I'm working on my project"));
-        messageModel.add(new MessageModel("user1", "Good luck!"));
-        messageModel.add(new MessageModel("user2", "Thanks!"));
-
 
         chat_recycler_view.setAdapter(messageRecyclerAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         chat_recycler_view.setLayoutManager(layoutManager);
 
-
-        messageModel.add(new MessageModel("user2", "I'm going to sleep now"));
-        messageModel.add(new MessageModel("user1", "Good night!"));
-        messageModel.add(new MessageModel("user2", "Good night!"));
-        messageModel.add(new MessageModel("user1", "See you tomorrow!"));
-        messageModel.add(new MessageModel("user2", "See you!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-        messageModel.add(new MessageModel("user2", "Bye!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-        messageModel.add(new MessageModel("user2", "Bye!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-        messageModel.add(new MessageModel("user1", "Bye!"));
-
-
-
         // Initially load the first batch of data
-//        loadOlderData();
+        loadOlderData();
         loadOlderDataOnScroll();
     }
 
@@ -156,9 +108,11 @@ public class IndividualChatActivity extends AppCompatActivity {
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) chat_recycler_view.getLayoutManager();
                 int firstVisibleItem = Objects.requireNonNull(layoutManager).findFirstVisibleItemPosition();
+                int visibleItemCount = layoutManager.getChildCount();
 
-                if (dy < 0 && !isLoading && firstVisibleItem == 0 && firstVisibleItem != lastVisibleItem) {
+                if (dy < 0 && !isLoading && firstVisibleItem <= visibleItemCount && firstVisibleItem != lastVisibleItem) {
                     loadOlderData();
+                    Log.d(TAG, "After loadOlderData on loadOlderDataOnScroll");
                 }
 
                 lastVisibleItem = firstVisibleItem;
@@ -174,67 +128,45 @@ public class IndividualChatActivity extends AppCompatActivity {
         int lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
 
         // Simulate fetching newer data from backend
-        ArrayList<MessageModel> olderData = fetchOlderMessagesFromBackend(currentPage);
-        Collections.reverse(olderData);
+        RestClient restClient = new RestClient(jwtToken);
+        ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
 
-        // Add older messages at the beginning of the list
-        messageModel.addAll(0, olderData);
-        messageRecyclerAdapter.notifyItemRangeInserted(0, olderData.size());
+        chatAPI.getMessagesByChatId(chatId, currentPage, size)
+                .enqueue(new Callback<MessageResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MessageResponse> call, @NonNull Response<MessageResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (response.body().getSuccess()) {
+                                messageResponseList = response.body().getObject().getContent();
+                                Collections.reverse(messageResponseList);
+                                messageRecyclerAdapter.setMessageListModel((ArrayList<MessageModel>) messageResponseList);
+                            } else {
+                                Toast.makeText(IndividualChatActivity.this, "1 Couldn't get messages", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(IndividualChatActivity.this, "2 Couldn't get messages", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<MessageResponse> call, @NonNull Throwable t) {
+                        Log.d(TAG, "3 Couldn't get messages, " + t.getMessage());
+                        Toast.makeText(IndividualChatActivity.this, "3 Couldn't get messages", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
         isLoading = false;
         currentPage++;
 
         // Restore scroll position
         if (lastVisibleItemPosition != RecyclerView.NO_POSITION) {
-            layoutManager.scrollToPosition(lastVisibleItemPosition + olderData.size());
+            layoutManager.scrollToPosition(lastVisibleItemPosition + messageResponseList.size());
         }
     }
 
-    private ArrayList<MessageModel> fetchOlderMessagesFromBackend(int page) {
-        // Simulate fetching newer data from backend based on the page number
-        // TODO: convert it to API call
-        ArrayList<MessageModel> newerData = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            newerData.add(new MessageModel("user" + i % 2, "Newer Item " + (i + page * 10)));
-        }
-        return newerData;
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        handler.removeCallbacks(getMessagesCallRunnable);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        handler.removeCallbacks(getMessagesCallRunnable);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        currentPage = 1;
-        loadOlderData();
-        handler.postDelayed(getMessagesCallRunnable, delay);
-    }
-
-    private final Runnable getMessagesCallRunnable = new Runnable() {
-        @Override
-        public void run() {
-            /*
-                1) Take the newest message from the conversation
-                2) Get all the newest messages after that message
-                3) Update the beginning of the conversation with the new messages
-             */
-
-            // Schedule the next API call
-            handler.postDelayed(this, delay);
-        }
-    };
-
+    /**
+     * Send message to backend
+     */
     private void sendMessageToUser(MessageRequest messageRequest) {
         RestClient restClient = new RestClient(jwtToken);
         ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
@@ -260,7 +192,7 @@ public class IndividualChatActivity extends AppCompatActivity {
 
     private MessageRequest createMessageRequest() {
         MessageRequest messageRequest = new MessageRequest();
-        messageRequest.setReceiverUserRegId(otherUserId);
+        messageRequest.setReceiverUserRegId(receiverId);
         messageRequest.setContent(chat_message_input.getText().toString().trim());
         if (messageRequest.getContent().isEmpty()) {
             return null;
@@ -276,7 +208,6 @@ public class IndividualChatActivity extends AppCompatActivity {
                 if (messageRequest == null) {
                     return;
                 }
-                // TODO: get the newer messages like run() method
                 sendMessageToUser(messageRequest);
             }
         });
@@ -286,7 +217,7 @@ public class IndividualChatActivity extends AppCompatActivity {
         chat_message_input = findViewById(R.id.chat_message_input);
         message_send_btn = findViewById(R.id.message_send_btn);
         back_btn = findViewById(R.id.back_btn);
-        other_username = findViewById(R.id.other_username);
+        receiver_username = findViewById(R.id.other_username);
         chat_recycler_view = findViewById(R.id.chat_recycler_view);
     }
 

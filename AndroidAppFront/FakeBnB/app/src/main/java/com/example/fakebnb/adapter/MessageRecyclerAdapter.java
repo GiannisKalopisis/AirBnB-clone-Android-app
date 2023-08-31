@@ -20,9 +20,9 @@ public class MessageRecyclerAdapter extends RecyclerView.Adapter<MessageRecycler
     private String receiverUsername;
     private ArrayList<MessageModel> messageModel;
 
-    public MessageRecyclerAdapter(ArrayList<MessageModel> messageModel, String senderUsername,
+    public MessageRecyclerAdapter(String senderUsername,
                                   String receiverUsername) {
-        this.messageModel = messageModel;
+        this.messageModel = new ArrayList<>();
         this.senderUsername = senderUsername;
         this.receiverUsername = receiverUsername;
     }
@@ -31,7 +31,7 @@ public class MessageRecyclerAdapter extends RecyclerView.Adapter<MessageRecycler
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_message_recycler_view, parent, false);
-        MessageRecyclerAdapter.ViewHolder holder = new MessageRecyclerAdapter.ViewHolder(view);
+        ViewHolder holder = new ViewHolder(view);
         return holder;
     }
 
@@ -54,7 +54,7 @@ public class MessageRecyclerAdapter extends RecyclerView.Adapter<MessageRecycler
     }
     
     public void setMessageListModel(ArrayList<MessageModel> messageModel) {
-        this.messageModel = messageModel;
+        this.messageModel.addAll(0, messageModel);
         /* In case data come from a server and they change
            you have to refresh them.
          */

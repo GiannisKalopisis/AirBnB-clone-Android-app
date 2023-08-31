@@ -90,10 +90,6 @@ public class WriteReviewActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed SUBMIT REVIEW BUTTON", Toast.LENGTH_SHORT).show();
 
-                // get Data
-                String review = reviewText.getText().toString();
-                float rating = ratingBar.getRating();
-
                 RestClient restClient = new RestClient(jwtToken);
                 BookingReviewAPI bookingReviewAPI = restClient.getClient().create(BookingReviewAPI.class);
                 BookingReviewRequest bookingReviewRequest = createBookingReviewRequest();
@@ -124,13 +120,6 @@ public class WriteReviewActivity extends AppCompatActivity {
                                 Toast.makeText(WriteReviewActivity.this, "Failed to connect to server and submit review", Toast.LENGTH_SHORT).show();
                             }
                         });
-
-                // send Review to DB
-                Log.d(TAG, "onClick: review: " + review);
-                Log.d(TAG, "onClick: rating: " + rating);
-
-                Intent submit_review_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-                startActivity(submit_review_intent);
             }
         });
     }

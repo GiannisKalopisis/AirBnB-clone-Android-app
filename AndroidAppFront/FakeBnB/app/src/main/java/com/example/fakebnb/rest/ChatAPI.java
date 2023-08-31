@@ -1,7 +1,9 @@
 package com.example.fakebnb.rest;
 
+import com.example.fakebnb.model.request.ChatSenderReceiverRequest;
 import com.example.fakebnb.model.request.MessageRequest;
 import com.example.fakebnb.model.request.OverviewMessageRequest;
+import com.example.fakebnb.model.response.ChatIdResponse;
 import com.example.fakebnb.model.response.OverviewChatResponse;
 import com.example.fakebnb.model.response.MessageResponse;
 
@@ -23,7 +25,10 @@ public interface ChatAPI {
                                                               @Body OverviewMessageRequest overviewMessageRequest);
 
     @GET("/app/chat/{chatId}")
-    Call<OverviewChatResponse> getMessagesByChatId(@Query("page") int page,
-                                                   @Query("size") int size,
-                                                   @Path("chatId") Long chatId);
+    Call<MessageResponse> getMessagesByChatId(@Path(value = "chatId") Long chatId,
+                                              @Query("page") int page,
+                                              @Query("size") int size);
+
+    @POST("/app/chat/senderReceiver")
+    Call<ChatIdResponse> getChatIdBySenderReceiver(@Body ChatSenderReceiverRequest chatSenderReceiverRequest);
 }

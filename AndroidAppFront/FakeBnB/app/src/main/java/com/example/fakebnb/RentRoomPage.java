@@ -27,13 +27,16 @@ import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.fakebnb.adapter.RulesAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.BookingRequest;
+import com.example.fakebnb.model.request.ChatSenderReceiverRequest;
 import com.example.fakebnb.model.response.AbleToReviewResponse;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.BookingResponse;
+import com.example.fakebnb.model.response.ChatIdResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.BookingAPI;
 import com.example.fakebnb.rest.BookingReviewAPI;
+import com.example.fakebnb.rest.ChatAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -65,7 +68,7 @@ public class RentRoomPage extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
-    private Long apartmentId, hostId;
+    private Long apartmentId, hostId, chatId;
     private ApartmentResponse.ApartmentData apartmentData = null;
     private UserRegResponse.UserRegData host = null;
 
@@ -195,7 +198,7 @@ public class RentRoomPage extends AppCompatActivity {
                                             googleMap.getUiSettings().setZoomControlsEnabled(true);
                                             // Check if an address is available and show it on the map
                                             if (apartmentData != null) {
-                                                showAddressOnMap("Sperchiou 70, Peristeri");
+                                                showAddressOnMap(finalAddress);
                                             }
                                         }
                                     });
@@ -242,7 +245,7 @@ public class RentRoomPage extends AppCompatActivity {
                         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                         googleMap.getUiSettings().setZoomControlsEnabled(true);
                         if (apartmentData != null) {
-                            showAddressOnMap(apartmentData.getAddress() + ", " + apartmentData.getDistrict());
+                            showAddressOnMap(finalAddress);
                         }
                     }
                 });
@@ -622,19 +625,43 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: get the host id from the API
-                long hostId = 2L;
+                RestClient restClient = new RestClient(jwtToken);
+                ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
+                ChatSenderReceiverRequest chatSenderReceiverRequest = setChatSenderReceiverRequest();
 
-                Toast.makeText(view.getContext(), "Pressed CONTACT HOST BUTTON", Toast.LENGTH_SHORT).show();
-                Intent contact_host_intent = new Intent(getApplicationContext(), IndividualChatActivity.class);
-                contact_host_intent.putExtra("user_id", userId);
-                contact_host_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                contact_host_intent.putExtra("user_roles", roleList);
-                contact_host_intent.putExtra("other_user_id", hostId);
-                startActivity(contact_host_intent);
+                chatAPI.getChatIdBySenderReceiver(chatSenderReceiverRequest)
+                        .enqueue(new Callback<ChatIdResponse>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ChatIdResponse> call, @NonNull Response<ChatIdResponse> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    if (response.body().getSuccess()) {
+                                        chatId = response.body().getObject();
+                                        Toast.makeText(view.getContext(), "Pressed CONTACT HOST BUTTON", Toast.LENGTH_SHORT).show();
+                                        Intent contact_host_intent = new Intent(getApplicationContext(), IndividualChatActivity.class);
+                                        contact_host_intent.putExtra("user_id", userId);
+                                        contact_host_intent.putExtra("user_jwt", jwtToken);
+                                        ArrayList<String> roleList = new ArrayList<>();
+                                        for (RoleName role : roles) {
+                                            roleList.add(role.toString());
+                                        }
+                                        contact_host_intent.putExtra("user_roles", roleList);
+                                        contact_host_intent.putExtra("other_user_id", hostId);
+                                        contact_host_intent.putExtra("chat_id", chatId);
+                                        startActivity(contact_host_intent);
+                                    } else {
+                                        Toast.makeText(RentRoomPage.this, "1 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    Toast.makeText(RentRoomPage.this, "2 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<ChatIdResponse> call, @NonNull Throwable t) {
+                                Log.d(TAG, "Failed to connect to server and get chat with host" + apartmentId);
+                                Toast.makeText(RentRoomPage.this, "Failed to connect to server and get chat with host", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
 
@@ -712,5 +739,12 @@ public class RentRoomPage extends AppCompatActivity {
         bookingRequest.setCheckInDate("2021-05-01");
         bookingRequest.setCheckOutDate("2021-05-05");
         return bookingRequest;
+    }
+
+    private ChatSenderReceiverRequest setChatSenderReceiverRequest() {
+        ChatSenderReceiverRequest chatSenderReceiverRequest = new ChatSenderReceiverRequest();
+        chatSenderReceiverRequest.setSenderId(userId);
+        chatSenderReceiverRequest.setReceiverId(hostId);
+        return chatSenderReceiverRequest;
     }
 }
