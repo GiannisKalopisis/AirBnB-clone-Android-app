@@ -45,7 +45,7 @@ public class ChatController {
         return chatService.getMessagesByChatId(chatId, page, size);
     }
 
-    @GetMapping(path = "/chat/senderReceiver")
+    @PostMapping(path = "/chat/senderReceiver")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getChatIdBySenderReceiver(@Valid @RequestBody ChatSenderReceiverRequest chatSenderReceiverRequest,
                                                        @Valid @CurrentUser UserDetailsImpl currentUser) {
