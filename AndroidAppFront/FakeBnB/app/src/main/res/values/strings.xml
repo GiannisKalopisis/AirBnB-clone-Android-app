@@ -31,4 +31,8 @@
     <string name="add_new_place_text">Add a new place to FakeBnB</string>
     <string name="add_new_place">Add new place</string>
     <string name="delete_place">Delete place</string>
+    <string name="district">District</string>
+    <string name="city">City</string>
+    <string name="amenities">Amenities</string>
+    <string name="country">Country</string>
 </resources>

@@ -26,10 +26,10 @@ import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.fakebnb.adapter.RulesAdapter;
 import com.example.fakebnb.enums.RoleName;
-import com.example.fakebnb.model.RentRoomModel;
 import com.example.fakebnb.model.request.BookingRequest;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.BookingResponse;
+import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.BookingAPI;
 import com.example.fakebnb.rest.RestClient;
@@ -43,13 +43,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class RentRoomPage extends AppCompatActivity {
@@ -60,22 +63,25 @@ public class RentRoomPage extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
-    private Long rentalId;
-    private ApartmentResponse.ApartmentData apartmentData;
+    private Long apartmentId, hostId;
+    private ApartmentResponse.ApartmentData apartmentData = null;
+    private UserRegResponse.UserRegData host = null;
 
     private TextView rentRoomPersonsValue, rentRoomBedsValue, rentRoomBathroomsValue,
             rentRoomBedroomsValue, rentRoomPriceValue, rentRoomExtraPriceValue, rentRoomFinalPriceValue,
-            rentRoomDescriptionValue, rentRoomAddressValue, rentRoomAreaValue, rentRoomHostNameValue;
+            rentRoomDescriptionValue, rentRoomAddressValue, rentRoomDistrictValue,
+            rentRoomCityValue, rentRoomCountryValue, rentRoomHostNameValue;
 
     private RecyclerView recyclerViewRules, recyclerViewAmenities;
 
-    private MapView rentRoomMapView;
+    private MapView rentRoomMapView = null;
+    private GoogleMap googleMap;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
     private boolean isMapReady = false;
+    private String finalAddress = null;
 
     private Button seeHostButton, contactHostButton, makeReservationButton, writeReviewButton;
     private Button chatButton, profileButton, roleButton;
-    private RentRoomModel info;
 
     private boolean userStayedAtRental = false;
     private TextView rentRoomReviewTitle;
@@ -92,7 +98,7 @@ public class RentRoomPage extends AppCompatActivity {
         if (intent != null) {
             userId = intent.getSerializableExtra("user_id", Long.class);
             jwtToken = intent.getSerializableExtra("user_jwt", String.class);
-            rentalId = intent.getSerializableExtra("rental_id", Long.class);
+            apartmentId = intent.getSerializableExtra("rental_id", Long.class);
             ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
             if (roleList != null) {
                 roles = new HashSet<>();
@@ -118,87 +124,133 @@ public class RentRoomPage extends AppCompatActivity {
          * d. get the host image - failure is OK
          */
 
+        // Proceed with initializing the MapView and displaying the map
+        initView();
+        bottomBarClickListeners();
+        buttonClickListener();
+
+        // THOSE 2 LINES ARE MUST BE BEFORE API CALL TO WORK GOOGLE MAPS AND NOT CRASH ONRESUME METHOD
+        checkGoogleAPIAvailability();
+        rentRoomMapView.onCreate(savedInstanceState);
+
         RestClient restClient = new RestClient(jwtToken);
         ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
 
-        fetchApartmentInfo(rentalId, apartmentAPI, savedInstanceState);
+        // GET HOST ID
+        apartmentAPI.getHostId(apartmentId)
+                .enqueue(new Callback<UserRegResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UserRegResponse> call, @NonNull Response<UserRegResponse> response) {
+                        if (response.isSuccessful()) {
+                            if (response.body() != null) {
+                                Log.d(TAG, "onResponse: HOST ID: " + response.body().getObject().getId());
+                                host = response.body().getObject();
+                                hostId = response.body().getObject().getId();
+                            } else {
+                                Toast.makeText(RentRoomPage.this, "Could not get host of apartment", Toast.LENGTH_SHORT).show();
+                                goToMainPage();
+                            }
+                        } else {
+                            Toast.makeText(RentRoomPage.this, "Could not get host of apartment", Toast.LENGTH_SHORT).show();
+                            goToMainPage();
+                        }
+                    }
 
-        info = new RentRoomModel(4, 2, 2, 100, 15,"Entire House",
-                "This is a descriptionwerg wgwe werg wergwer gwergwer gwerg werg wwerg werfgwefg wdfgsdfgwertg wergswdfg sdfg sdfg we ",
-                "These are the rules. These are the rules1. These are the rules2. These are the rules3. These are the rules4. These are the rules5.",
-                "Sperchiou 70, Peristeri 121 37", "These are the amenities. These are the amenities1. These are the amenities2. These are the amenities3. These are the amenities4.",
-                "photo_path.png", "Sakis Karpas", true);
+                    @Override
+                    public void onFailure(@NonNull Call<UserRegResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(RentRoomPage.this, "Failed to connect to server and get host of apartment", Toast.LENGTH_SHORT).show();
+                        goToMainPage();
+                    }
+                });
 
-
-        Toast.makeText(this, TAG + " ID: " + getIntent().getIntExtra("rental_id", 0) + 1, Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * API calls methods
-     */
-
-    private void fetchApartmentInfo(long rentalId, ApartmentAPI apartmentAPI, @Nullable Bundle savedInstanceState) {
-        apartmentAPI.getApartmentInfo(rentalId)
+        // GET APARTMENT INFO
+        apartmentAPI.getApartmentInfo(apartmentId)
                 .enqueue(new Callback<ApartmentResponse>() {
                     @Override
                     public void onResponse(@NonNull retrofit2.Call<ApartmentResponse> call, @NonNull retrofit2.Response<ApartmentResponse> response) {
-                        handleResponse(response, apartmentAPI, savedInstanceState);
+                        if (response.isSuccessful()) {
+                            if (response.body() != null) {
+                                apartmentData = response.body().getObject();
+
+                                concatFinalAddress();
+                                renderFetchedData();
+                                createSlider();
+
+                                Log.d(TAG, "handleResponse: INTO HANDLE");
+
+//                                checkGoogleAPIAvailability();
+//                                rentRoomMapView.onCreate(savedInstanceState);
+                                // Check for location permissions and request if not granted
+                                if (ContextCompat.checkSelfPermission(RentRoomPage.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                    ActivityCompat.requestPermissions(RentRoomPage.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+                                } else {
+                                    rentRoomMapView.getMapAsync(new OnMapReadyCallback() {
+                                        @Override
+                                        public void onMapReady(@NonNull GoogleMap map) {
+                                            googleMap = map;
+                                            isMapReady = true; // Mark the map as ready
+                                            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                            googleMap.getUiSettings().setZoomControlsEnabled(true);
+                                            // Check if an address is available and show it on the map
+                                            if (apartmentData != null) {
+                                                showAddressOnMap("Sperchiou 70, Peristeri");
+                                            }
+                                        }
+                                    });
+                                }
+
+                                fetchApartmentImages(apartmentId, apartmentAPI);
+                                fetchHostImage(apartmentId, apartmentAPI);
+                            } else {
+                                showToast("Could not get rental info");
+                                goToMainPage();
+                            }
+                        } else {
+                            showToast("Could not get rental info");
+                            goToMainPage();
+                        }
                     }
 
                     @Override
                     public void onFailure(@NonNull retrofit2.Call<ApartmentResponse> call, @NonNull Throwable t) {
                         showToast("Failed to connect to server");
-                        finish();
+                        goToMainPage();
                     }
                 });
     }
 
-    private void handleResponse(retrofit2.Response<ApartmentResponse> response, ApartmentAPI apartmentAPI, @Nullable Bundle savedInstanceState) {
-        if (response.isSuccessful()) {
-            if (response.body() != null) {
-                apartmentData = response.body().getObject();
+    private void concatFinalAddress() {
+        finalAddress = apartmentData.getAddress() + ", " +
+                apartmentData.getDistrict() + ", " +
+                apartmentData.getCity() + ", " +
+                apartmentData.getCountry();
+    }
 
-                checkGoogleAPIAvailability();
-
-                // Check for location permissions and request if not granted
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-                } else {
-                    // Proceed with initializing the MapView and displaying the map
-                    initView();
-                    bottomBarClickListeners();
-
-                    rentRoomMapView.onCreate(savedInstanceState);
-                    rentRoomMapView.getMapAsync(new OnMapReadyCallback() {
-                        @Override
-                        public void onMapReady(@NonNull GoogleMap googleMap) {
-                            isMapReady = true; // Mark the map as ready
-                            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                            googleMap.getUiSettings().setZoomControlsEnabled(true);
-                            // Check if an address is available and show it on the map
-                            if (info != null) {
-                                showAddressOnMap(googleMap, info.getAddress());
-                            }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Location permission granted, initialize the map
+                rentRoomMapView.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(@NonNull GoogleMap map) {
+                        googleMap = map;
+                        isMapReady = true;
+                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        googleMap.getUiSettings().setZoomControlsEnabled(true);
+                        if (apartmentData != null) {
+                            showAddressOnMap(apartmentData.getAddress() + ", " + apartmentData.getDistrict());
                         }
-                    });
-
-                    renderFetchedData();
-                    buttonClickListener();
-                    createSlider();
-                    fetchApartmentImages(rentalId, apartmentAPI);
-                    fetchHostImage(apartmentData.getId(), apartmentAPI);
-                }
+                    }
+                });
             } else {
-                showToast("Could not get rental info");
-                finish();
+                Toast.makeText(this, "Not rendering map", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            showToast("Could not get rental info");
-            finish();
         }
     }
 
-    private void fetchApartmentImages(long rentalId, ApartmentAPI apartmentAPI) {
+    private void fetchApartmentImages(long apartmentId, ApartmentAPI apartmentAPI) {
         /*
         apartmentAPI.callOfImages()...
         if (success) {
@@ -229,6 +281,18 @@ public class RentRoomPage extends AppCompatActivity {
         Toast.makeText(RentRoomPage.this, message, Toast.LENGTH_SHORT).show();
     }
 
+    private void goToMainPage() {
+        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
+        main_page_intent.putExtra("user_id", userId);
+        main_page_intent.putExtra("user_jwt", jwtToken);
+        ArrayList<String> roleList = new ArrayList<>();
+        for (RoleName role : roles) {
+            roleList.add(role.toString());
+        }
+        main_page_intent.putStringArrayListExtra("user_roles", roleList);
+        startActivity(main_page_intent);
+    }
+
 
     /**
      * Google Maps methods
@@ -249,15 +313,15 @@ public class RentRoomPage extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        rentRoomMapView.onResume();
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         rentRoomMapView.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        rentRoomMapView.onResume();
     }
 
     @Override
@@ -272,8 +336,9 @@ public class RentRoomPage extends AppCompatActivity {
         rentRoomMapView.onLowMemory();
     }
 
-    private void showAddressOnMap(GoogleMap googleMap, String address) {
-        if (isMapReady) {
+    private void showAddressOnMap(String address) {
+        if (isMapReady && googleMap != null) {
+            googleMap.clear(); // Clear any existing markers on the map
             LatLng locationLatLng = getLocationFromAddress(address);
             if (locationLatLng != null) {
                 googleMap.addMarker(new MarkerOptions().position(locationLatLng).title(address));
@@ -316,24 +381,29 @@ public class RentRoomPage extends AppCompatActivity {
     }
 
     private void renderRoomInfoSection() {
-        rentRoomPersonsValue.setText(String.valueOf(info.getMax_persons_allowed()));
-        rentRoomBedsValue.setText(String.valueOf(info.getBathrooms()));
-        rentRoomBathroomsValue.setText(String.valueOf(info.getBedrooms()));
-        rentRoomBedroomsValue.setText(String.valueOf(info.getPrice()));
+        rentRoomPersonsValue.setText(String.valueOf(apartmentData.getMaxVisitors()));
+        rentRoomBedsValue.setText(String.valueOf(apartmentData.getNumberOfBeds()));
+        rentRoomBathroomsValue.setText(String.valueOf(apartmentData.getNumberOfBathrooms()));
+        rentRoomBedroomsValue.setText(String.valueOf(apartmentData.getNumberOfBedrooms()));
     }
 
     private void renderPriceSection() {
-        rentRoomPriceValue.setText(String.valueOf(info.getPrice()));
-        rentRoomExtraPriceValue.setText(String.valueOf(info.getExtra_person_cost()));
-        rentRoomFinalPriceValue.setText(String.valueOf(info.getPrice() + info.getExtra_person_cost()));
+        rentRoomPriceValue.setText(String.valueOf(apartmentData.getMinRetailPrice()));
+        rentRoomExtraPriceValue.setText(String.valueOf(apartmentData.getExtraCostPerPerson()));
+        // TODO: need to pass search parameters to calculate the final price
+        rentRoomFinalPriceValue.setText(
+                String.valueOf(
+                        apartmentData.getExtraCostPerPerson().
+                                multiply(BigDecimal.valueOf(3L)).
+                                add(apartmentData.getMinRetailPrice())));
     }
 
     private void renderDescriptionSection() {
-        rentRoomDescriptionValue.setText(info.getDescription());
+        rentRoomDescriptionValue.setText(apartmentData.getDescription());
     }
 
     private void renderRulesSection() {
-        String[] rulesArray = info.getRules().split("[\n.]");
+        String[] rulesArray = apartmentData.getRules().split("[\n.]");
         // Create an ArrayList to store the rules
         ArrayList<String> rulesList = new ArrayList<>();
         // Add each rule to the ArrayList
@@ -350,14 +420,14 @@ public class RentRoomPage extends AppCompatActivity {
     }
 
     private void renderLocationSection() {
-        String[] areaArray = info.getAddress().split(",");
-        rentRoomAddressValue.setText(areaArray[0]);
-        rentRoomAreaValue.setText(areaArray[1]);
-
+        rentRoomAddressValue.setText(apartmentData.getAddress());
+        rentRoomDistrictValue.setText(apartmentData.getDistrict());
+        rentRoomCityValue.setText(apartmentData.getCity());
+        rentRoomCountryValue.setText(apartmentData.getCountry());
     }
 
     private void renderAmenitiesSection() {
-        String[] amenitiesArray = info.getAmenities().split("[\n.]");
+        String[] amenitiesArray = apartmentData.getAmenities().split("[\n.]");
         // Create an ArrayList to store the amenities
         ArrayList<String> amenitiesList = new ArrayList<>();
         // Add each amenity to the ArrayList
@@ -374,12 +444,13 @@ public class RentRoomPage extends AppCompatActivity {
     }
 
     private void renderHostSection() {
-        rentRoomHostNameValue.setText(info.getHostName());
+        rentRoomHostNameValue.setText("Sakis Karpas");
     }
 
     private void renderReviewSection() {
+        // TODO: get the userStayedAtRental from the API
         Log.d(TAG, "renderReviewSection: started");
-        userStayedAtRental = info.getUserStayedHere();
+        userStayedAtRental = true;
         if (userStayedAtRental) {
             rentRoomReviewTitle.setVisibility(View.VISIBLE);
             writeReviewButton.setVisibility(View.VISIBLE);
@@ -415,7 +486,9 @@ public class RentRoomPage extends AppCompatActivity {
         rentRoomFinalPriceValue = findViewById(R.id.rentRoomFinalPriceValue);
         rentRoomDescriptionValue = findViewById(R.id.rentRoomDescriptionValue);
         rentRoomAddressValue = findViewById(R.id.rentRoomAddressValue);
-        rentRoomAreaValue = findViewById(R.id.rentRoomAreaValue);
+        rentRoomDistrictValue = findViewById(R.id.rentRoomDistrictValue);
+        rentRoomCityValue = findViewById(R.id.rentRoomCityValue);
+        rentRoomCountryValue = findViewById(R.id.rentRoomCountryValue);
         rentRoomHostNameValue = findViewById(R.id.rentRoomHostNameValue);
         rentRoomReviewTitle = findViewById(R.id.rentRoomReviewTitle);
 
@@ -505,7 +578,6 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // TODO: get the host id from the API
-                long hostId = 1L;
 
                 Toast.makeText(view.getContext(), "Pressed SEE HOST BUTTON", Toast.LENGTH_SHORT).show();
                 Intent see_host_intent = new Intent(getApplicationContext(), HostReviewPageActivity.class);
@@ -567,7 +639,7 @@ public class RentRoomPage extends AppCompatActivity {
                                                 roleList.add(role.toString());
                                             }
                                             make_reservation_intent.putExtra("user_roles", roleList);
-                                            make_reservation_intent.putExtra("apartment_id", apartmentData.getId());
+                                            make_reservation_intent.putExtra("apartment_id", apartmentId);
                                             startActivity(make_reservation_intent);
                                         } else {
                                             Toast.makeText(RentRoomPage.this, "1 Reservation failed", Toast.LENGTH_SHORT).show();
@@ -603,7 +675,7 @@ public class RentRoomPage extends AppCompatActivity {
 
     private BookingRequest setBookingRequest() {
         BookingRequest bookingRequest = new BookingRequest();
-        bookingRequest.setApartmentId(apartmentData.getId());
+        bookingRequest.setApartmentId(apartmentId);
         bookingRequest.setCheckInDate("2021-05-01");
         bookingRequest.setCheckOutDate("2021-05-05");
         return bookingRequest;

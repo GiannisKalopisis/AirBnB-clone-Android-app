@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.Callbacks.AddApartmentCallback;
 import com.example.fakebnb.adapter.ImageAdapter;
+import com.example.fakebnb.adapter.ImageDeleteAdapter;
 import com.example.fakebnb.enums.RentalType;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.ApartmentRequest;
@@ -80,17 +81,19 @@ public class AddNewPlaceActivity extends AppCompatActivity {
     private String jwtToken;
     private Set<RoleName> roles;
 
-    private TextView addPlaceWarningAddress, addPlaceWarningDates, addPlaceWarningMaxVisitors,
+    private TextView addPlaceWarningAddress, addPlaceWarningDistrict, addPlaceWarningCity,
+            addPlaceWarningCountry, addPlaceWarningDates, addPlaceWarningMaxVisitors,
             addPlaceWarningMinPrice, addPlaceWarningExtraCost, addPlaceWarningRentType,
-            addPlaceWarningPhotoUpload, addPlaceWarningRules, addPlaceWarningDescription,
-            addPlaceWarningBeds, addPlaceWarningBedrooms, addPlaceWarningBathrooms,
-            addPlaceWarningLivingRooms, addPlaceWarningArea;
+            addPlaceWarningPhotoUpload, addPlaceWarningRules, addPlaceWarningAmenities,
+            addPlaceWarningDescription, addPlaceWarningBeds, addPlaceWarningBedrooms,
+            addPlaceWarningBathrooms, addPlaceWarningLivingRooms, addPlaceWarningArea;
 
-    private EditText addPlaceAddressEditText, startDateEditText, endDateEditText,
+    private EditText addPlaceAddressEditText, addPlaceDistrictEditText, addPlaceCityEditText,
+            addPlaceCountryEditText, startDateEditText, endDateEditText,
             addPlaceMaxVisitorsEditText, addPlaceMinPriceEditText, addPlaceExtraCostEditText,
-            addPlaceRulesEditText, addPlaceDescriptionEditText, addPlaceBedsEditText,
-            addPlaceBedroomsEditText, addPlaceBathroomsEditText, addPlaceLivingRoomsEditText,
-            addPlaceAreaEditText;
+            addPlaceRulesEditText, addPlaceAmenitiesEditText, addPlaceDescriptionEditText,
+            addPlaceBedsEditText, addPlaceBedroomsEditText, addPlaceBathroomsEditText,
+            addPlaceLivingRoomsEditText, addPlaceAreaEditText;
 
     private RadioGroup addPlaceRentalTypeRadioGroup;
 
@@ -119,7 +122,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
     private Bitmap imageBitmap;
     private List<Bitmap> imageBitmapList;
     private RecyclerView imagesRecyclerView;
-    private ImageAdapter imageAdapter;
+    private ImageDeleteAdapter imageAdapter;
 
     // Permissions for accessing the storage
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -156,10 +159,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         checkGoogleAPIAvailability();
         addPlaceMapView.onCreate(savedInstanceState);
 
-        checkGoogleAPIAvailability();
-
-        addPlaceMapView.onCreate(savedInstanceState);
-
         // Check for location permissions and request if not granted
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
@@ -186,7 +185,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
         imagesRecyclerView = findViewById(R.id.imagesRecyclerView);
         imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        imageAdapter = new ImageAdapter(imageBitmapList);
+        imageAdapter = new ImageDeleteAdapter(imageBitmapList);
         imagesRecyclerView.setAdapter(imageAdapter);
 
         imageClickListener();
@@ -348,6 +347,35 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         return locationLatLng;
     }
 
+    private String concatAddressToShowOnMap() {
+        String address = "";
+        if (!addPlaceAddressEditText.getText().toString().isEmpty()) {
+            address = addPlaceAddressEditText.getText().toString();
+        }
+        if (!addPlaceDistrictEditText.getText().toString().isEmpty()) {
+            if (!address.isEmpty()) {
+                address += ", " + addPlaceDistrictEditText.getText().toString();
+            } else {
+                address = addPlaceDistrictEditText.getText().toString();
+            }
+        }
+        if (!addPlaceCityEditText.getText().toString().isEmpty()) {
+            if (!address.isEmpty()) {
+                address += ", " + addPlaceCityEditText.getText().toString();
+            } else {
+                address = addPlaceCityEditText.getText().toString();
+            }
+        }
+        if (!addPlaceCountryEditText.getText().toString().isEmpty()) {
+            if (!address.isEmpty()) {
+                address += ", " + addPlaceCountryEditText.getText().toString();
+            } else {
+                address = addPlaceCountryEditText.getText().toString();
+            }
+        }
+        return address;
+    }
+
 
     /**
      * Text Watchers
@@ -355,6 +383,9 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
     private void setTextWatchers() {
         setTextWatcherAddress();
+        setTextWatcherDistrict();
+        setTextWatcherCity();
+        setTextWatcherCountry();
         setTextWatcherStartDate();
         setTextWatcherEndDate();
         setTextWatcherMaxVisitors();
@@ -362,6 +393,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         setTextWatcherExtraCost();
 //        setTextWatcherPhotoUpload();
         setTextWatcherRules();
+        setTextWatcherAmenities();
         setTextWatcherDescription();
         setTextWatcherBeds();
         setTextWatcherBedrooms();
@@ -384,7 +416,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningAddress.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningAddress.setVisibility(View.GONE);
-                    addressToShowOnMap = addPlaceAddressEditText.getText().toString();
+                    addressToShowOnMap = concatAddressToShowOnMap();
                     if (isMapReady && googleMap != null) {
                         showAddressOnMap(addressToShowOnMap);
                     }
@@ -392,6 +424,78 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             }
         };
         addPlaceAddressEditText.addTextChangedListener(textWatcher);
+    }
+
+    private void setTextWatcherDistrict() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (addPlaceDistrictEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningDistrict.setVisibility(View.VISIBLE);
+                } else {
+                    addPlaceWarningDistrict.setVisibility(View.GONE);
+                    addressToShowOnMap = concatAddressToShowOnMap();
+                    if (isMapReady && googleMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
+                    }
+                }
+            }
+        };
+        addPlaceDistrictEditText.addTextChangedListener(textWatcher);
+    }
+
+    private void setTextWatcherCity() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (addPlaceCityEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningCity.setVisibility(View.VISIBLE);
+                } else {
+                    addPlaceWarningCity.setVisibility(View.GONE);
+                    addressToShowOnMap = concatAddressToShowOnMap();
+                    if (isMapReady && googleMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
+                    }
+                }
+            }
+        };
+        addPlaceCityEditText.addTextChangedListener(textWatcher);
+    }
+
+    private void setTextWatcherCountry() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (addPlaceCountryEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningCountry.setVisibility(View.VISIBLE);
+                } else {
+                    addPlaceWarningCountry.setVisibility(View.GONE);
+                    addressToShowOnMap = concatAddressToShowOnMap();
+                    if (isMapReady && googleMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
+                    }
+                }
+            }
+        };
+        addPlaceCountryEditText.addTextChangedListener(textWatcher);
     }
 
     private void setTextWatcherStartDate() {
@@ -534,6 +638,26 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceRulesEditText.addTextChangedListener(textWatcher);
     }
 
+    private void setTextWatcherAmenities() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (addPlaceAmenitiesEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningAmenities.setVisibility(View.VISIBLE);
+                } else {
+                    addPlaceWarningAmenities.setVisibility(View.GONE);
+                }
+            }
+        };
+        addPlaceAmenitiesEditText.addTextChangedListener(textWatcher);
+    }
+
     private void setTextWatcherDescription() {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -656,6 +780,9 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
     private void resetWarnVisibility() {
         addPlaceWarningAddress.setVisibility(View.GONE);
+        addPlaceWarningDistrict.setVisibility(View.GONE);
+        addPlaceWarningCity.setVisibility(View.GONE);
+        addPlaceWarningCountry.setVisibility(View.GONE);
         addPlaceWarningDates.setVisibility(View.GONE);
         addPlaceWarningMaxVisitors.setVisibility(View.GONE);
         addPlaceWarningMinPrice.setVisibility(View.GONE);
@@ -663,6 +790,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceWarningRentType.setVisibility(View.GONE);
         addPlaceWarningPhotoUpload.setVisibility(View.GONE);
         addPlaceWarningRules.setVisibility(View.GONE);
+        addPlaceWarningAmenities.setVisibility(View.GONE);
         addPlaceWarningDescription.setVisibility(View.GONE);
         addPlaceWarningBeds.setVisibility(View.GONE);
         addPlaceWarningBedrooms.setVisibility(View.GONE);
@@ -755,7 +883,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!validateFields()) {
-                    Toast.makeText(view.getContext(), "222 Please fill all the fields", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -763,7 +891,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
                 ApartmentRequest apartmentRequest = setApartmentRequestData(view);
                 if (apartmentRequest == null) {
-                    Toast.makeText(view.getContext(), "111 Please fill all the fields correctly", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(view.getContext(), "Please fill correctly all the fields", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -796,16 +924,15 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         ApartmentRequest apartmentRequest = new ApartmentRequest();
 
-        // TODO: had to add address field in backend, address can be a concatenation of address, district, city, country
-
         // country, city, district
-        apartmentRequest.setCountry(addPlaceAddressEditText.getText().toString());
-        apartmentRequest.setCity(addPlaceAddressEditText.getText().toString());
-        apartmentRequest.setDistrict(addPlaceAddressEditText.getText().toString());
+        apartmentRequest.setAddress(addPlaceAddressEditText.getText().toString());
+        apartmentRequest.setDistrict(addPlaceDistrictEditText.getText().toString());
+        apartmentRequest.setCity(addPlaceCityEditText.getText().toString());
+        apartmentRequest.setCountry(addPlaceCountryEditText.getText().toString());
 
         // maxVisitors
         try {
-            int maxVisitors = Integer.parseInt(addPlaceMaxVisitorsEditText.getText().toString());
+            Integer maxVisitors = Integer.parseInt(addPlaceMaxVisitorsEditText.getText().toString());
             apartmentRequest.setMaxVisitors(maxVisitors);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Max visitors must be a number", Toast.LENGTH_SHORT).show();
@@ -830,15 +957,13 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             return null;
         }
 
-        // TODO: add them to the apartment data model in backend
-        String rules = addPlaceRulesEditText.getText().toString();
-
-        // description, no need to convert
+        apartmentRequest.setRules(addPlaceRulesEditText.getText().toString());
+        apartmentRequest.setAmenities(addPlaceAmenitiesEditText.getText().toString());
         apartmentRequest.setDescription(addPlaceDescriptionEditText.getText().toString());
 
         // number of beds
         try {
-            short beds = Short.parseShort(addPlaceBedsEditText.getText().toString());
+            Short beds = Short.parseShort(addPlaceBedsEditText.getText().toString());
             apartmentRequest.setNumberOfBeds(beds);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Beds must be a number", Toast.LENGTH_SHORT).show();
@@ -847,7 +972,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // number of bedrooms
         try {
-            short bedrooms = Short.parseShort(addPlaceBedroomsEditText.getText().toString());
+            Short bedrooms = Short.parseShort(addPlaceBedroomsEditText.getText().toString());
             apartmentRequest.setNumberOfBedrooms(bedrooms);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Bedrooms must be a number", Toast.LENGTH_SHORT).show();
@@ -856,7 +981,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // number of bathrooms
         try {
-            short bathrooms = Short.parseShort(addPlaceBathroomsEditText.getText().toString());
+            Short bathrooms = Short.parseShort(addPlaceBathroomsEditText.getText().toString());
             apartmentRequest.setNumberOfBathrooms(bathrooms);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Bathrooms must be a number", Toast.LENGTH_SHORT).show();
@@ -865,7 +990,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // number of living rooms
         try {
-            short livingRooms = Short.parseShort(addPlaceLivingRoomsEditText.getText().toString());
+            Short livingRooms = Short.parseShort(addPlaceLivingRoomsEditText.getText().toString());
             apartmentRequest.setNumberOfLivingRooms(livingRooms);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Living rooms must be a number", Toast.LENGTH_SHORT).show();
@@ -886,8 +1011,18 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // latitude & longitude of address
         LatLng location = getLocationFromAddress(addPlaceAddressEditText.getText().toString());
-        apartmentRequest.setGeoLat(new BigDecimal(location.latitude));
-        apartmentRequest.setGeoLong(new BigDecimal(location.longitude));
+        try {
+            apartmentRequest.setGeoLat(new BigDecimal(location.latitude));
+        } catch (NullPointerException e) {
+            Toast.makeText(view.getContext(), "Latitude of address is not valid", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        try {
+            apartmentRequest.setGeoLong(new BigDecimal(location.longitude));
+        } catch (NullPointerException e) {
+            Toast.makeText(view.getContext(), "Longitude of address is not valid", Toast.LENGTH_SHORT).show();
+            return null;
+        }
 
         // rentalType (ROOM or HOUSE)
         apartmentRequest.setRentalType(addPlaceRentalTypeRadioGroup.getCheckedRadioButtonId() == R.id.roomTypeRadioButton ? RentalType.RENTAL_ROOM : RentalType.RENTAL_HOUSE);
@@ -986,6 +1121,9 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // Warning TextViews
         addPlaceWarningAddress = findViewById(R.id.addPlaceWarningAddress);
+        addPlaceWarningDistrict = findViewById(R.id.addPlaceWarningDistrict);
+        addPlaceWarningCity = findViewById(R.id.addPlaceWarningCity);
+        addPlaceWarningCountry = findViewById(R.id.addPlaceWarningCountry);
         addPlaceWarningDates = findViewById(R.id.addPlaceWarningDates);
         addPlaceWarningMaxVisitors = findViewById(R.id.addPlaceWarningMaxVisitors);
         addPlaceWarningMinPrice = findViewById(R.id.addPlaceWarningMinPrice);
@@ -993,6 +1131,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceWarningRentType = findViewById(R.id.addPlaceWarningRentType);
         addPlaceWarningPhotoUpload = findViewById(R.id.addPlaceWarningPhotoUpload);
         addPlaceWarningRules = findViewById(R.id.addPlaceWarningRules);
+        addPlaceWarningAmenities = findViewById(R.id.addPlaceWarningAmenities);
         addPlaceWarningDescription = findViewById(R.id.addPlaceWarningDescription);
         addPlaceWarningBeds = findViewById(R.id.addPlaceWarningBeds);
         addPlaceWarningBedrooms = findViewById(R.id.addPlaceWarningBedrooms);
@@ -1002,12 +1141,16 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
         // EditTexts
         addPlaceAddressEditText = findViewById(R.id.addPlaceAddressEditText);
+        addPlaceDistrictEditText = findViewById(R.id.addPlaceDistrictEditText);
+        addPlaceCityEditText = findViewById(R.id.addPlaceCityEditText);
+        addPlaceCountryEditText = findViewById(R.id.addPlaceCountryEditText);
         startDateEditText = findViewById(R.id.startDateEditText);
         endDateEditText = findViewById(R.id.endDateEditText);
         addPlaceMaxVisitorsEditText = findViewById(R.id.addPlaceMaxVisitorsEditText);
         addPlaceMinPriceEditText = findViewById(R.id.addPlaceMinPriceEditText);
         addPlaceExtraCostEditText = findViewById(R.id.addPlaceExtraCostEditText);
         addPlaceRulesEditText = findViewById(R.id.addPlaceRulesEditText);
+        addPlaceAmenitiesEditText = findViewById(R.id.addPlaceAmenitiesEditText);
         addPlaceDescriptionEditText = findViewById(R.id.addPlaceDescriptionEditText);
         addPlaceBedsEditText = findViewById(R.id.addPlaceBedsEditText);
         addPlaceBedroomsEditText = findViewById(R.id.addPlaceBedroomsEditText);

@@ -2,9 +2,11 @@ package com.example.fakebnb.rest;
 
 import com.example.fakebnb.model.request.ApartmentRequest;
 import com.example.fakebnb.model.response.ApartmentResponse;
+import com.example.fakebnb.model.response.UserRegResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -21,4 +23,10 @@ public interface ApartmentAPI {
 
     @GET("/app/apartment/{apartmentId}")
     Call<ApartmentResponse> getApartmentInfo(@Path("apartmentId") Long apartmentId);
+
+    @DELETE("/app/apartment/{apartmentId}")
+    Call<ApartmentResponse> deleteApartment(@Path("apartmentId") Long apartmentId);
+
+    @GET("/app/apartment/{apartmentId}/host")
+    Call<UserRegResponse> getHostId(@Path("apartmentId") Long apartmentId);
 }

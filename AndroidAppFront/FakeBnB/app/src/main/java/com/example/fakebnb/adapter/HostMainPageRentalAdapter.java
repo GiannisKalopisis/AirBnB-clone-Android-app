@@ -72,7 +72,7 @@ public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPage
                     if (hostMainPageRecyclerViewInterface != null){
                         int clickedPosition = getAdapterPosition();
                         if (clickedPosition != RecyclerView.NO_POSITION) {
-                            long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
+                            Long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
                             hostMainPageRecyclerViewInterface.onItemClick(rentalId);
                         }
                     }

@@ -1,35 +1,48 @@
 package com.example.fakebnb;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.RadioButton;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.adapter.ImageDeleteAdapter;
 import com.example.fakebnb.enums.RentalType;
 import com.example.fakebnb.enums.RoleName;
-import com.example.fakebnb.model.HostRoomModel;
 import com.example.fakebnb.model.request.ApartmentRequest;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.RealPathUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,13 +52,21 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -67,14 +88,18 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             modifyPlaceWarningMaxVisitors, modifyPlaceWarningMinPrice, modifyPlaceWarningExtraCost,
             modifyPlaceWarningRentalType, modifyPlaceWarningPhotoUpload, modifyPlaceWarningRules,
             modifyPlaceWarningDescription, modifyPlaceWarningBeds, modifyPlaceWarningBedrooms,
-            modifyPlaceWarningBathrooms, modifyPlaceWarningLivingRooms, modifyPlaceWarningArea;
+            modifyPlaceWarningBathrooms, modifyPlaceWarningLivingRooms, modifyPlaceWarningArea,
+            modifyPlaceWarningDistrict, modifyPlaceWarningCity, modifyPlaceWarningCountry,
+            modifyPlaceWarningAmenities;
 
     // EditTexts fields
     private EditText modifyPlaceAddress, modifyPlaceStartDate, modifyPlaceEndDate,
             modifyPlaceMaxVisitors, modifyPlaceMinPrice, modifyPlaceExtraCost,
             modifyPlacePhotoUpload, modifyPlaceRules,
             modifyPlaceDescription, modifyPlaceBeds, modifyPlaceBedrooms,
-            modifyPlaceBathrooms, modifyPlaceLivingRooms, modifyPlaceArea;
+            modifyPlaceBathrooms, modifyPlaceLivingRooms, modifyPlaceArea,
+            modifyPlaceDistrict, modifyPlaceCity, modifyPlaceCountry, modifyPlaceAmenities;
+
     private RadioGroup modifyPlaceRentalTypeRadioGroup;
     // MapView
     private MapView modifyPlaceMapView;
@@ -86,11 +111,27 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     // page buttons
     private Button savePlaceChangesButton, deletePlaceButton;
 
-    private HostRoomModel hostRoomModel;
-
-
     // bottom buttons
     private Button chatButton, profileButton, roleButton;
+
+    /**
+     * Variables for IMAGE UPLOAD
+     */
+    private Button selectImageButton;
+    private ImageView imageView;
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private String imagePath;
+    private Bitmap imageBitmap;
+    private List<Bitmap> imageBitmapList;
+    private RecyclerView imagesRecyclerView;
+    private ImageDeleteAdapter imageAdapter;
+
+    // Permissions for accessing the storage
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_MEDIA_IMAGES
+    };
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -115,6 +156,26 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
         bottomBarClickListeners();
         resetWarnVisibility();
+        setTextWatchers();
+        onDatesClicked();
+        modificationButtonsClickListener();
+        savePlaceChangesButton.setVisibility(View.GONE);
+
+        /**
+         * Variables for MULTIPLE IMAGES
+         */
+        imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
+        imagesRecyclerView = findViewById(R.id.modifyImageRecyclerView);
+        imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        imageAdapter = new ImageDeleteAdapter(imageBitmapList);
+        imagesRecyclerView.setAdapter(imageAdapter);
+
+        imageClickListener();
+        setImagePickerLauncher();
+
+        // THOSE 2 LINES ARE MUST BE BEFORE API CALL TO WORK GOOGLE MAPS AND NOT CRASH ONRESUME METHOD
+        checkGoogleAPIAvailability();
+        modifyPlaceMapView.onCreate(savedInstanceState);
 
         RestClient restClient = new RestClient(jwtToken);
         ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
@@ -122,98 +183,151 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         apartmentAPI.getApartmentInfo(rentalId)
                 .enqueue(new Callback<ApartmentResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
-
-                        int statusCode = response.code();
-                        Log.d("API_CALL", "GetApartmentInfo status code: " + statusCode);
-
+                    public void onResponse(@NonNull retrofit2.Call<ApartmentResponse> call, @NonNull retrofit2.Response<ApartmentResponse> response) {
                         if (response.isSuccessful()) {
                             ApartmentResponse apartmentResponse = response.body();
                             if (apartmentResponse != null) {
-                                Log.d("API_CALL", "GetApartmentInfo successful");
                                 apartmentData = apartmentResponse.getObject();
 
-                                /*
-                                  Rest of initialization after the fetching of data from database
-                                 */
                                 setDataToViews();
-                                setTextWatchers();
-                                modificationButtonsClickListener();
-                                savePlaceChangesButton.setVisibility(View.GONE);
-
-                                checkGoogleAPIAvailability();
-                                modifyPlaceMapView.onCreate(savedInstanceState);
-                                modifyPlaceMapView.getMapAsync(new OnMapReadyCallback() {
-                                    @Override
-                                    public void onMapReady(@NonNull GoogleMap map) {
-                                        googleMap = map; // Store the GoogleMap object in the global variable
-                                        isMapReady = true; // Mark the map as ready
-                                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                                        googleMap.getUiSettings().setZoomControlsEnabled(true);
-                                        // Check if an address is available and show it on the map
-                                        if (addressToShowOnMap != null) {
-                                            showAddressOnMap(addressToShowOnMap);
-                                        }
-                                    }
-                                });
-
                                 // Check for location permissions and request if not granted
                                 if (ContextCompat.checkSelfPermission(PlaceModificationPageActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                                     ActivityCompat.requestPermissions(PlaceModificationPageActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+                                } else {
+                                    modifyPlaceMapView.getMapAsync(new OnMapReadyCallback() {
+                                        @Override
+                                        public void onMapReady(@NonNull GoogleMap map) {
+                                            googleMap = map; // Store the GoogleMap object in the global variable
+                                            isMapReady = true; // Mark the map as ready
+                                            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                            googleMap.getUiSettings().setZoomControlsEnabled(true);
+                                            // Check if an address is available and show it on the map
+                                            if (addressToShowOnMap != null) {
+                                                showAddressOnMap(addressToShowOnMap);
+                                            }
+                                        }
+                                    });
                                 }
-
                             } else {
                                 // Handle unsuccessful response
                                 Toast.makeText(PlaceModificationPageActivity.this, "Couldn't get info of apartment.", Toast.LENGTH_SHORT).show();
                                 Log.d("API_CALL", "GetApartmentInfo failed");
-
-                                Intent host_main_page_intent = new Intent(PlaceModificationPageActivity.this, HostMainPageActivity.class);
-                                host_main_page_intent.putExtra("user_id", userId);
-                                host_main_page_intent.putExtra("user_jwt", jwtToken);
-                                ArrayList<String> roleList = new ArrayList<>();
-                                for (RoleName role : roles) {
-                                    roleList.add(role.toString());
-                                }
-                                host_main_page_intent.putExtra("user_roles", roleList);
-                                startActivity(host_main_page_intent);
+                                goToHostMainPage();
                             }
                         } else {
                             // Handle unsuccessful response
                             Toast.makeText(PlaceModificationPageActivity.this, "Couldn't get info of apartment.", Toast.LENGTH_SHORT).show();
                             Log.d("API_CALL", "GetApartmentInfo failed");
-
-                            Intent host_main_page_intent = new Intent(PlaceModificationPageActivity.this, HostMainPageActivity.class);
-                            host_main_page_intent.putExtra("user_id", userId);
-                            host_main_page_intent.putExtra("user_jwt", jwtToken);
-                            ArrayList<String> roleList = new ArrayList<>();
-                            for (RoleName role : roles) {
-                                roleList.add(role.toString());
-                            }
-                            host_main_page_intent.putExtra("user_roles", roleList);
-                            startActivity(host_main_page_intent);
+                            goToHostMainPage();
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull retrofit2.Call<ApartmentResponse> call, @NonNull Throwable t) {
 
                         // Handle failure
-                        Toast.makeText(PlaceModificationPageActivity.this,
-                                "Failed to communicate with server. Couldn't get info of apartment.",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PlaceModificationPageActivity.this, "Failed to communicate with server. Couldn't get info of apartment.", Toast.LENGTH_SHORT).show();
                         Log.e("API_CALL", "Error: " + t.getMessage());
-
-                        Intent host_main_page_intent = new Intent(PlaceModificationPageActivity.this, HostMainPageActivity.class);
-                        host_main_page_intent.putExtra("user_id", userId);
-                        host_main_page_intent.putExtra("user_jwt", jwtToken);
-                        ArrayList<String> roleList = new ArrayList<>();
-                        for (RoleName role : roles) {
-                            roleList.add(role.toString());
-                        }
-                        host_main_page_intent.putExtra("user_roles", roleList);
-                        startActivity(host_main_page_intent);
+                        goToHostMainPage();
                     }
                 });
+
+    }
+
+    /**
+     * Same listener for single and multiple images(Recycler view)
+     */
+    private void imageClickListener() {
+        Log.d(TAG, "imageClickListener: Started");
+
+        selectImageButton.setOnClickListener(view -> {
+
+            if (ActivityCompat.checkSelfPermission(PlaceModificationPageActivity.this, Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        PlaceModificationPageActivity.this,
+                        PERMISSIONS_STORAGE,
+                        REQUEST_EXTERNAL_STORAGE
+                );
+            } else {
+                Toast.makeText(PlaceModificationPageActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                imagePickerLauncher.launch(intent);
+            }
+        });
+    }
+
+    /**
+     * Multiple images as RecyclerView
+     */
+    private void setImagePickerLauncher() {
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        imagePath = RealPathUtil.getRealPath(PlaceModificationPageActivity.this, imageUri);
+                        imageBitmap = BitmapFactory.decodeFile(imagePath);
+
+                        // Add the selected image to the layout
+                        imageBitmapList.add(imageBitmap);
+                        imageAdapter.notifyDataSetChanged();
+                    }
+                }
+        );
+    }
+
+    private void goToHostMainPage() {
+        Intent host_main_page_intent = new Intent(PlaceModificationPageActivity.this, HostMainPageActivity.class);
+        host_main_page_intent.putExtra("user_id", userId);
+        host_main_page_intent.putExtra("user_jwt", jwtToken);
+        ArrayList<String> roleList = new ArrayList<>();
+        for (RoleName role : roles) {
+            roleList.add(role.toString());
+        }
+        host_main_page_intent.putExtra("user_roles", roleList);
+        startActivity(host_main_page_intent);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Location permission granted, initialize the map
+                modifyPlaceMapView.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(@NonNull GoogleMap map) {
+                        googleMap = map;
+                        isMapReady = true;
+                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        googleMap.getUiSettings().setZoomControlsEnabled(true);
+                        if (addressToShowOnMap != null) {
+                            showAddressOnMap(addressToShowOnMap);
+                        }
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Not rendering map", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == REQUEST_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(PlaceModificationPageActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                imagePickerLauncher.launch(intent);
+            } else {
+                Toast.makeText(this, "Access to images is necessary", Toast.LENGTH_SHORT).show();
+                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                host_main_page_intent.putExtra("user_id", userId);
+                host_main_page_intent.putExtra("user_jwt", jwtToken);
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                host_main_page_intent.putExtra("user_roles", roleList);
+                startActivity(host_main_page_intent);
+            }
+        }
     }
 
     /**
@@ -293,52 +407,132 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
      */
 
     private void setDataToViews() {
-        modifyPlaceAddress.setText(apartmentData.getCountry());
-        modifyPlaceStartDate.setText(apartmentData.getAvailableStartDate().toString());
-        modifyPlaceEndDate.setText(apartmentData.getAvailableEndDate().toString());
-        modifyPlaceMaxVisitors.setText(apartmentData.getMaxVisitors());
+        modifyPlaceAddress.setText(apartmentData.getAddress());
+        modifyPlaceDistrict.setText(apartmentData.getDistrict());
+        modifyPlaceCity.setText(apartmentData.getCity());
+        modifyPlaceCountry.setText(apartmentData.getCountry());
+        modifyPlaceStartDate.setText(dateFormation(String.valueOf(apartmentData.getAvailableStartDate())));
+        modifyPlaceEndDate.setText(dateFormation(String.valueOf(apartmentData.getAvailableEndDate())));
+        modifyPlaceMaxVisitors.setText(String.valueOf(apartmentData.getMaxVisitors()));
         modifyPlaceMinPrice.setText(String.valueOf(apartmentData.getMinRetailPrice()));
         modifyPlaceExtraCost.setText(String.valueOf(apartmentData.getExtraCostPerPerson()));
-        modifyPlacePhotoUpload.setText("photo.png");
-        modifyPlaceRules.setText("Has to add rules");
+//        modifyPlacePhotoUpload.setText("photo.png");
+        modifyPlaceRules.setText(apartmentData.getRules());
+        modifyPlaceAmenities.setText(apartmentData.getAmenities());
         modifyPlaceDescription.setText(apartmentData.getDescription());
-        modifyPlaceBeds.setText(apartmentData.getNumberOfBeds());
-        modifyPlaceBedrooms.setText(apartmentData.getNumberOfBedrooms());
-        modifyPlaceBathrooms.setText(apartmentData.getNumberOfBathrooms());
-        modifyPlaceLivingRooms.setText(apartmentData.getNumberOfLivingRooms());
+        modifyPlaceBeds.setText(String.valueOf(apartmentData.getNumberOfBeds()));
+        modifyPlaceBedrooms.setText(String.valueOf(apartmentData.getNumberOfBedrooms()));
+        modifyPlaceBathrooms.setText(String.valueOf(apartmentData.getNumberOfBathrooms()));
+        modifyPlaceLivingRooms.setText(String.valueOf(apartmentData.getNumberOfLivingRooms()));
         modifyPlaceArea.setText(String.valueOf(apartmentData.getArea()));
+
+        if (apartmentData.getRentalType() == RentalType.RENTAL_ROOM) {
+            modifyPlaceRentalTypeRadioGroup.check(R.id.roomTypeRadioButton);
+        } else {
+            modifyPlaceRentalTypeRadioGroup.check(R.id.houseTypeRadioButton);
+        }
     }
 
-    private void getDataFromDatabase() {
-        Log.d(TAG, "getDataFromDatabase: started");
+    private String dateFormation(String unformattedDate) {
+        try {
+            SimpleDateFormat inputDateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss 'GMT'Z yyyy", Locale.US);
+            Date inputDate = inputDateFormat.parse(unformattedDate);
 
-        // get Data from database
-        hostRoomModel = new HostRoomModel("Sperchiou 70, Peristeri", "24-7-2023", "29-7-2023", "Room",
-                "photo_path.png", "Rule1, Rule2, Rule3", "wqefqxc wedfqw eweeq qwef qwef qwef qwefsd",
-                4, 4, 3, 2, 1, 150, 25, 70);
+            SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy-MM-dd", new Locale("tr", "TR")); // Turkish locale
+            outputDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+03:00"));
+            return inputDate != null ? outputDateFormat.format(inputDate) : "Error in formatting date";
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private ApartmentRequest setUpdateApartmentValues() {
         ApartmentRequest apartmentRequest = new ApartmentRequest();
-        apartmentRequest.setCountry(modifyPlaceAddress.getText().toString());
-        apartmentRequest.setCity(modifyPlaceAddress.getText().toString());
-        apartmentRequest.setDistrict(modifyPlaceAddress.getText().toString());
-//        CONVERT THE DATES CORRECTLY!!!
+
+        apartmentRequest.setAddress(modifyPlaceAddress.getText().toString());
+        apartmentRequest.setDistrict(modifyPlaceDistrict.getText().toString());
+        apartmentRequest.setCity(modifyPlaceCity.getText().toString());
+        apartmentRequest.setCountry(modifyPlaceCountry.getText().toString());
         apartmentRequest.setAvailableStartDate(modifyPlaceStartDate.getText().toString());
         apartmentRequest.setAvailableEndDate(modifyPlaceEndDate.getText().toString());
-        apartmentRequest.setMaxVisitors(Integer.parseInt(modifyPlaceMaxVisitors.getText().toString()));
-        apartmentRequest.setMinRetailPrice(new BigDecimal(modifyPlaceMinPrice.getText().toString()));
-        apartmentRequest.setExtraCostPerPerson(new BigDecimal(modifyPlaceExtraCost.getText().toString()));
+        apartmentRequest.setRules(modifyPlaceRules.getText().toString());
+        apartmentRequest.setAmenities(modifyPlaceAmenities.getText().toString());
         apartmentRequest.setDescription(modifyPlaceDescription.getText().toString());
-        apartmentRequest.setNumberOfBeds(Short.parseShort(modifyPlaceBeds.getText().toString()));
-        apartmentRequest.setNumberOfBedrooms(Short.parseShort(modifyPlaceBedrooms.getText().toString()));
-        apartmentRequest.setNumberOfBathrooms(Short.parseShort(modifyPlaceBathrooms.getText().toString()));
-        apartmentRequest.setNumberOfLivingRooms(Short.parseShort(modifyPlaceLivingRooms.getText().toString()));
-        apartmentRequest.setArea(new BigDecimal(modifyPlaceArea.getText().toString()));
+
+        try {
+            apartmentRequest.setMaxVisitors(Integer.parseInt(modifyPlaceMaxVisitors.getText().toString()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Max visitors must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        try {
+            apartmentRequest.setMinRetailPrice(new BigDecimal(modifyPlaceMinPrice.getText().toString()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Minimum rental price must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        try {
+            apartmentRequest.setExtraCostPerPerson(new BigDecimal(modifyPlaceExtraCost.getText().toString()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Extra cost per person must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        try {
+            apartmentRequest.setNumberOfBeds(Short.parseShort(modifyPlaceBeds.getText().toString()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Number of beds must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        try {
+            apartmentRequest.setNumberOfBedrooms(Short.parseShort(modifyPlaceBedrooms.getText().toString()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Number of bedrooms must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        try {
+            apartmentRequest.setNumberOfBathrooms(Short.parseShort(modifyPlaceBathrooms.getText().toString()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Number of bathrooms must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        try {
+            apartmentRequest.setNumberOfLivingRooms(Short.parseShort(modifyPlaceLivingRooms.getText().toString()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Number of living rooms must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        try {
+            apartmentRequest.setArea(new BigDecimal(modifyPlaceArea.getText().toString()));
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Area must be a number", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
         LatLng location = getLocationFromAddress(modifyPlaceAddress.getText().toString());
-        apartmentRequest.setGeoLat(new BigDecimal(location.latitude));
-        apartmentRequest.setGeoLong(new BigDecimal(location.longitude));
+
+        try {
+            apartmentRequest.setGeoLat(new BigDecimal(location.latitude));
+        } catch (NullPointerException e) {
+            Toast.makeText(this, "Latitude of address is not valid", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        try {
+            apartmentRequest.setGeoLong(new BigDecimal(location.longitude));
+        } catch (NullPointerException e) {
+            Toast.makeText(this, "Longitude of address is not valid", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
         apartmentRequest.setRentalType(modifyPlaceRentalTypeRadioGroup.getCheckedRadioButtonId() == R.id.roomTypeRadioButton ? RentalType.RENTAL_ROOM : RentalType.RENTAL_HOUSE);
+
         return apartmentRequest;
     }
 
@@ -349,13 +543,17 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         Log.d(TAG, "setTextWatchers: started");
 
         setTextWatcherAddress();
+        setTextWatcherDistrict();
+        setTextWatcherCity();
+        setTextWatcherCountry();
         setTextWatcherStartDate();
         setTextWatcherEndDate();
         setTextWatcherMaxVisitors();
         setTextWatcherMinPrice();
         setTextWatcherExtraCost();
-        setTextWatcherPhotoUpload();
+//        setTextWatcherPhotoUpload();
         setTextWatcherRules();
+        setTextWatcherAmenities();
         setTextWatcherDescription();
         setTextWatcherBeds();
         setTextWatcherBedrooms();
@@ -383,9 +581,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
                     modifyPlaceWarningAddress.setVisibility(View.GONE);
-                    addressToShowOnMap = modifyPlaceAddress.getText().toString();
                     savePlaceChangesButton.setVisibility(View.VISIBLE);
-                    Toast.makeText(PlaceModificationPageActivity.this, String.valueOf(googleMap), Toast.LENGTH_SHORT).show();
+                    addressToShowOnMap = concatAddressToShowOnMap();
                     if (isMapReady && googleMap != null) {
                         showAddressOnMap(addressToShowOnMap);
                     }
@@ -393,6 +590,102 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             }
         };
         modifyPlaceAddress.addTextChangedListener(textWatcher);
+    }
+
+    private void setTextWatcherDistrict() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!modifyPlaceDistrict.getText().toString().isEmpty()) {
+                    modifyPlaceWarningDistrict.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (modifyPlaceDistrict.getText().toString().isEmpty()) {
+                    modifyPlaceWarningDistrict.setVisibility(View.VISIBLE);
+                    savePlaceChangesButton.setVisibility(View.GONE);
+                } else {
+                    modifyPlaceWarningDistrict.setVisibility(View.GONE);
+                    savePlaceChangesButton.setVisibility(View.VISIBLE);
+                    addressToShowOnMap = concatAddressToShowOnMap();
+                    if (isMapReady && googleMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
+                    }
+                }
+            }
+        };
+        modifyPlaceDistrict.addTextChangedListener(textWatcher);
+    }
+
+    private void setTextWatcherCity() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!modifyPlaceCity.getText().toString().isEmpty()) {
+                    modifyPlaceWarningCity.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (modifyPlaceCity.getText().toString().isEmpty()) {
+                    modifyPlaceWarningCity.setVisibility(View.VISIBLE);
+                    savePlaceChangesButton.setVisibility(View.GONE);
+                } else {
+                    modifyPlaceWarningCity.setVisibility(View.GONE);
+                    savePlaceChangesButton.setVisibility(View.VISIBLE);
+                    addressToShowOnMap = concatAddressToShowOnMap();
+                    if (isMapReady && googleMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
+                    }
+                }
+            }
+        };
+        modifyPlaceCity.addTextChangedListener(textWatcher);
+    }
+
+    private void setTextWatcherCountry() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!modifyPlaceCountry.getText().toString().isEmpty()) {
+                    modifyPlaceWarningCountry.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (modifyPlaceCountry.getText().toString().isEmpty()) {
+                    modifyPlaceWarningCountry.setVisibility(View.VISIBLE);
+                    savePlaceChangesButton.setVisibility(View.GONE);
+                } else {
+                    modifyPlaceWarningCountry.setVisibility(View.GONE);
+                    savePlaceChangesButton.setVisibility(View.VISIBLE);
+                    addressToShowOnMap = concatAddressToShowOnMap();
+                    if (isMapReady && googleMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
+                    }
+                }
+            }
+        };
+        modifyPlaceCountry.addTextChangedListener(textWatcher);
     }
 
     private void setTextWatcherStartDate() {
@@ -577,6 +870,34 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modifyPlaceRules.addTextChangedListener(textWatcher);
     }
 
+    private void setTextWatcherAmenities() {
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!modifyPlaceAmenities.getText().toString().isEmpty()) {
+                    modifyPlaceWarningAmenities.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (modifyPlaceAmenities.getText().toString().isEmpty()) {
+                    modifyPlaceWarningAmenities.setVisibility(View.VISIBLE);
+                    savePlaceChangesButton.setVisibility(View.GONE);
+                } else {
+                    modifyPlaceWarningAmenities.setVisibility(View.GONE);
+                    savePlaceChangesButton.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+        modifyPlaceAmenities.addTextChangedListener(textWatcher);
+    }
+
     private void setTextWatcherDescription() {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -734,6 +1055,35 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modifyPlaceArea.addTextChangedListener(textWatcher);
     }
 
+    private String concatAddressToShowOnMap() {
+        String address = "";
+        if (!modifyPlaceAddress.getText().toString().isEmpty()) {
+            address = modifyPlaceAddress.getText().toString();
+        }
+        if (!modifyPlaceDistrict.getText().toString().isEmpty()) {
+            if (!address.isEmpty()) {
+                address += ", " + modifyPlaceDistrict.getText().toString();
+            } else {
+                address = modifyPlaceDistrict.getText().toString();
+            }
+        }
+        if (!modifyPlaceCity.getText().toString().isEmpty()) {
+            if (!address.isEmpty()) {
+                address += ", " + modifyPlaceCity.getText().toString();
+            } else {
+                address = modifyPlaceCity.getText().toString();
+            }
+        }
+        if (!modifyPlaceCountry.getText().toString().isEmpty()) {
+            if (!address.isEmpty()) {
+                address += ", " + modifyPlaceCountry.getText().toString();
+            } else {
+                address = modifyPlaceCountry.getText().toString();
+            }
+        }
+        return address;
+    }
+
     private void resetWarnVisibility() {
         Log.d(TAG, "resetWarnVisibility: started");
 
@@ -758,6 +1108,9 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
         // initialize warning messages fields
         modifyPlaceWarningAddress = findViewById(R.id.modifyPlaceWarningAddress);
+        modifyPlaceWarningDistrict = findViewById(R.id.modifyPlaceWarningDistrict);
+        modifyPlaceWarningCity = findViewById(R.id.modifyPlaceWarningCity);
+        modifyPlaceWarningCountry = findViewById(R.id.modifyPlaceWarningCountry);
         modifyPlaceWarningDates = findViewById(R.id.modifyPlaceWarningDates);
         modifyPlaceWarningMaxVisitors = findViewById(R.id.modifyPlaceWarningMaxVisitors);
         modifyPlaceWarningMinPrice = findViewById(R.id.modifyPlaceWarningMinPrice);
@@ -765,6 +1118,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modifyPlaceWarningRentalType = findViewById(R.id.modifyPlaceWarningRentalType);
         modifyPlaceWarningPhotoUpload = findViewById(R.id.modifyPlaceWarningPhotoUpload);
         modifyPlaceWarningRules = findViewById(R.id.modifyPlaceWarningRules);
+        modifyPlaceWarningAmenities = findViewById(R.id.modifyPlaceWarningAmenities);
         modifyPlaceWarningDescription = findViewById(R.id.modifyPlaceWarningDescription);
         modifyPlaceWarningBeds = findViewById(R.id.modifyPlaceWarningBeds);
         modifyPlaceWarningBedrooms = findViewById(R.id.modifyPlaceWarningBedrooms);
@@ -774,14 +1128,26 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
         // initialize EditTexts fields
         modifyPlaceAddress = findViewById(R.id.modifyPlaceAddressEditText);
+        modifyPlaceDistrict = findViewById(R.id.modifyPlaceDistrictEditText);
+        modifyPlaceCity = findViewById(R.id.modifyPlaceCityEditText);
+        modifyPlaceCountry = findViewById(R.id.modifyPlaceCountryEditText);
         modifyPlaceStartDate = findViewById(R.id.modifyStartDateEditText);
         modifyPlaceEndDate = findViewById(R.id.modifyEndDateEditText);
         modifyPlaceMaxVisitors = findViewById(R.id.modifyPlaceMaxVisitorsEditText);
         modifyPlaceMinPrice = findViewById(R.id.modifyPlaceMinPriceEditText);
         modifyPlaceExtraCost = findViewById(R.id.modifyPlaceExtraCostEditText);
         modifyPlaceRentalTypeRadioGroup = findViewById(R.id.modifyPlaceRentalTypeRadioGroup);
-        modifyPlacePhotoUpload = findViewById(R.id.modifyPlacePhotoUploadEditText);
+
+        // TODO: change the photo uploader
+//        modifyPlacePhotoUpload = findViewById(R.id.modifyPlacePhotoUploadEditText);
+
+        /**
+         * PHOTO ONLY
+         */
+        selectImageButton = findViewById(R.id.modifySelectImageButton);
+
         modifyPlaceRules = findViewById(R.id.modifyPlaceRulesEditText);
+        modifyPlaceAmenities = findViewById(R.id.modifyPlaceAmenitiesEditText);
         modifyPlaceDescription = findViewById(R.id.modifyPlaceDescriptionEditText);
         modifyPlaceBeds = findViewById(R.id.modifyPlaceBedsEditText);
         modifyPlaceBedrooms = findViewById(R.id.modifyPlaceBedroomsEditText);
@@ -801,6 +1167,85 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         roleButton = findViewById(R.id.roleButton);
     }
 
+    private void onDatesClicked() {
+        Log.d(TAG, "onDatesClicked: started");
+
+        modifyPlaceStartDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Calendar c = Calendar.getInstance();
+
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        // on below line we are passing context.
+                        PlaceModificationPageActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @SuppressLint("SetTextI18n")
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
+                                modifyPlaceStartDate.setText(formattedDate);
+                            }
+                        },
+                        year, month, day);
+                // not allow older dates to be selected
+                datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+                // display date picker dialog.
+                datePickerDialog.show();
+            }
+        });
+
+        modifyPlaceEndDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (modifyPlaceStartDate.getText().toString().equals("")) {
+                    Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                final Calendar c = Calendar.getInstance();
+
+                // Get the selected check-in date from startDateEditText and parse it to Calendar.
+                String checkInDateText = modifyPlaceStartDate.getText().toString();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                try {
+                    Date checkInDate = dateFormat.parse(checkInDateText);
+                    c.setTime(Objects.requireNonNull(checkInDate));
+                    c.add(Calendar.DAY_OF_MONTH, 1);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        // on below line we are passing context.
+                        PlaceModificationPageActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @SuppressLint("SetTextI18n")
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
+                                modifyPlaceEndDate.setText(formattedDate);
+                            }
+                        },
+                        year, month, day);
+                // not allow older dates to be selected
+                datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
+                // display date picker dialog.
+                datePickerDialog.show();
+            }
+        });
+    }
+
     private void modificationButtonsClickListener() {
         Log.d(TAG, "modificationButtonsClickListener: started");
 
@@ -809,6 +1254,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             resetWarnVisibility();
 
             ApartmentRequest apartmentRequest = setUpdateApartmentValues();
+            if (apartmentRequest == null) {
+                Toast.makeText(this, "Please fill correctly all the fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             RestClient restClient = new RestClient(jwtToken);
             ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
 
@@ -833,12 +1283,12 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                             startActivity(host_main_page_intent);
                         } else {
                             // Handle unsuccessful response
-                            Toast.makeText(PlaceModificationPageActivity.this, "Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
                             Log.d("API_CALL", "UpdateApartment failed");
                         }
                     } else {
                         // Handle unsuccessful response
-                        Toast.makeText(PlaceModificationPageActivity.this, "Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
                         Log.d("API_CALL", "UpdateApartment failed");
                     }
                 }
@@ -859,10 +1309,49 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // delete place from database
                 resetWarnVisibility();
-                Toast.makeText(PlaceModificationPageActivity.this, "Rental deleted correctly", Toast.LENGTH_SHORT).show();
-                // onBackPressed(); // -> not pressed the back. Have to remake the host main page
-                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                startActivity(host_main_page_intent);
+                RestClient restClient = new RestClient(jwtToken);
+                ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
+
+                apartmentAPI.deleteApartment(rentalId)
+                        .enqueue(new Callback<ApartmentResponse>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                                if (response.isSuccessful()) {
+                                    // Handle successful response
+                                    ApartmentResponse apartmentResponse = response.body();
+                                    if (apartmentResponse != null) {
+                                        Toast.makeText(PlaceModificationPageActivity.this, "Rental deleted correctly", Toast.LENGTH_SHORT).show();
+                                        Log.d("API_CALL", "UpdateApartment successful");
+                                        Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                                        host_main_page_intent.putExtra("user_id", userId);
+                                        host_main_page_intent.putExtra("user_jwt", jwtToken);
+                                        ArrayList<String> roleList = new ArrayList<>();
+                                        for (RoleName role : roles) {
+                                            roleList.add(role.toString());
+                                        }
+                                        host_main_page_intent.putExtra("user_roles", roleList);
+                                        startActivity(host_main_page_intent);
+                                    } else {
+                                        // Handle unsuccessful response
+                                        Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
+                                        Log.d("API_CALL", "UpdateApartment failed");
+                                    }
+                                } else {
+                                    // Handle unsuccessful response
+                                    Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
+                                    Log.d("API_CALL", "UpdateApartment failed");
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                                // Handle failure
+                                Toast.makeText(PlaceModificationPageActivity.this,
+                                        "Failed to communicate with server. Couldn't delete rental.",
+                                        Toast.LENGTH_SHORT).show();
+                                Log.e("API_CALL", "Error: " + t.getMessage());
+                            }
+                        });
             }
         });
     }

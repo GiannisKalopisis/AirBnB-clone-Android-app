@@ -7,11 +7,13 @@ import java.util.Date;
 
 public class ApartmentRequest {
 
+    private String amenities;
+    private String address;
     private String country;
     private String city;
     private String district;
-    private String availableStartDate;
-    private String availableEndDate;
+    private String availableStartDate;  // send as String, backend will parse it to Date
+    private String availableEndDate;    // send as String, backend will parse it to Date
     private Integer maxVisitors;
     private BigDecimal minRetailPrice;
     private BigDecimal extraCostPerPerson;
@@ -23,7 +25,24 @@ public class ApartmentRequest {
     private BigDecimal area;
     private BigDecimal geoLat;
     private BigDecimal geoLong;
+    private String rules;
     private RentalType rentalType;
+
+    public String getAmenities() {
+        return amenities;
+    }
+
+    public void setAmenities(String amenities) {
+        this.amenities = amenities;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public String getCountry() {
         return country;
@@ -65,7 +84,7 @@ public class ApartmentRequest {
         this.availableEndDate = availableEndDate;
     }
 
-    public int getMaxVisitors() {
+    public Integer getMaxVisitors() {
         return maxVisitors;
     }
 
@@ -151,6 +170,14 @@ public class ApartmentRequest {
 
     public void setGeoLong(BigDecimal geoLong) {
         this.geoLong = geoLong;
+    }
+
+    public String getRules() {
+        return rules;
+    }
+
+    public void setRules(String rules) {
+        this.rules = rules;
     }
 
     public RentalType getRentalType() {
