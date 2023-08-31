@@ -27,11 +27,13 @@ import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.fakebnb.adapter.RulesAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.BookingRequest;
+import com.example.fakebnb.model.response.AbleToReviewResponse;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.BookingResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.BookingAPI;
+import com.example.fakebnb.rest.BookingReviewAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -83,7 +85,6 @@ public class RentRoomPage extends AppCompatActivity {
     private Button seeHostButton, contactHostButton, makeReservationButton, writeReviewButton;
     private Button chatButton, profileButton, roleButton;
 
-    private boolean userStayedAtRental = false;
     private TextView rentRoomReviewTitle;
 
     private ArrayList<SlideModel> slideModels;
@@ -146,6 +147,7 @@ public class RentRoomPage extends AppCompatActivity {
                                 Log.d(TAG, "onResponse: HOST ID: " + response.body().getObject().getId());
                                 host = response.body().getObject();
                                 hostId = response.body().getObject().getId();
+                                renderHostSection();
                             } else {
                                 Toast.makeText(RentRoomPage.this, "Could not get host of apartment", Toast.LENGTH_SHORT).show();
                                 goToMainPage();
@@ -376,7 +378,6 @@ public class RentRoomPage extends AppCompatActivity {
         renderRulesSection();
         renderLocationSection();
         renderAmenitiesSection();
-        renderHostSection();
         renderReviewSection();
     }
 
@@ -444,21 +445,45 @@ public class RentRoomPage extends AppCompatActivity {
     }
 
     private void renderHostSection() {
-        rentRoomHostNameValue.setText("Sakis Karpas");
+        rentRoomHostNameValue.setText(host.getUsername());
     }
 
     private void renderReviewSection() {
         // TODO: get the userStayedAtRental from the API
         Log.d(TAG, "renderReviewSection: started");
-        userStayedAtRental = true;
-        if (userStayedAtRental) {
-            rentRoomReviewTitle.setVisibility(View.VISIBLE);
-            writeReviewButton.setVisibility(View.VISIBLE);
-        } else {
-            rentRoomReviewTitle.setVisibility(View.GONE);
-            writeReviewButton.setVisibility(View.GONE);
-        }
-        Log.d(TAG, "renderReviewSection: finished");
+
+        RestClient restClient = new RestClient(jwtToken);
+        BookingReviewAPI bookingReviewAPI = restClient.getClient().create(BookingReviewAPI.class);
+
+        bookingReviewAPI.ableToReview(apartmentId)
+                .enqueue(new Callback<AbleToReviewResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<AbleToReviewResponse> call, @NonNull Response<AbleToReviewResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (Boolean.TRUE.equals(response.body().getObject())) {
+                                Log.d(TAG, "1 User can review apartment:" + apartmentId);
+                                rentRoomReviewTitle.setVisibility(View.VISIBLE);
+                                writeReviewButton.setVisibility(View.VISIBLE);
+                            } else {
+                                Log.d(TAG, "2 User cannot review apartment:" + apartmentId);
+                                rentRoomReviewTitle.setVisibility(View.GONE);
+                                writeReviewButton.setVisibility(View.GONE);
+                            }
+                        } else {
+                            Log.d(TAG, "3 User cannot review apartment:" + apartmentId);
+                            rentRoomReviewTitle.setVisibility(View.GONE);
+                            writeReviewButton.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<AbleToReviewResponse> call, @NonNull Throwable t) {
+                        Log.d(TAG, "Failed to connect to server and check if reviews are enabled" + apartmentId);
+                        Toast.makeText(RentRoomPage.this, "4 Failed to connect to server and check if reviews are enabled", Toast.LENGTH_SHORT).show();
+                        rentRoomReviewTitle.setVisibility(View.GONE);
+                        writeReviewButton.setVisibility(View.GONE);
+                    }
+                });
     }
 
     private void createSlider() {
@@ -668,6 +693,14 @@ public class RentRoomPage extends AppCompatActivity {
                 // TODO: go to write review page
                 Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
                 Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewActivity.class);
+                write_review_intent.putExtra("user_id", userId);
+                write_review_intent.putExtra("user_jwt", jwtToken);
+                ArrayList<String> roleList = new ArrayList<>();
+                for (RoleName role : roles) {
+                    roleList.add(role.toString());
+                }
+                write_review_intent.putExtra("user_roles", roleList);
+                write_review_intent.putExtra("rental_id", apartmentId);
                 startActivity(write_review_intent);
             }
         });

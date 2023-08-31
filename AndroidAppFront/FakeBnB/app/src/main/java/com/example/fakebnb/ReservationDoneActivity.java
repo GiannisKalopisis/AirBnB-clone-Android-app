@@ -28,8 +28,6 @@ public class ReservationDoneActivity extends AppCompatActivity {
     private Set<RoleName> roles;
     private Long apartmentId;
 
-    private ImageView gifImageView;
-
     private Button reservationDoneHomeButton;
 
 
@@ -91,6 +89,5 @@ public class ReservationDoneActivity extends AppCompatActivity {
     private void initView() {
         Log.d(TAG, "initViews: started");
         reservationDoneHomeButton = findViewById(R.id.reservationDoneHomeButton);
-//        gifImageView = findViewById(R.id.reservationDoneImage);
     }
 }
