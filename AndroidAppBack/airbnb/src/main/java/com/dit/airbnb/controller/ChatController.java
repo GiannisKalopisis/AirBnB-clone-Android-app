@@ -51,4 +51,5 @@ public class ChatController {
                                                        @Valid @CurrentUser UserDetailsImpl currentUser) {
         return chatService.getChatIdBySenderReceiver(chatSenderReceiverRequest);
     }
+
 }
