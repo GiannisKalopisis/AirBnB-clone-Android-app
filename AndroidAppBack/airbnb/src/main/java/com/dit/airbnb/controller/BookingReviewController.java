@@ -21,7 +21,7 @@ public class BookingReviewController {
 
     @PostMapping( "/bookingReview")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<?> createBooking(@Valid @RequestBody BookingReviewRequest bookingReviewRequest,
+    public ResponseEntity<?> createBookingReview(@Valid @RequestBody BookingReviewRequest bookingReviewRequest,
                                            @Valid @CurrentUser UserDetailsImpl currentUser) {
         return bookingReviewService.createBookingReview(currentUser, bookingReviewRequest);
     }
