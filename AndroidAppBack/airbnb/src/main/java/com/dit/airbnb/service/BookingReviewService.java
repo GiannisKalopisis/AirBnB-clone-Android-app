@@ -1,25 +1,29 @@
 package com.dit.airbnb.service;
 
-import com.dit.airbnb.dto.Apartment;
-import com.dit.airbnb.dto.Booking;
-import com.dit.airbnb.dto.BookingReview;
-import com.dit.airbnb.dto.UserReg;
+import com.dit.airbnb.dto.*;
 import com.dit.airbnb.exception.BadRequestException;
 import com.dit.airbnb.exception.ResourceNotFoundException;
-import com.dit.airbnb.exception.UserExistsException;
 import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.BookingRepository;
 import com.dit.airbnb.repository.BookingReviewRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.booking_review.BookingReviewRequest;
+import com.dit.airbnb.response.BookingReviewResponse;
+import com.dit.airbnb.response.MessageResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
+import com.dit.airbnb.response.generic.PagedResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -36,6 +40,9 @@ public class BookingReviewService {
 
     @Autowired
     private ApartmentRepository apartmentRepository;
+
+    @Autowired
+    private ValidatePageParametersService validatePageParametersService;
 
     public ResponseEntity<?> createBookingReview(UserDetailsImpl currentUser, BookingReviewRequest bookingReviewRequest) {
 
@@ -77,4 +84,33 @@ public class BookingReviewService {
 
         return ResponseEntity.ok(new ApiResponse(true, "ableToReview succeed", !bookingList.isEmpty()));
     }
+
+    public ResponseEntity<?> getBookingReviewsByApartmentId(Long apartmentId, int page, int size) {
+
+        validatePageParametersService.validate(page, size);
+
+        Page<BookingReview> bookingReviewPage = bookingReviewRepository.findBookingReviewsByApartmentId(apartmentId, PageRequest.of(page, size));
+
+        PagedResponse<BookingReviewResponse> bookingReviewResponsePagedResponse = createBookingReviewPageResponse(bookingReviewPage);
+
+        return ResponseEntity.ok(new ApiResponse(true, "getBookingReviewsByApartmentId succeed", bookingReviewResponsePagedResponse));
+    }
+
+    private PagedResponse<BookingReviewResponse> createBookingReviewPageResponse(Page<BookingReview> bookingReviewPage) {
+        if (bookingReviewPage.getNumberOfElements() == 0) {
+            return new PagedResponse<>(Collections.emptyList(), bookingReviewPage.getNumber(),
+                    bookingReviewPage.getSize(), bookingReviewPage.getTotalElements(),
+                    bookingReviewPage.getTotalPages(), bookingReviewPage.isLast());
+        }
+
+        List<BookingReviewResponse> bookingReviewResponses = new ArrayList<>();
+        for (BookingReview booingReview : bookingReviewPage) {
+            bookingReviewResponses.add(new BookingReviewResponse(booingReview.getRating(), booingReview.getDescription()));
+        }
+
+        return new PagedResponse<>(bookingReviewResponses, bookingReviewPage.getNumber(),
+                bookingReviewPage.getSize(), bookingReviewPage.getTotalElements(),
+                bookingReviewPage.getTotalPages(), bookingReviewPage.isLast());
+    }
+
 }
