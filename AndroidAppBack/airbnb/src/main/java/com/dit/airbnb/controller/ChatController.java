@@ -1,5 +1,6 @@
 package com.dit.airbnb.controller;
 
+import com.dit.airbnb.request.chat.ChatSenderReceiverRequest;
 import com.dit.airbnb.request.chat.MessageRequest;
 import com.dit.airbnb.request.chat.OverviewMessageRequest;
 import com.dit.airbnb.security.user.CurrentUser;
@@ -38,9 +39,16 @@ public class ChatController {
     @GetMapping(path = "/chat/{chatId}", params = {"page", "size"})
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getMessagesByChatId(@RequestParam(value = "page", defaultValue = PaginationConstants.DEFAULT_PAGE) int page,
-                                                            @RequestParam(value = "size", defaultValue = PaginationConstants.DEFAULT_SIZE) int size,
-                                                            @PathVariable(value = "chatId") Long chatId,
-                                                            @Valid @CurrentUser UserDetailsImpl currentUser) {
+                                                @RequestParam(value = "size", defaultValue = PaginationConstants.DEFAULT_SIZE) int size,
+                                                @PathVariable(value = "chatId") Long chatId,
+                                                @Valid @CurrentUser UserDetailsImpl currentUser) {
         return chatService.getMessagesByChatId(chatId, page, size);
+    }
+
+    @GetMapping(path = "/chat/senderReceiver")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
+    public ResponseEntity<?> getChatIdBySenderReceiver(@Valid @RequestBody ChatSenderReceiverRequest chatSenderReceiverRequest,
+                                                       @Valid @CurrentUser UserDetailsImpl currentUser) {
+        return chatService.getChatIdBySenderReceiver(chatSenderReceiverRequest);
     }
 }

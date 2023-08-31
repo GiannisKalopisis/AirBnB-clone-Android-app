@@ -8,6 +8,7 @@ import com.dit.airbnb.exception.ResourceNotFoundException;
 import com.dit.airbnb.repository.ChatRepository;
 import com.dit.airbnb.repository.MessageRepository;
 import com.dit.airbnb.repository.UserRegRepository;
+import com.dit.airbnb.request.chat.ChatSenderReceiverRequest;
 import com.dit.airbnb.request.chat.MessageRequest;
 import com.dit.airbnb.request.chat.OverviewMessageRequest;
 import com.dit.airbnb.response.MessageResponse;
@@ -151,6 +152,27 @@ public class ChatService {
         return new PagedResponse<>(messageResponses, messagePage.getNumber(),
                 messagePage.getSize(), messagePage.getTotalElements(),
                 messagePage.getTotalPages(), messagePage.isLast());
+    }
+
+    public ResponseEntity<?> getChatIdBySenderReceiver(ChatSenderReceiverRequest chatSenderReceiverRequest) {
+        UserReg sender = userRegRepository.findById(chatSenderReceiverRequest.getSenderId())
+                .orElseThrow(() -> new ResourceNotFoundException("Sender", "id", chatSenderReceiverRequest.getSenderId()));
+
+        UserReg receiver = userRegRepository.findById(chatSenderReceiverRequest.getReceiverId())
+                .orElseThrow(() -> new ResourceNotFoundException("Receiver", "id", chatSenderReceiverRequest.getReceiverId()));
+
+        Optional<Chat> optionalChat = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(chatSenderReceiverRequest.getSenderId(), chatSenderReceiverRequest.getReceiverId());
+        Chat chat;
+
+        if (optionalChat.isEmpty()) {
+            chat = new Chat(sender, receiver);
+            chatRepository.save(chat);
+        } else {
+            chat = optionalChat.get();
+        }
+
+        return ResponseEntity.ok(new ApiResponse(true, "getChatIdBySenderReceiver succeed", chat.getId()));
+
     }
 
 }
