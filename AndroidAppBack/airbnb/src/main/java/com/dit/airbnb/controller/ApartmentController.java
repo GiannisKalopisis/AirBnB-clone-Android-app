@@ -5,6 +5,7 @@ import com.dit.airbnb.request.user_reg.UserRegUpdateRequest;
 import com.dit.airbnb.security.user.CurrentUser;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import com.dit.airbnb.service.ApartmentService;
+import com.dit.airbnb.util.PaginationConstants;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.validation.Valid;
@@ -54,5 +55,16 @@ public class ApartmentController {
     public ResponseEntity<?> getHostId(@PathVariable(value = "apartmentId") Long apartmentId,
                                        @Valid @CurrentUser UserDetailsImpl currentUser) {
         return apartmentService.getHostIdByApartmentId(apartmentId);
+    }
+
+
+    @GetMapping(value = "/apartment/{hostId}", params = {"page", "size"})
+    @PreAuthorize("hasAuthority('ROLE_HOST')")
+    public ResponseEntity<?> getHostApartments(
+                                        @RequestParam(value = "page", defaultValue = PaginationConstants.DEFAULT_PAGE) int page,
+                                        @RequestParam(value = "size", defaultValue = PaginationConstants.DEFAULT_SIZE) int size,
+                                        @PathVariable(value = "hostId") Long hostId,
+                                        @Valid @CurrentUser UserDetailsImpl currentUser) {
+        return apartmentService.getHostApartments(hostId, page, size);
     }
 }
