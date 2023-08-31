@@ -1,6 +1,7 @@
 package com.dit.airbnb.dto;
 
 import com.dit.airbnb.csv_dto.BookingReviewCSV;
+import com.dit.airbnb.request.booking_review.BookingReviewRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,6 +42,11 @@ public class BookingReview {
     public BookingReview(BookingReviewCSV bookingReviewCSV) {
         this.rating = bookingReviewCSV.getRating();
         this.description = bookingReviewCSV.getDescription();
+    }
+
+    public BookingReview(BookingReviewRequest bookingReviewRequest) {
+        this.rating = bookingReviewRequest.getRating();
+        this.description = bookingReviewRequest.getDescription();
     }
 
 }
