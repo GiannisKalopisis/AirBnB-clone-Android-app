@@ -16,8 +16,8 @@ import java.util.List;
 @Repository
 public interface BookingReviewRepository extends PagingAndSortingRepository<BookingReview, Long>, JpaRepository<BookingReview, Long> {
 
-    @Query( " select b" +
-            " from Apartment as a inner join a.bookings as b" +
+    @Query( " select br" +
+            " from Apartment as a inner join a.bookings as b inner join b.bookingReviews as br" +
             " where a.id = :apartmentId")
     Page<BookingReview> findBookingReviewsByApartmentId(@Param("apartmentId") Long apartmentId, Pageable pageable);
 

@@ -105,7 +105,7 @@ public class BookingReviewService {
 
         List<BookingReviewResponse> bookingReviewResponses = new ArrayList<>();
         for (BookingReview booingReview : bookingReviewPage) {
-            bookingReviewResponses.add(new BookingReviewResponse(booingReview.getRating(), booingReview.getDescription()));
+            bookingReviewResponses.add(new BookingReviewResponse(booingReview.getCreatorUserReg().getUsername(), booingReview.getRating(), booingReview.getDescription()));
         }
 
         return new PagedResponse<>(bookingReviewResponses, bookingReviewPage.getNumber(),
