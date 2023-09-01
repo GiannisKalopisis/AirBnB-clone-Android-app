@@ -11,6 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BookingReviewResponse {
 
+    private String username;
+
     private Short rating;
 
     private String description;
