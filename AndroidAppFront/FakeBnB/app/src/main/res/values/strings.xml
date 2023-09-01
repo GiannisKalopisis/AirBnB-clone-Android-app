@@ -35,4 +35,6 @@
     <string name="city">City</string>
     <string name="amenities">Amenities</string>
     <string name="country">Country</string>
+    <string name="default_username">Username</string>
+    <string name="email_gmail_com">email@gmail.com</string>
 </resources>

@@ -1,4 +1,4 @@
 firstName,lastName,username,password,email,phone,roleTypeNumber
-george,michas,michas,12345,geo@gmail.com,999999,1
-giannis,kalopisis,kalopisis,123456,gian@gmail.com,999999,2
-mf,doom,mf,123,mfdoom@gmail.com,999999,1
+george,michas,michasgeo,123456789,geo@gmail.com,999999,1
+giannis,kalopisis,kalopisis,123456789,gian@gmail.com,999999,2
+mf,doom,mf,123456789,mfdoom@gmail.com,999999,1

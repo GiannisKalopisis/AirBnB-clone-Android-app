@@ -1,8 +1,10 @@
 package com.example.fakebnb.model.response;
 
+import com.example.fakebnb.model.BookingReviewModel;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class BookingReviewResponse implements Serializable {
 
@@ -11,7 +13,7 @@ public class BookingReviewResponse implements Serializable {
     @SerializedName("message")
     private String message;
     @SerializedName("object")
-    private BookingReviewData object;
+    private PagedResponse<BookingReviewModel> object;
 
     public Boolean getSuccess() {
         return success;
@@ -29,45 +31,80 @@ public class BookingReviewResponse implements Serializable {
         this.message = message;
     }
 
-    public BookingReviewData getObject() {
+    public PagedResponse<BookingReviewModel> getObject() {
         return object;
     }
 
-    public void setObject(BookingReviewData object) {
+    public void setObject(PagedResponse<BookingReviewModel> object) {
         this.object = object;
     }
 
-    public class BookingReviewData implements Serializable {
+    public class PagedResponse <T>  implements Serializable {
 
-        @SerializedName("id")
-        private Long id;
-        @SerializedName("rating")
-        private Short rating;
-        @SerializedName("description")
-        private String description;
+        @SerializedName("content")
+        private List<T> content;
 
-        public Long getId() {
-            return id;
+        @SerializedName("page")
+        private int page;
+
+        @SerializedName("size")
+        private int size;
+
+        @SerializedName("totalElements")
+        private long totalElements;
+
+        @SerializedName("totalPages")
+        private int totalPages;
+
+        @SerializedName("last")
+        private boolean last;
+
+        public List<T> getContent() {
+            return content;
         }
 
-        public void setId(Long id) {
-            this.id = id;
+        public void setContent(List<T> content) {
+            this.content = content;
         }
 
-        public Short getRating() {
-            return rating;
+        public int getPage() {
+            return page;
         }
 
-        public void setRating(Short rating) {
-            this.rating = rating;
+        public void setPage(int page) {
+            this.page = page;
         }
 
-        public String getDescription() {
-            return description;
+        public int getSize() {
+            return size;
         }
 
-        public void setDescription(String description) {
-            this.description = description;
+        public void setSize(int size) {
+            this.size = size;
+        }
+
+        public long getTotalElements() {
+            return totalElements;
+        }
+
+        public void setTotalElements(long totalElements) {
+            this.totalElements = totalElements;
+        }
+
+        public int getTotalPages() {
+            return totalPages;
+        }
+
+        public void setTotalPages(int totalPages) {
+            this.totalPages = totalPages;
+        }
+
+        public boolean isLast() {
+            return last;
+        }
+
+        public void setLast(boolean last) {
+            this.last = last;
         }
     }
 }

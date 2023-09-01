@@ -22,14 +22,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="@string/jane" />
+        android:text="@string/default_username" />
 
     <TextView
         android:id="@+id/hostReviewEmailView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="@string/jane_email_com" />
+        android:text="@string/email_gmail_com" />
 
     <TextView
         android:id="@+id/hostReviewPhoneView"

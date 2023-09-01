@@ -10,16 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.R;
+import com.example.fakebnb.model.BookingReviewModel;
 import com.example.fakebnb.model.HostReviewModel;
 
 import java.util.ArrayList;
 
 public class HostReviewAdapter extends RecyclerView.Adapter<HostReviewAdapter.ViewHolder>{
 
-    private ArrayList<HostReviewModel> reviews;
+    private ArrayList<BookingReviewModel> reviews;
 
-    public HostReviewAdapter(ArrayList<HostReviewModel> reviews) {
-        this.reviews = reviews;
+    public HostReviewAdapter() {
+        this.reviews = new ArrayList<>();
     }
 
     @NonNull
@@ -33,8 +34,8 @@ public class HostReviewAdapter extends RecyclerView.Adapter<HostReviewAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.reviewUsernameTextView.setText(reviews.get(position).getUsername());
-        holder.reviewRatingStarBar.setRating(reviews.get(position).getStars());
-        holder.commentTextView.setText(reviews.get(position).getComment());
+        holder.reviewRatingStarBar.setRating(reviews.get(position).getRating());
+        holder.commentTextView.setText(reviews.get(position).getDescription());
     }
 
     @Override
@@ -42,8 +43,8 @@ public class HostReviewAdapter extends RecyclerView.Adapter<HostReviewAdapter.Vi
         return reviews.size();
     }
 
-    public void setReviews(ArrayList<HostReviewModel> reviews) {
-        this.reviews = reviews;
+    public void setReviewsListModel(ArrayList<BookingReviewModel> reviews) {
+        this.reviews.addAll(reviews);
         /* In case data come from a server and they change
            you have to refresh them.
          */

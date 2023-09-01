@@ -617,6 +617,7 @@ public class RentRoomPage extends AppCompatActivity {
                 }
                 see_host_intent.putExtra("user_roles", roleList);
                 see_host_intent.putExtra("host_id", hostId);
+                see_host_intent.putExtra("apartment_id", apartmentId);
                 startActivity(see_host_intent);
             }
         });
