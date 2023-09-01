@@ -21,6 +21,7 @@ import com.example.fakebnb.model.MessageModel;
 import com.example.fakebnb.model.request.MessageRequest;
 import com.example.fakebnb.model.response.ChatInfoResponse;
 import com.example.fakebnb.model.response.MessageResponse;
+import com.example.fakebnb.model.response.SingleMessageResponse;
 import com.example.fakebnb.rest.ChatAPI;
 import com.example.fakebnb.rest.RestClient;
 
@@ -44,17 +45,16 @@ public class IndividualChatActivity extends AppCompatActivity {
     private TextView receiver_username;
     private RecyclerView chat_recycler_view;
 
-
     // intent variables
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
-    private Long receiverId;
     private Long chatId;
 
     // pagination
     private ArrayList<MessageModel> messageModel = new ArrayList<>();
     private String senderUsername, receiverUsername;
+    private Long senderId, receiverId;
     private MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter(senderUsername, receiverUsername);
 //    private boolean isLoading = false;
     private int currentPage = 0; // Keeps track of the current page
@@ -117,6 +117,8 @@ public class IndividualChatActivity extends AppCompatActivity {
                             if (response.body().getSuccess()) {
                                 senderUsername = response.body().getObject().getSenderUsername();
                                 receiverUsername = response.body().getObject().getReceiverUsername();
+                                senderId = response.body().getObject().getSenderId();
+                                receiverId = response.body().getObject().getReceiverId();
                                 receiver_username.setText(receiverUsername);
                                 messageRecyclerAdapter.setSenderUsername(senderUsername);
                                 messageRecyclerAdapter.setReceiverUsername(receiverUsername);
@@ -196,6 +198,11 @@ public class IndividualChatActivity extends AppCompatActivity {
                                 Collections.reverse(messageResponseList);
                                 messageRecyclerAdapter.setMessageListModel((ArrayList<MessageModel>) messageResponseList);
                                 isLastPage = response.body().getObject().isLast();
+                                if (currentPage == 0) {
+                                    if (lastVisibleItemPosition != RecyclerView.NO_POSITION) {
+                                        layoutManager.scrollToPosition(0);
+                                    }
+                                }
                             } else {
                                 Toast.makeText(IndividualChatActivity.this, "1 Couldn't get messages", Toast.LENGTH_SHORT).show();
                             }
@@ -228,20 +235,23 @@ public class IndividualChatActivity extends AppCompatActivity {
         ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
 
         chatAPI.createMessage(messageRequest)
-                .enqueue(new Callback<MessageResponse>() {
+                .enqueue(new Callback<SingleMessageResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<MessageResponse> call, @NonNull Response<MessageResponse> response) {
+                    public void onResponse(@NonNull Call<SingleMessageResponse> call, @NonNull Response<SingleMessageResponse> response) {
                         if(response.isSuccessful()){
                             Toast.makeText(IndividualChatActivity.this, "Message sent", Toast.LENGTH_SHORT).show();
+                            messageRecyclerAdapter.clearMessages();
+                            currentPage = 0;
+                            loadOlderData();
                         } else {
-                            Toast.makeText(IndividualChatActivity.this, "Message not sent", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(IndividualChatActivity.this, "Couldn't send message", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<MessageResponse> call, @NonNull Throwable t) {
-                        Toast.makeText(IndividualChatActivity.this, "Message not sent", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "onFailure: " + t.getMessage());
+                    public void onFailure(@NonNull Call<SingleMessageResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(IndividualChatActivity.this, "Failed to connect to server and send message", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Failed to connect to server and send message: " + t.getMessage());
                     }
                 });
     }
@@ -249,7 +259,7 @@ public class IndividualChatActivity extends AppCompatActivity {
     private MessageRequest createMessageRequest() {
         MessageRequest messageRequest = new MessageRequest();
         messageRequest.setReceiverUserRegId(receiverId);
-        messageRequest.setContent(chat_message_input.getText().toString().trim());
+        messageRequest.setContent(chat_message_input.getText().toString());
         if (messageRequest.getContent().isEmpty()) {
             return null;
         }
@@ -261,12 +271,17 @@ public class IndividualChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 MessageRequest messageRequest = createMessageRequest();
+                chat_message_input.setText("");
                 if (messageRequest == null) {
                     return;
                 }
                 sendMessageToUser(messageRequest);
             }
         });
+    }
+
+    private void resetDisplayedMessageAndDisplayFirstPage() {
+
     }
 
     private void initView() {

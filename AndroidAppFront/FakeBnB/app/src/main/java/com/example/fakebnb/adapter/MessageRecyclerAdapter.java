@@ -60,6 +60,10 @@ public class MessageRecyclerAdapter extends RecyclerView.Adapter<MessageRecycler
     public int getItemCount() {
         return messageModel.size();
     }
+
+    public void clearMessages() {
+        messageModel.clear();
+    }
     
     public void setMessageListModel(ArrayList<MessageModel> messageModel) {
         this.messageModel.addAll(0, messageModel);

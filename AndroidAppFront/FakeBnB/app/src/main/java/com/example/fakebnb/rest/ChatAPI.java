@@ -7,6 +7,7 @@ import com.example.fakebnb.model.response.ChatIdResponse;
 import com.example.fakebnb.model.response.ChatInfoResponse;
 import com.example.fakebnb.model.response.OverviewChatResponse;
 import com.example.fakebnb.model.response.MessageResponse;
+import com.example.fakebnb.model.response.SingleMessageResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -18,7 +19,7 @@ import retrofit2.http.Query;
 public interface ChatAPI {
 
     @POST("/app/chat/message")
-    Call<MessageResponse> createMessage(@Body MessageRequest messageRequest);
+    Call<SingleMessageResponse> createMessage(@Body MessageRequest messageRequest);
 
     @GET("/app/chat/all")
     Call<OverviewChatResponse> getOverviewMessagesByRegUserId(@Query("page") int page,
