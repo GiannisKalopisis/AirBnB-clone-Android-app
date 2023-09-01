@@ -27,6 +27,14 @@ public class MessageRecyclerAdapter extends RecyclerView.Adapter<MessageRecycler
         this.receiverUsername = receiverUsername;
     }
 
+    public void setSenderUsername(String senderUsername) {
+        this.senderUsername = senderUsername;
+    }
+
+    public void setReceiverUsername(String receiverUsername) {
+        this.receiverUsername = receiverUsername;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -58,6 +66,10 @@ public class MessageRecyclerAdapter extends RecyclerView.Adapter<MessageRecycler
         /* In case data come from a server and they change
            you have to refresh them.
          */
+        notifyDataSetChanged();
+    }
+
+    public void notifyNamesChanged() {
         notifyDataSetChanged();
     }
 

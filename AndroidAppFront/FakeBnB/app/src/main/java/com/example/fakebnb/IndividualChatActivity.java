@@ -19,6 +19,7 @@ import com.example.fakebnb.adapter.MessageRecyclerAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.MessageModel;
 import com.example.fakebnb.model.request.MessageRequest;
+import com.example.fakebnb.model.response.ChatInfoResponse;
 import com.example.fakebnb.model.response.MessageResponse;
 import com.example.fakebnb.rest.ChatAPI;
 import com.example.fakebnb.rest.RestClient;
@@ -53,7 +54,8 @@ public class IndividualChatActivity extends AppCompatActivity {
 
     // pagination
     private ArrayList<MessageModel> messageModel = new ArrayList<>();
-    private MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter("michasgeo", "kalopisis");
+    private String senderUsername, receiverUsername;
+    private MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter(senderUsername, receiverUsername);
 //    private boolean isLoading = false;
     private int currentPage = 0; // Keeps track of the current page
     private int size = 20; // The number of items fetched per page
@@ -82,10 +84,12 @@ public class IndividualChatActivity extends AppCompatActivity {
                 }
             }
         }
+        Toast.makeText(this, "ChatID: " + chatId + "\nUserID: " + userId, Toast.LENGTH_SHORT).show();
 
         initView();
 
-        receiver_username.setText("Test Username");
+        getChatInfo();
+
         backButtonOnClickListener();
         messageSendOnClickListener();
 
@@ -96,6 +100,56 @@ public class IndividualChatActivity extends AppCompatActivity {
         // Initially load the first batch of data
         loadOlderData();
         loadOlderDataOnScroll();
+    }
+
+    /**
+     * Get info of chat
+     */
+    private void getChatInfo() {
+        RestClient restClient = new RestClient(jwtToken);
+        ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
+
+        chatAPI.getChatInfoByChatId(chatId)
+                .enqueue(new Callback<ChatInfoResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ChatInfoResponse> call, @NonNull Response<ChatInfoResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (response.body().getSuccess()) {
+                                senderUsername = response.body().getObject().getSenderUsername();
+                                receiverUsername = response.body().getObject().getReceiverUsername();
+                                receiver_username.setText(receiverUsername);
+                                messageRecyclerAdapter.setSenderUsername(senderUsername);
+                                messageRecyclerAdapter.setReceiverUsername(receiverUsername);
+                                messageRecyclerAdapter.notifyNamesChanged();
+                            } else {
+                                Toast.makeText(IndividualChatActivity.this, "Couldn't get chat info", Toast.LENGTH_SHORT).show();
+                                goToMainPage();
+                            }
+                        } else {
+                            Toast.makeText(IndividualChatActivity.this, "Couldn't get chat info", Toast.LENGTH_SHORT).show();
+                            goToMainPage();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ChatInfoResponse> call, @NonNull Throwable t) {
+                        Log.d(TAG, "Failed to connect to server and get chat info: " + t.getMessage());
+                        Toast.makeText(IndividualChatActivity.this, "Failed to connect to server and get chat info", Toast.LENGTH_SHORT).show();
+                        goToMainPage();
+                    }
+                });
+    }
+
+    private void goToMainPage() {
+        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
+        main_page_intent.putExtra("user_id", userId);
+        main_page_intent.putExtra("user_jwt", jwtToken);
+        ArrayList<String> roleList = new ArrayList<>();
+        for (RoleName role : roles) {
+            roleList.add(role.toString());
+        }
+        main_page_intent.putStringArrayListExtra("user_roles", roleList);
+        startActivity(main_page_intent);
     }
 
     /**
