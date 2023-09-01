@@ -49,5 +49,7 @@ public class UserRegController {
         return userRegService.getUserRegById(userId, currentUser);
     }
 
+    
+
 
 }

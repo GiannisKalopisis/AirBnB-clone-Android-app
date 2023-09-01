@@ -11,6 +11,7 @@ import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.chat.ChatSenderReceiverRequest;
 import com.dit.airbnb.request.chat.MessageRequest;
 import com.dit.airbnb.request.chat.OverviewMessageRequest;
+import com.dit.airbnb.response.ChatInfoResponse;
 import com.dit.airbnb.response.MessageResponse;
 import com.dit.airbnb.response.OverviewMessageResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
@@ -175,6 +176,11 @@ public class ChatService {
 
     }
 
+    public ResponseEntity<?> getChatInfoByChatId(Long chatId) {
+        Chat chat = chatRepository.findById(chatId).orElseThrow( () -> new ResourceNotFoundException("Chat", "id", chatId));
+        ChatInfoResponse chatInfoResponse = new ChatInfoResponse(chat.getFirstSenderUserReg().getId(), chat.getFirstSenderUserReg().getUsername(), chat.getFirstReceiverUserReg().getId(), chat.getFirstReceiverUserReg().getUsername());
 
+        return ResponseEntity.ok(new ApiResponse(true, "getChatInfoByChatId succeed", chatInfoResponse));
+    }
 
 }

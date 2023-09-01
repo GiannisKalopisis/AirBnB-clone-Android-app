@@ -52,4 +52,11 @@ public class ChatController {
         return chatService.getChatIdBySenderReceiver(chatSenderReceiverRequest);
     }
 
+    @GetMapping(path = "/chat/{chatId}/info")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
+    public ResponseEntity<?> getChatInfoByChatId(@PathVariable(value = "chatId") Long chatId,
+                                                 @Valid @CurrentUser UserDetailsImpl currentUser) {
+        return chatService.getChatInfoByChatId(chatId);
+    }
+
 }

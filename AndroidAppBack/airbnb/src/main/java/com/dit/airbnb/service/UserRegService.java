@@ -138,9 +138,9 @@ public class UserRegService {
     }
 
     public ResponseEntity<?> getUserRegById(Long userRegId, UserDetailsImpl userDetails) {
-        if (!userRegId.equals(userDetails.getId())) {
-            throw new ResourceNotFoundException("UserReg", "id", userRegId);
-        }
+        //if (!userRegId.equals(userDetails.getId())) {
+        //    throw new ResourceNotFoundException("UserReg", "id", userRegId);
+        //}
         UserReg userReg = userRegRepository.findById(userRegId).orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", userRegId));
         UserRegResponse userRegResponseRes = new UserRegResponse(userReg.getId(), userReg.getFirstName(),
                 userReg.getLastName(), userReg.getUsername(), userReg.getEmail(), userReg.getPhone());
