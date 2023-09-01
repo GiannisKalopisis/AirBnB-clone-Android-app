@@ -60,6 +60,7 @@ public class IndividualChatActivity extends AppCompatActivity {
     private int lastVisibleItem = 0;
     private boolean isLoading = false;
     private List<MessageModel> messageResponseList = new ArrayList<>();
+    private boolean isLastPage = false;
 
 
     @Override
@@ -110,9 +111,9 @@ public class IndividualChatActivity extends AppCompatActivity {
                 int firstVisibleItem = Objects.requireNonNull(layoutManager).findFirstVisibleItemPosition();
                 int visibleItemCount = layoutManager.getChildCount();
 
-                if (dy < 0 && !isLoading && firstVisibleItem <= visibleItemCount && firstVisibleItem != lastVisibleItem) {
+                if (dy < 0 && !isLoading && firstVisibleItem <= visibleItemCount
+                        && firstVisibleItem != lastVisibleItem && !isLastPage) {
                     loadOlderData();
-                    Log.d(TAG, "After loadOlderData on loadOlderDataOnScroll");
                 }
 
                 lastVisibleItem = firstVisibleItem;
@@ -140,6 +141,7 @@ public class IndividualChatActivity extends AppCompatActivity {
                                 messageResponseList = response.body().getObject().getContent();
                                 Collections.reverse(messageResponseList);
                                 messageRecyclerAdapter.setMessageListModel((ArrayList<MessageModel>) messageResponseList);
+                                isLastPage = response.body().getObject().isLast();
                             } else {
                                 Toast.makeText(IndividualChatActivity.this, "1 Couldn't get messages", Toast.LENGTH_SHORT).show();
                             }
