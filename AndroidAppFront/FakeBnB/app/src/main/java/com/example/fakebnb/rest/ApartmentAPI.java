@@ -1,6 +1,7 @@
 package com.example.fakebnb.rest;
 
 import com.example.fakebnb.model.request.ApartmentRequest;
+import com.example.fakebnb.model.response.ApartmentPagedResponse;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
 
@@ -11,6 +12,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApartmentAPI {
 
@@ -29,4 +31,9 @@ public interface ApartmentAPI {
 
     @GET("/app/apartment/{apartmentId}/host")
     Call<UserRegResponse> getHostId(@Path("apartmentId") Long apartmentId);
+
+    @GET("/app/apartment/{hostId}")
+    Call<ApartmentPagedResponse> getHostApartments(@Path(value = "hostId") Long hostId,
+                                                   @Query("page") int page,
+                                                   @Query("size") int size);
 }

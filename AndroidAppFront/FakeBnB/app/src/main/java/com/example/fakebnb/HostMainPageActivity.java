@@ -24,12 +24,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fakebnb.adapter.HostMainPageRentalAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.HostRentalMainPageModel;
+import com.example.fakebnb.model.MessageModel;
+import com.example.fakebnb.model.RentalModel;
+import com.example.fakebnb.model.response.ApartmentPagedResponse;
+import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
+import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import retrofit2.Call;
@@ -53,9 +60,10 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
 
     // Pagination variables
     private ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
+    private List<RentalModel> rentalsResponseList = new ArrayList<>();
     private HostMainPageRentalAdapter rentalAdapter = new HostMainPageRentalAdapter(this, hostRentals);
-    private boolean isLoading = false;
-    private int currentPage = 1; // Keeps track of the current page
+    private boolean isLoading = false, isLastPage = false;
+    private int currentPage = 0, size = 4; // Keeps track of the current page
 
 
     @Override
@@ -78,6 +86,22 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
             }
         }
 
+        getUserData();
+        bottomBarClickListeners();
+        addButtonClickListener();
+
+        hostRentalsRecyclerView.setAdapter(rentalAdapter);
+        hostRentalsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        loadMoreData();
+        loadHostRentalsOnScroll();
+    }
+
+
+    /**
+     * Get and set USER DATA
+     */
+    private void getUserData() {
         RestClient restClient = new RestClient(jwtToken);
         UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
@@ -88,43 +112,44 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                         if (response.isSuccessful()) {
                             UserRegResponse userRegResponse = response.body();
                             if (userRegResponse != null) {
-                                Log.d("API_CALL", "GetUserReg successful");
+                                Log.d(TAG, "GetUserReg successful");
                                 userRegData = userRegResponse.getObject();
                                 getAndSetWelcomeData();
                             } else {
-                                // Handle unsuccessful response
-                                Log.d("API_CALL", "GetUserReg failed");
+                                Log.d(TAG, "Couldn't get user's data");
+                                Toast.makeText(HostMainPageActivity.this, "Couldn't get user's data", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            // Handle unsuccessful response
-                            Log.d("API_CALL", "GetUserReg failed");
+                            Log.d(TAG, "Couldn't get user's data");
+                            Toast.makeText(HostMainPageActivity.this, "Couldn't get user's data", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<UserRegResponse> call, @NonNull Throwable t) {
-                        // Handle failure
-                        Log.e("API_CALL", "Error: " + t.getMessage());
+                        Log.e(TAG, "Failed to communicate with server and get user's data: " + t.getMessage());
+                        Toast.makeText(HostMainPageActivity.this, "Failed to communicate with server and get user's data: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
 
-        bottomBarClickListeners();
-        addButtonClickListener();
+    @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
+    private void getAndSetWelcomeData() {
+        Log.d(TAG, "getAndSetWelcomeData: started");
 
-        hostRentals.add(new HostRentalMainPageModel("Amalfi1 coast rooms", "Αθήνα", 4.5f, 1L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi2 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 2L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi3 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 3L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi4 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 4L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi5 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 5L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi6 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 6L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi7 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 7L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi8 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 8L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi9 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 9L));
-        hostRentals.add(new HostRentalMainPageModel("Amalfi10 coast rooms with a long description that might take up two lines", "Αθήνα", 4.5f, 10L));
+        welcomeMessage.setText("Welcome, " + userRegData.getUsername());
+//        Bitmap userImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.people1);
+//        userImageBitmap = getCircularBitmap(userImageBitmap);
+//        if (userImageBitmap != null) {
+//            profile_pic_layout.setImageBitmap(userImageBitmap);
+//            profile_pic_layout.setPadding(0, 0, 0, 0);
+//        }
+    }
 
-        hostRentalsRecyclerView.setAdapter(rentalAdapter);
-        hostRentalsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+    /**
+     * Pagination methods
+     */
+    private void loadHostRentalsOnScroll() {
         hostRentalsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -136,43 +161,63 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
                 if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
-                        && firstVisibleItemPosition >= 0) {
+                        && firstVisibleItemPosition >= 0  && !isLastPage) {
                     // Load more data when the user is near the end of the list
                     Toast.makeText(HostMainPageActivity.this, "LoadingPage: " + currentPage, Toast.LENGTH_SHORT).show();
                     loadMoreData();
                 }
             }
         });
-        // Initially load the first batch of data
-        loadMoreData();
     }
-
-    /**
-     * Pagination methods
-     */
 
     private void loadMoreData() {
         isLoading = true;
 
-        // Simulate fetching data from backend
-        ArrayList<HostRentalMainPageModel> newData = fetchDataFromBackend(currentPage);
+        // Calculate the offset before fetching newer data
+        LinearLayoutManager layoutManager = (LinearLayoutManager) hostRentalsRecyclerView.getLayoutManager();
+        int lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
 
-        hostRentals.addAll(newData);
+        RestClient restClient = new RestClient(jwtToken);
+        ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
+
+        apartmentAPI.getHostApartments(userId, currentPage, size)
+                .enqueue(new Callback<ApartmentPagedResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApartmentPagedResponse> call, @NonNull Response<ApartmentPagedResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (response.body().getSuccess()) {
+                                Toast.makeText(HostMainPageActivity.this, "Get rentals successfully", Toast.LENGTH_SHORT).show();
+                                rentalsResponseList = response.body().getObject().getContent();
+                                isLastPage = response.body().getObject().isLast();
+                                if (rentalsResponseList != null) {
+                                    for (RentalModel rental : rentalsResponseList) {
+                                        hostRentals.add(new HostRentalMainPageModel(rental.getDescription(),
+                                                                               rental.getDistrict() + ", " + rental.getCity(),
+                                                                              5, rental.getId()));
+                                    }
+                                }
+                                rentalAdapter.notifyDataSetChanged();
+                            } else {
+                                Toast.makeText(HostMainPageActivity.this, "Couldn't get rentals", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(HostMainPageActivity.this, "Couldn't get rentals", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApartmentPagedResponse> call, @NonNull Throwable t) {
+
+                    }
+                });
+
+
+//        hostRentals.addAll(newData);
         rentalAdapter.notifyDataSetChanged();
 
         isLoading = false;
         currentPage++;
     }
-
-    private ArrayList<HostRentalMainPageModel> fetchDataFromBackend(int page) {
-        // Simulate fetching data from backend based on the page number
-        ArrayList<HostRentalMainPageModel> newData = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            newData.add(new HostRentalMainPageModel("Amalfi" + (i + page * 10) + " coast rooms", "Αθήνα", 4.5f, (long) (i + page * 10L)));
-        }
-        return newData;
-    }
-
 
     private void addButtonClickListener() {
         addRentalButton.setOnClickListener(new View.OnClickListener() {
@@ -190,19 +235,6 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                 startActivity(add_new_place_intent);
             }
         });
-    }
-
-    @SuppressLint({"UseCompatLoadingForDrawables", "SetTextI18n"})
-    private void getAndSetWelcomeData() {
-        Log.d(TAG, "getAndSetWelcomeData: started");
-
-        welcomeMessage.setText("Welcome, " + userRegData.getUsername());
-//        Bitmap userImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.people1);
-//        userImageBitmap = getCircularBitmap(userImageBitmap);
-//        if (userImageBitmap != null) {
-//            profile_pic_layout.setImageBitmap(userImageBitmap);
-//            profile_pic_layout.setPadding(0, 0, 0, 0);
-//        }
     }
 
     private Bitmap getCircularBitmap(Bitmap bitmap) {

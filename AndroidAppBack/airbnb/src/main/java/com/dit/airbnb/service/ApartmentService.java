@@ -1,14 +1,13 @@
 package com.dit.airbnb.service;
 
 import com.dit.airbnb.dto.Apartment;
-import com.dit.airbnb.dto.Message;
 import com.dit.airbnb.dto.UserReg;
 import com.dit.airbnb.exception.ResourceNotFoundException;
 import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.apartment.ApartmentRequest;
 import com.dit.airbnb.response.ApartmentResponse;
-import com.dit.airbnb.response.MessageResponse;
+import com.dit.airbnb.response.HostRentalsMainPageInfoResponse;
 import com.dit.airbnb.response.UserRegResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.response.generic.PagedResponse;
@@ -16,7 +15,6 @@ import com.dit.airbnb.security.user.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -109,26 +107,23 @@ public class ApartmentService {
 
         Page<Apartment> apartmentPage = apartmentRepository.findApartmentsByHostId(hostId, PageRequest.of(page, size));
 
-        PagedResponse<ApartmentResponse> apartmentPagedResponse = createApartmentPagedResponse(apartmentPage);
+        PagedResponse<HostRentalsMainPageInfoResponse> apartmentPagedResponse = createApartmentPagedResponse(apartmentPage);
 
         return ResponseEntity.ok(new ApiResponse(true, "getHostApartments succeed", apartmentPagedResponse));
     }
 
-    private PagedResponse<ApartmentResponse> createApartmentPagedResponse(Page<Apartment> apartmentPage) {
+    private PagedResponse<HostRentalsMainPageInfoResponse> createApartmentPagedResponse(Page<Apartment> apartmentPage) {
         if (apartmentPage.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), apartmentPage.getNumber(),
                     apartmentPage.getSize(), apartmentPage.getTotalElements(),
                     apartmentPage.getTotalPages(), apartmentPage.isLast());
         }
 
-        List<ApartmentResponse> apartmentResponses = new ArrayList<>();
+        List<HostRentalsMainPageInfoResponse> apartmentResponses = new ArrayList<>();
         for (Apartment apartment : apartmentPage) {
-            apartmentResponses.add(new ApartmentResponse(
-                    apartment.getAmenities(), apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
-                    apartment.getAvailableEndDate(), apartment.getMaxVisitors(), apartment.getMinRetailPrice(),
-                    apartment.getExtraCostPerPerson(), apartment.getDescription(), apartment.getNumberOfBeds(),
-                    apartment.getNumberOfBedrooms(), apartment.getNumberOfBathrooms(), apartment.getNumberOfLivingRooms(),
-                    apartment.getArea(), apartment.getGeoLat(), apartment.getGeoLong(), apartment.getRules(), apartment.getRentalType()));
+            apartmentResponses.add(new HostRentalsMainPageInfoResponse(
+                    apartment.getId(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(),
+                    apartment.getDescription()));
         }
 
         return new PagedResponse<>(apartmentResponses, apartmentPage.getNumber(),
