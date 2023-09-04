@@ -193,7 +193,8 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                                     for (RentalModel rental : rentalsResponseList) {
                                         hostRentals.add(new HostRentalMainPageModel(rental.getDescription(),
                                                                                rental.getDistrict() + ", " + rental.getCity(),
-                                                                              5, rental.getId()));
+                                                                                    rental.getAvgApartmentRating().floatValue(),
+                                                                                    rental.getId()));
                                     }
                                 }
                                 rentalAdapter.notifyDataSetChanged();

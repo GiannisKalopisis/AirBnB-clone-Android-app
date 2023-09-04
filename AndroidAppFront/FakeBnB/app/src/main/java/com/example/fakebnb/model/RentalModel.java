@@ -15,6 +15,8 @@ public class RentalModel {
 
     private String description;
 
+    private Double avgApartmentRating;
+
 
     public Long getId() {
         return id;
@@ -62,5 +64,13 @@ public class RentalModel {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Double getAvgApartmentRating() {
+        return avgApartmentRating;
+    }
+
+    public void setAvgApartmentRating(Double avgApartmentRating) {
+        this.avgApartmentRating = avgApartmentRating;
     }
 }
