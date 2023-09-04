@@ -1,6 +1,8 @@
 package com.dit.airbnb.service;
 
 import com.dit.airbnb.dto.Apartment;
+import com.dit.airbnb.dto.Booking;
+import com.dit.airbnb.dto.BookingReview;
 import com.dit.airbnb.dto.UserReg;
 import com.dit.airbnb.exception.ResourceNotFoundException;
 import com.dit.airbnb.repository.ApartmentRepository;
@@ -12,6 +14,7 @@ import com.dit.airbnb.response.UserRegResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.response.generic.PagedResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
+import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +26,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ApartmentService {
@@ -121,9 +125,19 @@ public class ApartmentService {
 
         List<HostRentalsMainPageInfoResponse> apartmentResponses = new ArrayList<>();
         for (Apartment apartment : apartmentPage) {
+            Double totalRating = 0.0;
+            Set<Booking> bookings = apartment.getBookings();
+            int bookingReviewCard = 0;
+            // NOTE(geo): MM impl
+            for (Booking booking: bookings) {
+                for (BookingReview bookingReview: booking.getBookingReviews()) {
+                    totalRating += bookingReview.getRating();
+                    bookingReviewCard++;
+                }
+            }
             apartmentResponses.add(new HostRentalsMainPageInfoResponse(
                     apartment.getId(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(),
-                    apartment.getDescription(), 0.0));
+                    apartment.getDescription(), bookingReviewCard != 0 ? Precision.round((totalRating / (double) bookingReviewCard), 2) : 0.0 ));
         }
 
         return new PagedResponse<>(apartmentResponses, apartmentPage.getNumber(),

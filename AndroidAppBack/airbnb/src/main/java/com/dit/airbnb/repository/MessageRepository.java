@@ -29,7 +29,6 @@ public interface MessageRepository extends PagingAndSortingRepository<Message, L
             " where (u.id = :userRegId) and (m.isLastMessage = true)  ORDER BY m.timeSent DESC")
     Page<Message> findByUserRegIdForHost(@Param("userRegId") Long userRegId, Pageable pageable);
 
-
     @Query("select m from Message as m where m.chat.id = :chatId")
     Page<Message> findByChatId(@Param("chatId") Long chatId, Pageable pageable);
 }
