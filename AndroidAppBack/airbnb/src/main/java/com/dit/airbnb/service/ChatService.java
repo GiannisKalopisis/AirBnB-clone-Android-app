@@ -101,9 +101,9 @@ public class ChatService {
         Page<Message> messagePage;
         assert roleName != null;
         if (roleName.equals(RoleName.ROLE_USER)) {
-            messagePage = messageRepository.findByUserRegIdForSimpleUser(userId, PageRequest.of(page, size, Sort.by("timeSent").descending()));
+            messagePage = messageRepository.findByUserRegIdForSimpleUser(userId, PageRequest.of(page, size));
         } else {
-            messagePage = messageRepository.findByUserRegIdForHost(userId, PageRequest.of(page, size, Sort.by("timeSent").descending()));
+            messagePage = messageRepository.findByUserRegIdForHost(userId, PageRequest.of(page, size));
         }
 
         PagedResponse<OverviewMessageResponse> overviewMessageResponsePagedResponse = createOverviewMessagePagedResponse(messagePage);
