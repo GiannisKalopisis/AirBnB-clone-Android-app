@@ -95,8 +95,12 @@ public class ChatService {
 
         Long userId = currentUser.getId();
 
+        // RoleName roleName = RoleName.getRoleName(messagesRequest.getRoleName());
+        RoleName roleName = messagesRequest.getRoleName();
+
         Page<Message> messagePage;
-        if (messagesRequest.getRoleName().equals(RoleName.ROLE_USER)) {
+        assert roleName != null;
+        if (roleName.equals(RoleName.ROLE_USER)) {
             messagePage = messageRepository.findByUserRegIdForSimpleUser(userId, PageRequest.of(page, size, Sort.by("timeSent").descending()));
         } else {
             messagePage = messageRepository.findByUserRegIdForHost(userId, PageRequest.of(page, size, Sort.by("timeSent").descending()));

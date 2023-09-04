@@ -29,6 +29,7 @@ public class Message {
     private Boolean seen;
 
     @CreatedDate
+    @Column(name = "timeSent")
     private Timestamp timeSent;
 
     @Column(name = "isLastMessage")
