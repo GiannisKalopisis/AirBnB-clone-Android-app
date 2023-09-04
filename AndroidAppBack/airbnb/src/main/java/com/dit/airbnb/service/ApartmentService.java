@@ -123,7 +123,7 @@ public class ApartmentService {
         for (Apartment apartment : apartmentPage) {
             apartmentResponses.add(new HostRentalsMainPageInfoResponse(
                     apartment.getId(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(),
-                    apartment.getDescription()));
+                    apartment.getDescription(), 0.0));
         }
 
         return new PagedResponse<>(apartmentResponses, apartmentPage.getNumber(),

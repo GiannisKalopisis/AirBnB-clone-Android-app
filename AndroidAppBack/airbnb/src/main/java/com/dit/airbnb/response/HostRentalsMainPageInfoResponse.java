@@ -18,6 +18,6 @@ public class HostRentalsMainPageInfoResponse {
 
     private String description;
 
-    private Short avgRating;
+    private Double avgApartmentRating;
 
 }
