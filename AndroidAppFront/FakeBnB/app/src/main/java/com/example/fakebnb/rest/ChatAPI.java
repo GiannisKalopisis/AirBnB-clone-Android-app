@@ -21,10 +21,10 @@ public interface ChatAPI {
     @POST("/app/chat/message")
     Call<SingleMessageResponse> createMessage(@Body MessageRequest messageRequest);
 
-    @GET("/app/chat/all")
-    Call<OverviewChatResponse> getOverviewMessagesByRegUserId(@Query("page") int page,
-                                                              @Query("size") int size,
-                                                              @Body OverviewMessageRequest overviewMessageRequest);
+    @POST("/app/chat/all")
+    Call<OverviewChatResponse> getOverviewMessagesByRegUserId(@Body OverviewMessageRequest overviewMessageRequest,
+                                                              @Query("page") int page,
+                                                              @Query("size") int size);
 
     @GET("/app/chat/{chatId}")
     Call<MessageResponse> getMessagesByChatId(@Path(value = "chatId") Long chatId,

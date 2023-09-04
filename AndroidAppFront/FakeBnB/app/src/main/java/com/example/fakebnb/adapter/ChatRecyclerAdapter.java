@@ -50,7 +50,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     }
 
     public void setChatListModel(ArrayList<OverviewChatModel> overviewChatModel) {
-        this.overviewChatModel = overviewChatModel;
+        this.overviewChatModel.addAll(overviewChatModel);
         /* In case data come from a server and they change
            you have to refresh them.
          */
@@ -73,7 +73,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
                         int clickedPosition = getAdapterPosition();
                         if (clickedPosition != RecyclerView.NO_POSITION) {
                             long chatId = overviewChatModel.get(clickedPosition).getChatId();
-                            chatRecyclerViewInterface.onItemClick(clickedPosition);
+                            chatRecyclerViewInterface.onItemClick(chatId);
                         }
                     }
                 }

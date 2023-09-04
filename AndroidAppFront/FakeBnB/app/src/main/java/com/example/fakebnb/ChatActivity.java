@@ -16,12 +16,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.adapter.ChatRecyclerAdapter;
 import com.example.fakebnb.enums.RoleName;
+import com.example.fakebnb.model.MessageModel;
 import com.example.fakebnb.model.OverviewChatModel;
+import com.example.fakebnb.model.request.OverviewMessageRequest;
 import com.example.fakebnb.model.response.OverviewChatResponse;
+import com.example.fakebnb.rest.ChatAPI;
+import com.example.fakebnb.rest.RestClient;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewInterface {
 
@@ -35,8 +44,8 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
     // bottom bar buttons
     private Button chatButton, profileButton, roleButton;
 
-    private int page = 1, size = 10;
-    private OverviewChatResponse.PagedResponse<OverviewChatModel> chats;
+    private int page = 0, size = 10;
+    private List<OverviewChatModel> chats;
 
     private RecyclerView chatRecyclerView;
 
@@ -46,9 +55,6 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
     private boolean isLoading = false;
     private int currentPage = 1; // Keeps track of the current page
 
-    // polling variables
-    private final Handler handler = new Handler();
-    private final int delay = 3000; // 3 seconds
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,94 +79,15 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
         bottomBarClickListener();
 
 
-//        RestClient restClient = new RestClient(jwtToken);
-//        ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
-//        OverviewMessageRequest overviewMessageRequest = new OverviewMessageRequest();
-//        overviewMessageRequest.setRoleName(currentRole);
-//
-//        chatAPI.getOverviewMessagesByRegUserId(page, size, overviewMessageRequest)
-//                .enqueue(new Callback<OverviewChatResponse>() {
-//                    @Override
-//                    public void onResponse(@NonNull Call<OverviewChatResponse> call, @NonNull Response<OverviewChatResponse> response) {
-//                        if (response.isSuccessful()) {
-//                            OverviewChatResponse overviewChatResponse = response.body();
-//                            if (overviewChatResponse != null) {
-//                                Log.d(TAG, "onResponse: Success");
-//                                chats = overviewChatResponse.getObject();
-//                            } else {
-//                                Log.d(TAG, "1 Couldn't fetch your chats");
-//                            }
-//                        } else {
-//                            Log.d(TAG, "2 Couldn't fetch your chats");
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(@NonNull Call<OverviewChatResponse> call, @NonNull Throwable t) {
-//                        Log.d(TAG, "onFailure: Couldn't fetch your chats, " + t.getMessage());
-//                    }
-//                });
 
-//        ChatRecyclerAdapter chatRecyclerAdapter = new ChatRecyclerAdapter(this, chats);
-
-
-        overviewChatModel.add(new OverviewChatModel(1L, "username1", "contentOfLastMessage1", true));
-        overviewChatModel.add(new OverviewChatModel(2L, "username2", "contentOfLastMessage2", false));
-        overviewChatModel.add(new OverviewChatModel(3L, "username3", "contentOfLastMessage3", true));
-        overviewChatModel.add(new OverviewChatModel(4L, "username4", "contentOfLastMessage4", false));
-        overviewChatModel.add(new OverviewChatModel(5L, "username5", "contentOfLastMessage5", true));
-        overviewChatModel.add(new OverviewChatModel(6L, "username6", "contentOfLastMessage6", false));
-        overviewChatModel.add(new OverviewChatModel(7L, "username7", "contentOfLastMessage7", true));
-        overviewChatModel.add(new OverviewChatModel(8L, "username8", "contentOfLastMessage8", false));
-        overviewChatModel.add(new OverviewChatModel(9L, "username9", "contentOfLastMessage9", true));
-        overviewChatModel.add(new OverviewChatModel(10L, "username10", "contentOfLastMessage10", false));
 
         chatRecyclerView.setAdapter(chatRecyclerAdapter);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Initially load the first batch of data
-//        loadMoreData();
-        loadOlderChatOnScroll();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        currentPage = 1;
         loadMoreChats();
-        handler.postDelayed(getMessagesCallRunnable, delay);
+//        loadOlderChatOnScroll();
     }
-
-
-    /**
-     * Runnable checker for new chats
-     */
-    private final Runnable getMessagesCallRunnable = new Runnable() {
-        @Override
-        public void run() {
-            /*
-                1) Take the newest chatId from the conversation
-                2) Get all the newest chats after that chatId
-                3) Update the beginning of the chat list
-             */
-
-            // Schedule the next API call
-            handler.postDelayed(this, delay);
-        }
-    };
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        handler.removeCallbacks(getMessagesCallRunnable);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        handler.removeCallbacks(getMessagesCallRunnable);
-    }
-
 
     /**
      * Load older chat when the user scrolls to the bottom of the list
@@ -189,26 +116,58 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
         isLoading = true;
 
         // Simulate fetching data from backend
-        ArrayList<OverviewChatModel> newData = fetchDataFromBackend(currentPage);
+        RestClient restClient = new RestClient(jwtToken);
+        ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
+        OverviewMessageRequest overviewMessageRequest = createOverviewMessageRequest();
 
-        overviewChatModel.addAll(newData);
-        chatRecyclerAdapter.notifyDataSetChanged();
+        chatAPI.getOverviewMessagesByRegUserId(overviewMessageRequest, page, size)
+                .enqueue(new Callback<OverviewChatResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<OverviewChatResponse> call, @NonNull Response<OverviewChatResponse> response) {
+                        if (response.isSuccessful()) {
+                            OverviewChatResponse overviewChatResponse = response.body();
+                            if (overviewChatResponse != null) {
+                                Log.d(TAG, "onResponse: Success");
+                                chats = overviewChatResponse.getObject().getContent();
+                                chatRecyclerAdapter.setChatListModel((ArrayList<OverviewChatModel>)  chats);
+                            } else {
+                                Log.d(TAG, "1 Couldn't fetch your chats");
+                            }
+                        } else {
+                            Log.d(TAG, "2 Couldn't fetch your chats");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<OverviewChatResponse> call, @NonNull Throwable t) {
+                        Log.d(TAG, "onFailure: Couldn't fetch your chats, " + t.getMessage());
+                    }
+                });
+
+//        overviewChatModel.addAll(newData);
+//        chatRecyclerAdapter.notifyDataSetChanged();
 
         isLoading = false;
-        currentPage++;
+        page++;
     }
 
-    private ArrayList<OverviewChatModel> fetchDataFromBackend(int page) {
-        // Simulate fetching data from backend based on the page number
-        // TODO: convert it to API call
-        ArrayList<OverviewChatModel> newData = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            newData.add(new OverviewChatModel((i + page * 10L),
-                            "username" + (i + page * 10),
-                            "contentOfLastMessage" + (i + page * 10),
-                            i%2 == 0));
-        }
-        return newData;
+//    private ArrayList<OverviewChatModel> fetchDataFromBackend(int page) {
+//        // Simulate fetching data from backend based on the page number
+//        // TODO: convert it to API call
+//        ArrayList<OverviewChatModel> newData = new ArrayList<>();
+//        for (int i = 0; i < 10; i++) {
+//            newData.add(new OverviewChatModel((i + page * 10L),
+//                            "username" + (i + page * 10),
+//                            "contentOfLastMessage" + (i + page * 10),
+//                            i%2 == 0));
+//        }
+//        return newData;
+//    }
+
+    private OverviewMessageRequest createOverviewMessageRequest() {
+        OverviewMessageRequest overviewMessageRequest = new OverviewMessageRequest();
+        overviewMessageRequest.setRoleName(currentRole);
+        return overviewMessageRequest;
     }
 
     private void initView() {
@@ -229,17 +188,6 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
             @Override
             public void onClick(View view) {
                 Toast.makeText(ChatActivity.this, "Already in Chat page", Toast.LENGTH_SHORT).show();
-//                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-//                Intent chat_intent = new Intent(ChatActivity.this, ChatActivity.class);
-//                chat_intent.putExtra("user_id", userId);
-//                chat_intent.putExtra("user_jwt", jwtToken);
-//                chat_intent.putExtra("user_current_role", currentRole.toString());
-//                ArrayList<String> roleList = new ArrayList<>();
-//                for (RoleName role : roles) {
-//                    roleList.add(role.toString());
-//                }
-//                chat_intent.putExtra("user_roles", roleList);
-//                startActivity(chat_intent);
             }
         });
 
