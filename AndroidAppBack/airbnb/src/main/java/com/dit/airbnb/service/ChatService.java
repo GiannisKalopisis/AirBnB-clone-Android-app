@@ -151,6 +151,10 @@ public class ChatService {
 
         List<MessageResponse> messageResponses = new ArrayList<>();
         for (Message message : messagePage) {
+            if (message.getIsLastMessage()) {
+                message.setIsLastMessage(true);
+                messageRepository.save(message);
+            }
             messageResponses.add(new MessageResponse(message.getSenderUserReg().getUsername(), message.getContent()));
         }
 
