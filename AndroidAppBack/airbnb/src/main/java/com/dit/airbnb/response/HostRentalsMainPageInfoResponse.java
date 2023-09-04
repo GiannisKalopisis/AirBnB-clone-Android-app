@@ -16,6 +16,8 @@ public class HostRentalsMainPageInfoResponse {
 
     private String district;
 
-    private String Description;
+    private String description;
+
+    private Short avgRating;
 
 }
