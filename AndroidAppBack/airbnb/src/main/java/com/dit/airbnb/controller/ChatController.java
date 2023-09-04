@@ -27,7 +27,7 @@ public class ChatController {
         return chatService.createMessage(currentUser, messageRequest);
     }
 
-    @GetMapping(path = "/chat/all", params = {"page", "size"})
+    @PostMapping(path = "/chat/all", params = {"page", "size"})
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getOverviewMessagesByRegUserId(@RequestParam(value = "page", defaultValue = PaginationConstants.DEFAULT_PAGE) int page,
                                                     @RequestParam(value = "size", defaultValue = PaginationConstants.DEFAULT_SIZE) int size,
