@@ -1,6 +1,7 @@
 package com.dit.airbnb.dto;
 
 import com.dit.airbnb.csv_dto.BookingCSV;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,9 +24,11 @@ public class Booking {
     @Column(name = "id")
     private Long id;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "check_in_date")
     private Date checkInDate;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "check_out_date")
     private Date checkOutDate;
 

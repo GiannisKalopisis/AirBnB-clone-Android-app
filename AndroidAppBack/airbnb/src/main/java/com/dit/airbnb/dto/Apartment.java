@@ -4,6 +4,7 @@ package com.dit.airbnb.dto;
 import com.dit.airbnb.csv_dto.ApartmentCSV;
 import com.dit.airbnb.dto.enums.RentalType;
 import com.dit.airbnb.request.apartment.ApartmentRequest;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,9 +43,11 @@ public class Apartment {
     @Column(name = "district")
     private String district;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "availableStartDate")
     private Date availableStartDate;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     @Column(name = "availableEndDate")
     private Date availableEndDate;
 
