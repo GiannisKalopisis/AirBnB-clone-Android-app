@@ -1,21 +1,16 @@
 package com.dit.airbnb.service;
 
-import com.dit.airbnb.dto.Apartment;
-import com.dit.airbnb.dto.Message;
-import com.dit.airbnb.dto.SearchLog;
-import com.dit.airbnb.dto.UserReg;
+import com.dit.airbnb.dto.*;
 import com.dit.airbnb.exception.ResourceNotFoundException;
 import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.SearchLogRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.search.SearchRequest;
-import com.dit.airbnb.response.ApartmentResponse;
-import com.dit.airbnb.response.OverviewMessageResponse;
 import com.dit.airbnb.response.SearchResponse;
 import com.dit.airbnb.response.generic.PagedResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import jakarta.persistence.criteria.Predicate;
-import org.apache.commons.math3.stat.descriptive.summary.Product;
+import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.*;
@@ -24,10 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -70,9 +62,19 @@ public class SearchService {
 
         List<SearchResponse> searchResponses = new ArrayList<>();
         for (Apartment apartment : apartmentPage) {
+            Double totalRating = 0.0;
+            Set<Booking> bookings = apartment.getBookings();
+            int bookingReviewCard = 0;
+            // NOTE(geo): MM impl
+            for (Booking booking: bookings) {
+                for (BookingReview bookingReview: booking.getBookingReviews()) {
+                    totalRating += bookingReview.getRating();
+                    bookingReviewCard++;
+                }
+            }
             // = minRetailPrice + numOfGuests*extraCostPerPerson)
             BigDecimal totalCost = apartment.getExtraCostPerPerson().multiply(new BigDecimal((searchRequest.getNumberOfGuests()))).add(apartment.getMinRetailPrice());
-            searchResponses.add(new SearchResponse(apartment.getId(), totalCost,
+            searchResponses.add(new SearchResponse(apartment.getId(), totalCost,  bookingReviewCard != 0 ? Precision.round((totalRating / (double) bookingReviewCard), 2) : 0.0 ,
                     apartment.getAmenities(), apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
                     apartment.getAvailableEndDate(), apartment.getMaxVisitors(), apartment.getMinRetailPrice(),
                     apartment.getExtraCostPerPerson(), apartment.getDescription(), apartment.getNumberOfBeds(),

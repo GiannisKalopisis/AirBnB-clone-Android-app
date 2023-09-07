@@ -21,6 +21,8 @@ public class SearchResponse {
     // = minRetailPrice + numOfGuests*extraCostPerPerson)
     private BigDecimal totalCost;
 
+    private Double avgRating;
+
     private String amenities;
 
     private String address;
