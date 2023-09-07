@@ -1,10 +1,10 @@
 hostId,amenities,address,country,city,district,availableStartDate,availableEndDate,maxVisitors,minRetailPrice,extraCostPerPerson,description,numberOfBeds,numberOfBedrooms,numberOfBathrooms,numberOfLivingRooms,area,geoLat,geoLong,rules,rentalType
-2,aqw qweqwe. qw eqwe. qw,Sperchiou 70,Greece,Attica, Peristeri, 2000-05-04, 2000-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
-2,z,temp adress 1,temp country 1, temp city 1, temp distritc 1, 2001-05-04, 2002-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
-2,zz,temp adress 1,temp country 1, temp city 1, temp distritc 1, 2004-05-04, 20005-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
-2,zzzz,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
-2,zzzzz,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
-2,zzzzzzz,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
-2,ewq,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
-2,zfdf,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
-2,fw,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 100, 200, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,aqw qweqwe. qw eqwe. qw,Sperchiou 70,Greece,Attica, Peristeri, 2000-05-04, 2000-06-05, 1,101, 201, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,z,temp adress 1,temp country 1, temp city 1, temp distritc 1, 2001-05-04, 2002-06-05, 1, 102, 202, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,zz,temp adress 1,temp country 1, temp city 1, temp distritc 1, 2004-05-04, 20005-06-05, 1, 103, 203, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,zzzz,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 104, 204, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,zzzzz,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 105, 205, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,zzzzzzz,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 106, 206, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,ewq,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 100, 207, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,zfdf,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 108, 208, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp
+2,fw,temp adress 1,temp country 1, temp city 1, temp distritc 1, 1996-05-04, 1996-06-05, 1, 109, 209, temp description 1, 1, 1, 1, 32,23,32,3222,temp,temp

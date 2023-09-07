@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -78,6 +79,10 @@ public class SearchService {
                     apartment.getNumberOfBedrooms(), apartment.getNumberOfBathrooms(), apartment.getNumberOfLivingRooms(),
                     apartment.getArea(), apartment.getGeoLat(), apartment.getGeoLong(), apartment.getRules(), apartment.getRentalType()));
         }
+
+        // Define a custom comparator based on the totalCost attribute
+        Comparator<SearchResponse> totalCostComparator = Comparator.comparing(SearchResponse::getTotalCost);
+        searchResponses.sort(totalCostComparator);
 
         return new PagedResponse<>(searchResponses, apartmentPage.getNumber(),
                 apartmentPage.getSize(), apartmentPage.getTotalElements(),

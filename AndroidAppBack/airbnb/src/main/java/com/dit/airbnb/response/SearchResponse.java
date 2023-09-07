@@ -19,7 +19,7 @@ public class SearchResponse {
     private Long id;
 
     // = minRetailPrice + numOfGuests*extraCostPerPerson)
-    private BigDecimal totalPrice;
+    private BigDecimal totalCost;
 
     private String amenities;
 
