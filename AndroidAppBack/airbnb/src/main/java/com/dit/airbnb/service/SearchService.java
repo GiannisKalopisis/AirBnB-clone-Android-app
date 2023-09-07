@@ -7,6 +7,7 @@ import com.dit.airbnb.repository.SearchLogRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.search.SearchRequest;
 import com.dit.airbnb.response.SearchResponse;
+import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.response.generic.PagedResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import jakarta.persistence.criteria.Predicate;
@@ -50,7 +51,7 @@ public class SearchService {
 
         PagedResponse<SearchResponse> pagedSearchResponses = createApartmentPageResponse(searchRequest, apartmentPage);
 
-        return ResponseEntity.ok(pagedSearchResponses);
+        return ResponseEntity.ok(new ApiResponse(true, "search succeed", pagedSearchResponses));
     }
 
     private PagedResponse<SearchResponse> createApartmentPageResponse(SearchRequest searchRequest, Page<Apartment> apartmentPage) {
@@ -74,12 +75,8 @@ public class SearchService {
             }
             // = minRetailPrice + numOfGuests*extraCostPerPerson)
             BigDecimal totalCost = apartment.getExtraCostPerPerson().multiply(new BigDecimal((searchRequest.getNumberOfGuests()))).add(apartment.getMinRetailPrice());
-            searchResponses.add(new SearchResponse(apartment.getId(), totalCost,  bookingReviewCard != 0 ? Precision.round((totalRating / (double) bookingReviewCard), 2) : 0.0 ,
-                    apartment.getAmenities(), apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
-                    apartment.getAvailableEndDate(), apartment.getMaxVisitors(), apartment.getMinRetailPrice(),
-                    apartment.getExtraCostPerPerson(), apartment.getDescription(), apartment.getNumberOfBeds(),
-                    apartment.getNumberOfBedrooms(), apartment.getNumberOfBathrooms(), apartment.getNumberOfLivingRooms(),
-                    apartment.getArea(), apartment.getGeoLat(), apartment.getGeoLong(), apartment.getRules(), apartment.getRentalType()));
+            searchResponses.add(new SearchResponse(apartment.getId(), totalCost,  bookingReviewCard != 0 ? Precision.round((totalRating / (double) bookingReviewCard), 2) : 0.0,
+                    apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getDescription()));
         }
 
         // Define a custom comparator based on the totalCost attribute
@@ -117,11 +114,11 @@ public class SearchService {
             }
 
             if (searchRequest.getAvailableStartDate() != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("availableStartDate"), searchRequest.getAvailableStartDate()));
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("availableStartDate"), searchRequest.getAvailableStartDate()));
             }
 
             if (searchRequest.getAvailableEndDate() != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("availableEndDate"), searchRequest.getAvailableEndDate()));
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("availableEndDate"), searchRequest.getAvailableEndDate()));
             }
 
             if (searchRequest.getRentalType() != null) {

@@ -48,7 +48,7 @@ public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAd
     }
 
     public void setRentalModel(ArrayList<RentalMainPageModel> rentalModel) {
-        this.rentalModel = rentalModel;
+        this.rentalModel.addAll(rentalModel);
         /* In case data come from a server and they change
            you have to refresh them.
          */

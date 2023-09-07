@@ -92,6 +92,10 @@ public class RentRoomPage extends AppCompatActivity {
 
     private ArrayList<SlideModel> slideModels;
 
+    // search dates
+    private String checkInDate, checkOutDate;
+    private Integer numOfGuests;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,6 +114,9 @@ public class RentRoomPage extends AppCompatActivity {
                     roles.add(RoleName.valueOf(role));
                 }
             }
+            checkInDate = intent.getSerializableExtra("check_in_date", String.class);
+            checkOutDate = intent.getSerializableExtra("check_out_date", String.class);
+            numOfGuests = intent.getSerializableExtra("num_of_guests", Integer.class);
         }
 
         /**
@@ -132,6 +139,10 @@ public class RentRoomPage extends AppCompatActivity {
         initView();
         bottomBarClickListeners();
         buttonClickListener();
+
+        if (checkInDate == null || checkInDate.isEmpty() || checkOutDate == null || checkOutDate.isEmpty()) {
+            makeReservationButton.setVisibility(View.GONE);
+        }
 
         // THOSE 2 LINES ARE MUST BE BEFORE API CALL TO WORK GOOGLE MAPS AND NOT CRASH ONRESUME METHOD
         checkGoogleAPIAvailability();
@@ -394,12 +405,15 @@ public class RentRoomPage extends AppCompatActivity {
     private void renderPriceSection() {
         rentRoomPriceValue.setText(String.valueOf(apartmentData.getMinRetailPrice()));
         rentRoomExtraPriceValue.setText(String.valueOf(apartmentData.getExtraCostPerPerson()));
-        // TODO: need to pass search parameters to calculate the final price
-        rentRoomFinalPriceValue.setText(
-                String.valueOf(
-                        apartmentData.getExtraCostPerPerson().
-                                multiply(BigDecimal.valueOf(3L)).
-                                add(apartmentData.getMinRetailPrice())));
+        if (numOfGuests != null) {
+            rentRoomFinalPriceValue.setText(
+                    String.valueOf(
+                            apartmentData.getExtraCostPerPerson().
+                                    multiply(BigDecimal.valueOf(numOfGuests)).
+                                    add(apartmentData.getMinRetailPrice())));
+        } else {
+            rentRoomFinalPriceValue.setText("-");
+        }
     }
 
     private void renderDescriptionSection() {
@@ -452,7 +466,6 @@ public class RentRoomPage extends AppCompatActivity {
     }
 
     private void renderReviewSection() {
-        // TODO: get the userStayedAtRental from the API
         Log.d(TAG, "renderReviewSection: started");
 
         RestClient restClient = new RestClient(jwtToken);
@@ -605,8 +618,6 @@ public class RentRoomPage extends AppCompatActivity {
         seeHostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: get the host id from the API
-
                 Toast.makeText(view.getContext(), "Pressed SEE HOST BUTTON", Toast.LENGTH_SHORT).show();
                 Intent see_host_intent = new Intent(getApplicationContext(), HostReviewPageActivity.class);
                 see_host_intent.putExtra("user_id", userId);
@@ -625,7 +636,6 @@ public class RentRoomPage extends AppCompatActivity {
         contactHostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: get the host id from the API
                 RestClient restClient = new RestClient(jwtToken);
                 ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
                 ChatSenderReceiverRequest chatSenderReceiverRequest = setChatSenderReceiverRequest();
@@ -671,7 +681,6 @@ public class RentRoomPage extends AppCompatActivity {
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed MAKE RESERVATION BUTTON", Toast.LENGTH_SHORT).show();
 
-                // TODO: get the reservation dates, now use dummy dates
                 RestClient restClient = new RestClient(jwtToken);
                 BookingAPI bookingAPI = restClient.getClient().create(BookingAPI.class);
                 BookingRequest bookingRequest = setBookingRequest();
@@ -718,7 +727,6 @@ public class RentRoomPage extends AppCompatActivity {
         writeReviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: go to write review page
                 Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
                 Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewActivity.class);
                 write_review_intent.putExtra("user_id", userId);
@@ -737,8 +745,8 @@ public class RentRoomPage extends AppCompatActivity {
     private BookingRequest setBookingRequest() {
         BookingRequest bookingRequest = new BookingRequest();
         bookingRequest.setApartmentId(apartmentId);
-        bookingRequest.setCheckInDate("2021-05-01");
-        bookingRequest.setCheckOutDate("2021-05-05");
+        bookingRequest.setCheckInDate(checkInDate);
+        bookingRequest.setCheckOutDate(checkOutDate);
         return bookingRequest;
     }
 

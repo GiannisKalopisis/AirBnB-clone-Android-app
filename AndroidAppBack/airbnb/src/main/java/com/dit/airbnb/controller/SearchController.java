@@ -19,7 +19,7 @@ public class SearchController {
     @Autowired
     private SearchService searchService;
 
-    @GetMapping(path = "/search", params = {"page", "size"})
+    @PostMapping(path = "/search", params = {"page", "size"})
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> search(@RequestParam(value = "page", defaultValue = PaginationConstants.DEFAULT_PAGE) int page,
                                     @RequestParam(value = "size", defaultValue = PaginationConstants.DEFAULT_SIZE) int size,

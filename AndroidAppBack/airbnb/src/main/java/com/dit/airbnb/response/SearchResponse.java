@@ -23,45 +23,11 @@ public class SearchResponse {
 
     private Double avgRating;
 
-    private String amenities;
-
-    private String address;
-
     private String country;
 
     private String city;
 
     private String district;
 
-    private Date availableStartDate;
-
-    private Date availableEndDate;
-
-    private Integer maxVisitors;
-
-    private BigDecimal minRetailPrice;
-
-    private BigDecimal extraCostPerPerson;
-
     private String description;
-
-    private Short numberOfBeds;
-
-    private Short numberOfBedrooms;
-
-    private Short numberOfBathrooms;
-
-    private Short numberOfLivingRooms;
-
-    private BigDecimal area;
-
-    private BigDecimal geoLat;
-
-    private BigDecimal geoLong;
-
-    private String rules;
-
-    @Enumerated
-    private RentalType rentalType;
-
 }

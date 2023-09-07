@@ -18,7 +18,6 @@
         android:layout_marginStart="17dp"
         android:layout_marginTop="17dp"
         android:layout_marginEnd="17dp"
-        android:layout_marginBottom="17dp"
         />
 
     <!-- Welcome message at top left -->
@@ -48,7 +47,7 @@
             android:layout_height="40dp"
             android:background="@drawable/background_search"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="15dp"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
             android:elevation="10dp"
@@ -193,10 +192,21 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/rentalsTextView"
+        android:id="@+id/rentInfoMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/searchFieldsLayout"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:text="*To rent you have to fill the search form"
+        android:textStyle="normal"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/rentalsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rentInfoMessage"
         android:layout_marginTop="15dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
@@ -217,6 +227,27 @@
         android:layout_marginEnd="20dp"
         android:orientation="vertical">
     </androidx.recyclerview.widget.RecyclerView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <Button
+            android:id="@+id/homePageButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="80dp"
+            android:layout_marginEnd="30dp"
+            app:backgroundTint="@color/colorPrimary"
+            android:background="@drawable/baseline_home_24"
+            android:backgroundTintMode="src_over"
+            android:textStyle="normal"
+            android:textSize="30sp"/>
+
+    </RelativeLayout>
 
 
     <include
