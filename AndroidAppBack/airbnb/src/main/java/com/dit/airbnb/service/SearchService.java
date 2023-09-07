@@ -1,6 +1,7 @@
 package com.dit.airbnb.service;
 
 import com.dit.airbnb.dto.Apartment;
+import com.dit.airbnb.dto.Message;
 import com.dit.airbnb.dto.SearchLog;
 import com.dit.airbnb.dto.UserReg;
 import com.dit.airbnb.exception.ResourceNotFoundException;
@@ -8,6 +9,10 @@ import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.SearchLogRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.search.SearchRequest;
+import com.dit.airbnb.response.ApartmentResponse;
+import com.dit.airbnb.response.OverviewMessageResponse;
+import com.dit.airbnb.response.SearchResponse;
+import com.dit.airbnb.response.generic.PagedResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import jakarta.persistence.criteria.Predicate;
 import org.apache.commons.math3.stat.descriptive.summary.Product;
@@ -18,7 +23,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -46,8 +53,38 @@ public class SearchService {
         searchLog.setUserReg(userReg);
         searchLogRepository.save(searchLog);
 
-        return ResponseEntity.ok(searchProducts(searchRequest, page, size));
+        Page<Apartment> apartmentPage = searchProducts(searchRequest, page, size);
+
+        PagedResponse<SearchResponse> pagedSearchResponses = createApartmentPageResponse(searchRequest, apartmentPage);
+
+        return ResponseEntity.ok(pagedSearchResponses);
     }
+
+    private PagedResponse<SearchResponse> createApartmentPageResponse(SearchRequest searchRequest, Page<Apartment> apartmentPage) {
+        if (apartmentPage.getNumberOfElements() == 0) {
+            return new PagedResponse<>(Collections.emptyList(), apartmentPage.getNumber(),
+                    apartmentPage.getSize(), apartmentPage.getTotalElements(),
+                    apartmentPage.getTotalPages(), apartmentPage.isLast());
+        }
+
+        List<SearchResponse> searchResponses = new ArrayList<>();
+        for (Apartment apartment : apartmentPage) {
+            // = minRetailPrice + numOfGuests*extraCostPerPerson)
+            BigDecimal totalCost = apartment.getExtraCostPerPerson().multiply(new BigDecimal((searchRequest.getNumberOfGuests()))).add(apartment.getMinRetailPrice());
+            searchResponses.add(new SearchResponse(apartment.getId(), totalCost,
+                    apartment.getAmenities(), apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
+                    apartment.getAvailableEndDate(), apartment.getMaxVisitors(), apartment.getMinRetailPrice(),
+                    apartment.getExtraCostPerPerson(), apartment.getDescription(), apartment.getNumberOfBeds(),
+                    apartment.getNumberOfBedrooms(), apartment.getNumberOfBathrooms(), apartment.getNumberOfLivingRooms(),
+                    apartment.getArea(), apartment.getGeoLat(), apartment.getGeoLong(), apartment.getRules(), apartment.getRentalType()));
+        }
+
+        return new PagedResponse<>(searchResponses, apartmentPage.getNumber(),
+                apartmentPage.getSize(), apartmentPage.getTotalElements(),
+                apartmentPage.getTotalPages(), apartmentPage.isLast());
+    }
+
+
 
     public Page<Apartment> searchProducts(SearchRequest searchRequest, int page, int size) {
 
@@ -85,7 +122,7 @@ public class SearchService {
             }
 
             if (searchRequest.getNumberOfGuests() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("numberOfGuests"), searchRequest.getNumberOfGuests()));
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("maxVisitors"), searchRequest.getNumberOfGuests()));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
