@@ -40,11 +40,13 @@ import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.UserRegisterModel;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
+import com.example.fakebnb.utils.ImageUtils;
 import com.example.fakebnb.utils.RealPathUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -55,6 +57,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.MultipartBody.Part;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -75,6 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private String imagePath;
     private Bitmap imageBitmap;
+    private Part imagePart;
     /**
      * Variables for MULTIPLE IMAGES
      */
@@ -176,6 +183,9 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast.makeText(RegisterActivity.this, "Must fill all fields", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+                MultipartBody.Part imagePart = ImageUtils.getImagePart(imageBitmap, imagePath);
+
 
                 RestClient restClient = new RestClient(null);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
