@@ -1,6 +1,7 @@
 package com.dit.airbnb.controller;
 
 import com.dit.airbnb.request.apartment.ApartmentRequest;
+import com.dit.airbnb.request.user_reg.SignUpRequest;
 import com.dit.airbnb.request.user_reg.UserRegUpdateRequest;
 import com.dit.airbnb.security.user.CurrentUser;
 import com.dit.airbnb.security.user.UserDetailsImpl;
@@ -8,11 +9,16 @@ import com.dit.airbnb.service.ApartmentService;
 import com.dit.airbnb.util.PaginationConstants;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/app")
@@ -21,11 +27,17 @@ public class ApartmentController {
     @Autowired
     private ApartmentService apartmentService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PostMapping( "/apartment")
     @PreAuthorize("hasAuthority('ROLE_HOST')")
-    public ResponseEntity<?> createApartment(@Valid @RequestBody ApartmentRequest apartmentRequest,
-                                             @Valid @CurrentUser UserDetailsImpl currentUser) {
-        return apartmentService.createApartment(currentUser, apartmentRequest);
+    public ResponseEntity<?> createApartment(@Valid @RequestParam String apartmentRequest,
+                                             @RequestParam(value = "images") List<MultipartFile> images,
+                                             @Valid @CurrentUser UserDetailsImpl currentUser)
+        throws JsonParseException, JsonMappingException, IOException {
+        ApartmentRequest apartmentRequestReal = objectMapper.readValue(apartmentRequest, ApartmentRequest.class);
+        return apartmentService.createApartment(currentUser, apartmentRequestReal, images);
     }
 
     @PutMapping("/apartment/{apartmentId}")

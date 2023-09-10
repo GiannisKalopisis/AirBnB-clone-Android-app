@@ -176,6 +176,26 @@ public class ImageService {
                 .body(resource);
     }
 
+    public ResponseEntity<?> getApartmentImages(Long apartmentId) throws FileNotFoundException {
+        List<Image> images = imageRepository.findByApartmentId(apartmentId);
+        if (images == null) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + "emptyImage" + "\"")
+                    .body(null);
+        }
+        List<Resource> resources = new ArrayList<>();
+        for (Image image: images) {
+            resources.add(loadAsResource(image.getPath()));
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + "multipleImages" + "\"")
+                .body(resources);
+    }
+
+
+
     // Store images
     public UserReg userRegMultiSaveImage(Long userId, MultipartFile image) {
         UserReg userReg = userRegRepository.findById(userId)

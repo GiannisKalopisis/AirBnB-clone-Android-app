@@ -1,11 +1,9 @@
 package com.dit.airbnb.service;
 
-import com.dit.airbnb.dto.Apartment;
-import com.dit.airbnb.dto.Booking;
-import com.dit.airbnb.dto.BookingReview;
-import com.dit.airbnb.dto.UserReg;
+import com.dit.airbnb.dto.*;
 import com.dit.airbnb.exception.ResourceNotFoundException;
 import com.dit.airbnb.repository.ApartmentRepository;
+import com.dit.airbnb.repository.ImageRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.apartment.ApartmentRequest;
 import com.dit.airbnb.response.ApartmentResponse;
@@ -20,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -40,7 +39,13 @@ public class ApartmentService {
     @Autowired
     private UserRegRepository userRegRepository;
 
-    public ResponseEntity<?> createApartment(UserDetailsImpl currentUser, ApartmentRequest apartmentRequest) {
+    @Autowired
+    private ImageService imageService;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
+    public ResponseEntity<?> createApartment(UserDetailsImpl currentUser, ApartmentRequest apartmentRequest, List<MultipartFile> images) {
         Long userId = currentUser.getId();
         UserReg userReg = userRegRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", userId));
@@ -50,6 +55,14 @@ public class ApartmentService {
         apartment.setUserRegHost(userReg);
 
         apartmentRepository.save(apartment);
+
+        // Store image
+        for (var image: images) {
+            String imageName = imageService.store(image);
+            Image imageIn = new Image(imageName);
+            imageIn.setApartment(apartment);
+            imageRepository.save(imageIn);
+        }
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/{apartmentId}")
