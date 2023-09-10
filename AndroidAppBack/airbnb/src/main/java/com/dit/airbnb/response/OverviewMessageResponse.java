@@ -13,6 +13,8 @@ public class OverviewMessageResponse {
 
     private Long chatId;
 
+    private Long userId;
+
     private String username;
 
     private String contentOfLastMessage;

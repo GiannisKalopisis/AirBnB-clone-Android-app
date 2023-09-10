@@ -134,7 +134,8 @@ public class ChatService {
 
         List<OverviewMessageResponse> messageResponses = new ArrayList<>();
         for (Message message : messagePage) {
-            messageResponses.add(new OverviewMessageResponse(message.getChat().getId(), message.getSenderUserReg().getUsername(), message.getContent(), message.getSeen()));
+            UserReg userReg = message.getSenderUserReg();
+            messageResponses.add(new OverviewMessageResponse(message.getChat().getId(), userReg.getId(), userReg.getUsername(), message.getContent(), message.getSeen()));
         }
 
         return new PagedResponse<>(messageResponses, messagePage.getNumber(),
@@ -155,7 +156,7 @@ public class ChatService {
                 message.setSeen(true);
                 messageRepository.save(message);
             }
-            messageResponses.add(new MessageResponse(message.getSenderUserReg().getId(), message.getSenderUserReg().getUsername(), message.getContent()));
+            messageResponses.add(new MessageResponse(message.getSenderUserReg().getUsername(), message.getContent()));
         }
 
         return new PagedResponse<>(messageResponses, messagePage.getNumber(),
