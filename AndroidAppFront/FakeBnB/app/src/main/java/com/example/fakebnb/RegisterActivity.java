@@ -33,6 +33,7 @@ import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 import com.example.fakebnb.utils.ImageUtils;
 import com.example.fakebnb.utils.RealPathUtil;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,8 +46,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.MultipartBody.Part;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -159,6 +162,8 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View view) {
                 resetWarnVisibility();
 
+                // Serialize the object to JSON
+                Gson gson = new Gson();
                 UserRegisterModel userRegisterModel = setUserRegisterModel();
 
                 if (!initRegister()) {
@@ -174,8 +179,10 @@ public class RegisterActivity extends AppCompatActivity {
 
                 RestClient restClient = new RestClient(null);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+                Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(userRegisterModel));
+//                RequestBody signUpRequest = RequestBody.create(MediaType.parse("application/json"), gson.toJson(userRegisterModel));
 
-                userRegAPI.registerUser(userRegisterModel.toString(), imagePart)
+                userRegAPI.registerUser(gson.toJson(userRegisterModel), imagePart)
                         .enqueue(new Callback<UserRegisterModel>() {
                             @Override
                             public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {

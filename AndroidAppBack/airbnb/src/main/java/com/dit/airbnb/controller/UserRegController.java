@@ -34,12 +34,12 @@ public class UserRegController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping(value = "/user/signUp", params = {"signUpRequest", "file"})
+    @PostMapping(value = "/user/signUp")
     public ResponseEntity<?> signUp(@RequestParam(value = "signUpRequest") String signUpRequest,
-                                    @RequestParam(value = "file") MultipartFile file)
+                                    @RequestParam(value = "image") MultipartFile image)
             throws JsonParseException, JsonMappingException, IOException {
         SignUpRequest signUpRequestReal = objectMapper.readValue(signUpRequest, SignUpRequest.class);
-        return userRegService.signUpUser(signUpRequestReal, file);
+        return userRegService.signUpUser(signUpRequestReal, image);
     }
 
     @PostMapping("/user/signIn")

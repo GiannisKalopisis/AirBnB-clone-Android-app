@@ -1,6 +1,7 @@
 package com.example.fakebnb.utils;
 
 import android.graphics.Bitmap;
+import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -13,10 +14,20 @@ import okhttp3.RequestBody;
 public class ImageUtils {
 
     public static MultipartBody.Part getImagePart(Bitmap imageBitmap, String imagePath) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
-        RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), outputStream.toByteArray());
-        return MultipartBody.Part.createFormData("file", imagePath, requestBody);
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        imageBitmap.compress(Bitmap.CompressFormat.PNG, 70, outputStream);
+//        byte[] byteArray = outputStream.toByteArray();
+//        String base64Image = Base64.encodeToString(byteArray, Base64.DEFAULT);
+//        RequestBody requestBody = RequestBody.create(MediaType.parse("text/plain"), base64Image);
+//        return MultipartBody.Part.createFormData("file", imagePath, requestBody);
+
+        // Convert your bitmap to a byte array
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+        byte[] imageBytes = byteArrayOutputStream.toByteArray();
+
+        // Create a MultipartBody.Part for the image
+        return MultipartBody.Part.createFormData("image", "test_image.png", RequestBody.create(MediaType.parse("image/*"), imageBytes));
     }
 
     public static List<MultipartBody.Part> getImageParts(List<Bitmap> bitmapList, List<String> imagePaths) {
