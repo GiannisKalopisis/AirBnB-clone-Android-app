@@ -9,6 +9,9 @@ import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.security.user.CurrentUser;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import com.dit.airbnb.service.UserRegService;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,9 +30,14 @@ public class UserRegController {
     @Autowired
     private UserRegService userRegService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PostMapping("/user/signUp")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest, @RequestParam("file") MultipartFile file) {
-        return userRegService.signUpUser(signUpRequest, file);
+    public ResponseEntity<?> signUp(@RequestParam String signUpRequest, @RequestParam("file") MultipartFile file)
+            throws JsonParseException, JsonMappingException, IOException {
+        SignUpRequest signUpRequestReal = objectMapper.readValue(signUpRequest, SignUpRequest.class);
+        return userRegService.signUpUser(signUpRequestReal, file);
     }
 
     @PostMapping("/user/signIn")
