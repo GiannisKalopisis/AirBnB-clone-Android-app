@@ -16,7 +16,7 @@ public class ImageUtils {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         imageBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
         RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), outputStream.toByteArray());
-        return MultipartBody.Part.createFormData("image", imagePath, requestBody);
+        return MultipartBody.Part.createFormData("file", imagePath, requestBody);
     }
 
     public static List<MultipartBody.Part> getImageParts(List<Bitmap> bitmapList, List<String> imagePaths) {

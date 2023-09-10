@@ -2,7 +2,11 @@ package com.example.fakebnb.utils;
 
 import android.content.Intent;
 
+import com.example.fakebnb.MainPageActivity;
+import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.UserModel;
+
+import java.util.ArrayList;
 
 public class AndroidUtil {
 

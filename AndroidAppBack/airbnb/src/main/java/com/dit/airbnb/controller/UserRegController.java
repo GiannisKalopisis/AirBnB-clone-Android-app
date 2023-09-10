@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -33,8 +34,9 @@ public class UserRegController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping("/user/signUp")
-    public ResponseEntity<?> signUp(@RequestParam String signUpRequest, @RequestParam("file") MultipartFile file)
+    @PostMapping(value = "/user/signUp", params = {"signUpRequest", "file"})
+    public ResponseEntity<?> signUp(@RequestParam(value = "signUpRequest") String signUpRequest,
+                                    @RequestParam(value = "file") MultipartFile file)
             throws JsonParseException, JsonMappingException, IOException {
         SignUpRequest signUpRequestReal = objectMapper.readValue(signUpRequest, SignUpRequest.class);
         return userRegService.signUpUser(signUpRequestReal, file);

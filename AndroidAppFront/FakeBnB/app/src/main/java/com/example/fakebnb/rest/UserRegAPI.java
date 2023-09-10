@@ -6,18 +6,23 @@ import com.example.fakebnb.model.request.UserLoginModel;
 import com.example.fakebnb.model.request.UserRegisterModel;
 import com.example.fakebnb.model.response.UserRegResponse;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface UserRegAPI {
 
     @POST("/app/user/signUp")
-    Call<UserRegisterModel> registerUser(@Body UserRegisterModel userRegisterModel);
+    Call<UserRegisterModel> registerUser(@Query(value = "signUpRequest") String signUpRequest,
+                                         @Query(value = "file") MultipartBody.Part file);
 
     @POST("/app/user/signIn")
     Call<SignInResponse> singInUser(@Body UserLoginModel userLoginModel);

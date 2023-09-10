@@ -7,10 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -21,7 +17,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,11 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.fakebnb.adapter.ImageAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.UserRegisterModel;
 import com.example.fakebnb.rest.RestClient;
@@ -46,21 +37,16 @@ import com.example.fakebnb.utils.RealPathUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.MultipartBody.Part;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -186,11 +172,10 @@ public class RegisterActivity extends AppCompatActivity {
 
                 MultipartBody.Part imagePart = ImageUtils.getImagePart(imageBitmap, imagePath);
 
-
                 RestClient restClient = new RestClient(null);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
-                userRegAPI.registerUser(userRegisterModel)
+                userRegAPI.registerUser(userRegisterModel.toString(), imagePart)
                         .enqueue(new Callback<UserRegisterModel>() {
                             @Override
                             public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
