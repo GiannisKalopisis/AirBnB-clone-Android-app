@@ -29,7 +29,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -84,8 +86,6 @@ public class UserRegService {
         Image imageIn = new Image(imageName);
         imageIn.setUserReg(userReg);
         imageRepository.save(imageIn);
-
-        userReg.setImage(imageIn);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/{userId}")

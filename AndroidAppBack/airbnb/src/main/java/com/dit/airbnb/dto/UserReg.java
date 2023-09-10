@@ -89,9 +89,9 @@ public class UserReg {
     private Set<SearchLog> searchLogs = new HashSet<>();
 
     @Getter
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "image_id")
-    private Image image; // may be null
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userReg", cascade = CascadeType.ALL)
+    private Set<Image> images;
 
     @Getter
     @JsonIgnore

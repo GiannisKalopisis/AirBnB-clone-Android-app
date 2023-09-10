@@ -73,6 +73,7 @@ public class ImageService {
             filename = filename + (ImageService.IMAGE_COUNTER) + ".png";
         }
         ImageService.IMAGE_COUNTER++;
+
         try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + filename);
@@ -137,9 +138,14 @@ public class ImageService {
     }
 
     public List<Long> getUserRegImageResources(Long userId) {
-        Image images = imageRepository.findByUserRegId(userId);
+        List<Image> images = imageRepository.findByUserRegId(userId);
         List<Long> imageResources = new ArrayList<>();
-        imageResources.add(images.getId());
+        for (Image image : images) {
+            imageResources.add(image.getId());
+        }
+        if (imageResources.isEmpty()) {
+            imageResources.add((long) 0);
+        }
         return imageResources;
     }
 
@@ -156,14 +162,14 @@ public class ImageService {
     }
 
     public ResponseEntity<?> getUserImage(Long userId) throws FileNotFoundException {
-        Image image = imageRepository.findByUserRegId(userId);
-        if (image == null) {
+        List<Image> images = imageRepository.findByUserRegId(userId);
+        if (images == null) {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; filename=\"" + "emptyImage" + "\"")
                     .body(null);
         }
-        Resource resource = loadAsResource(image.getPath());
+        Resource resource = loadAsResource(images.get(0).getPath());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + resource.getFilename() + "\"")

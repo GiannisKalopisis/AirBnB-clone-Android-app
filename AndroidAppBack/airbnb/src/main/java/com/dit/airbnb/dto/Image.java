@@ -23,7 +23,8 @@ public class Image {
 
     @Getter
     @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "image")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_reg_id")
     private UserReg userReg;
 
     @Getter
