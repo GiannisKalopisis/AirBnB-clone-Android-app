@@ -4,6 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -11,6 +17,7 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
@@ -37,6 +44,7 @@ import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.BookingAPI;
 import com.example.fakebnb.rest.BookingReviewAPI;
 import com.example.fakebnb.rest.ChatAPI;
+import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -55,6 +63,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -76,6 +85,8 @@ public class RentRoomPage extends AppCompatActivity {
             rentRoomBedroomsValue, rentRoomPriceValue, rentRoomExtraPriceValue, rentRoomFinalPriceValue,
             rentRoomDescriptionValue, rentRoomAddressValue, rentRoomDistrictValue,
             rentRoomCityValue, rentRoomCountryValue, rentRoomHostNameValue;
+
+    private ImageView hostImage;
 
     private RecyclerView recyclerViewRules, recyclerViewAmenities;
 
@@ -463,6 +474,53 @@ public class RentRoomPage extends AppCompatActivity {
 
     private void renderHostSection() {
         rentRoomHostNameValue.setText(host.getUsername());
+
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getImage(hostId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            userImageBitmap = getCircularBitmap(userImageBitmap);
+                            if (userImageBitmap != null) {
+                                hostImage.setImageBitmap(userImageBitmap);
+                                hostImage.setPadding(0, 0, 0, 0);
+                            }
+                        } else {
+                            Toast.makeText(RentRoomPage.this, "1 Couldn't get host image", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "1 Couldn't get host image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        Toast.makeText(RentRoomPage.this, "2 Couldn't get host image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "2 Couldn't get host image: " + t.getMessage());
+                    }
+                });
+    }
+
+    private Bitmap getCircularBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outputBitmap);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+
+        canvas.drawCircle(width / 2f, height / 2f, width / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        bitmap.recycle();
+
+        return outputBitmap;
     }
 
     private void renderReviewSection() {
@@ -532,6 +590,7 @@ public class RentRoomPage extends AppCompatActivity {
         rentRoomCountryValue = findViewById(R.id.rentRoomCountryValue);
         rentRoomHostNameValue = findViewById(R.id.rentRoomHostNameValue);
         rentRoomReviewTitle = findViewById(R.id.rentRoomReviewTitle);
+        hostImage = findViewById(R.id.rent_room_host_image_view);
 
         // init recycler views
         recyclerViewRules = findViewById(R.id.recyclerViewRules);

@@ -175,12 +175,11 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
-                MultipartBody.Part imagePart = ImageUtils.getImagePart(imageBitmap, imagePath);
+                MultipartBody.Part imagePart = ImageUtils.getImagePart(imageBitmap);
 
                 RestClient restClient = new RestClient(null);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
                 Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(userRegisterModel));
-//                RequestBody signUpRequest = RequestBody.create(MediaType.parse("application/json"), gson.toJson(userRegisterModel));
 
                 userRegAPI.registerUser(gson.toJson(userRegisterModel), imagePart)
                         .enqueue(new Callback<UserRegisterModel>() {

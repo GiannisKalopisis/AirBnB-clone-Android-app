@@ -484,7 +484,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
         Log.d(TAG, "getAndSetWelcomeData: started");
 
         // get username and picture
-        welcomeMessage.setText("Welcome " + userRegData.getUsername());
+        welcomeMessage.setText("Welcome, " + userRegData.getUsername());
 
         RestClient restClient = new RestClient(jwtToken);
         ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
@@ -512,8 +512,6 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                         Log.d(TAG, "2 Couldn't get user image: " + t.getMessage());
                     }
                 });
-
-
     }
 
     private Bitmap getCircularBitmap(Bitmap bitmap) {

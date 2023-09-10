@@ -3,6 +3,7 @@ package com.example.fakebnb;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -30,6 +31,7 @@ import com.example.fakebnb.model.response.ApartmentPagedResponse;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
+import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 
@@ -39,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -138,12 +141,52 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
         Log.d(TAG, "getAndSetWelcomeData: started");
 
         welcomeMessage.setText("Welcome, " + userRegData.getUsername());
-//        Bitmap userImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.people1);
-//        userImageBitmap = getCircularBitmap(userImageBitmap);
-//        if (userImageBitmap != null) {
-//            profile_pic_layout.setImageBitmap(userImageBitmap);
-//            profile_pic_layout.setPadding(0, 0, 0, 0);
-//        }
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getImage(userId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            userImageBitmap = getCircularBitmap(userImageBitmap);
+                            if (userImageBitmap != null) {
+                                host_profile_pic_layout.setImageBitmap(userImageBitmap);
+                                host_profile_pic_layout.setPadding(0, 0, 0, 0);
+                            }
+                        } else {
+                            Toast.makeText(HostMainPageActivity.this, "1 Couldn't get user image", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "1 Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        Toast.makeText(HostMainPageActivity.this, "2 Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "2 Couldn't get user image: " + t.getMessage());
+                    }
+                });
+    }
+
+    private Bitmap getCircularBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outputBitmap);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+
+        canvas.drawCircle(width / 2f, height / 2f, width / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        bitmap.recycle();
+
+        return outputBitmap;
     }
 
     /**
@@ -236,26 +279,6 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                 startActivity(add_new_place_intent);
             }
         });
-    }
-
-    private Bitmap getCircularBitmap(Bitmap bitmap) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(outputBitmap);
-
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setFilterBitmap(true);
-        paint.setDither(true);
-
-        canvas.drawCircle(width / 2f, height / 2f, width / 2f, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-
-        canvas.drawBitmap(bitmap, 0, 0, paint);
-        bitmap.recycle();
-
-        return outputBitmap;
     }
 
     private void initView() {

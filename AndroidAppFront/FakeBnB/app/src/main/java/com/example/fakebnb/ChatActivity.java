@@ -1,6 +1,12 @@
 package com.example.fakebnb;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -14,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.Callbacks.ImageLoadCallback;
 import com.example.fakebnb.adapter.ChatRecyclerAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.MessageModel;
@@ -21,6 +28,7 @@ import com.example.fakebnb.model.OverviewChatModel;
 import com.example.fakebnb.model.request.OverviewMessageRequest;
 import com.example.fakebnb.model.response.OverviewChatResponse;
 import com.example.fakebnb.rest.ChatAPI;
+import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 
 import java.util.ArrayList;
@@ -28,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -86,7 +95,7 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
 
         // Initially load the first batch of data
         loadMoreChats();
-//        loadOlderChatOnScroll();
+        loadOlderChatOnScroll();
     }
 
     /**
@@ -129,6 +138,19 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
                             if (overviewChatResponse != null) {
                                 Log.d(TAG, "onResponse: Success");
                                 chats = overviewChatResponse.getObject().getContent();
+                                for (OverviewChatModel chat : chats) {
+                                    getUserImage(chat.getUserId(), new ImageLoadCallback() {
+                                        @Override
+                                        public void onImageLoaded(Bitmap userImageBitmap) {
+                                            chatRecyclerAdapter.setUserImage(chat.getChatId(), userImageBitmap);
+                                        }
+
+                                        @Override
+                                        public void onError(String errorMessage) {
+                                            Toast.makeText(ChatActivity.this, "Error while downloading image: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
                                 chatRecyclerAdapter.setChatListModel((ArrayList<OverviewChatModel>)  chats);
                             } else {
                                 Log.d(TAG, "1 Couldn't fetch your chats");
@@ -144,25 +166,57 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
                     }
                 });
 
-//        overviewChatModel.addAll(newData);
-//        chatRecyclerAdapter.notifyDataSetChanged();
-
         isLoading = false;
         page++;
     }
 
-//    private ArrayList<OverviewChatModel> fetchDataFromBackend(int page) {
-//        // Simulate fetching data from backend based on the page number
-//        // TODO: convert it to API call
-//        ArrayList<OverviewChatModel> newData = new ArrayList<>();
-//        for (int i = 0; i < 10; i++) {
-//            newData.add(new OverviewChatModel((i + page * 10L),
-//                            "username" + (i + page * 10),
-//                            "contentOfLastMessage" + (i + page * 10),
-//                            i%2 == 0));
-//        }
-//        return newData;
-//    }
+    private void getUserImage(Long userId, ImageLoadCallback callback) {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getImage(userId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            userImageBitmap = getCircularBitmap(userImageBitmap);
+                            if (userImageBitmap != null) {
+                                callback.onImageLoaded(userImageBitmap);
+                            } else {
+                                callback.onError("Couldn't process user image");
+                            }
+                        } else {
+                            callback.onError("Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        callback.onError("Couldn't get user image: " + t.getMessage());
+                    }
+                });
+    }
+
+    private Bitmap getCircularBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outputBitmap);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+
+        canvas.drawCircle(width / 2f, height / 2f, width / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        bitmap.recycle();
+
+        return outputBitmap;
+    }
 
     private OverviewMessageRequest createOverviewMessageRequest() {
         OverviewMessageRequest overviewMessageRequest = new OverviewMessageRequest();
