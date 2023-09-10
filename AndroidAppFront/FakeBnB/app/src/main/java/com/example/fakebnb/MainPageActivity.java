@@ -40,6 +40,7 @@ import com.example.fakebnb.model.SearchRentalModel;
 import com.example.fakebnb.model.request.SearchRequest;
 import com.example.fakebnb.model.response.SearchPagedResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
+import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.SearchAPI;
 import com.example.fakebnb.rest.UserRegAPI;
@@ -55,6 +56,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -484,12 +486,34 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
         // get username and picture
         welcomeMessage.setText("Welcome " + userRegData.getUsername());
 
-        Bitmap userImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.people1);
-        userImageBitmap = getCircularBitmap(userImageBitmap);
-        if (userImageBitmap != null) {
-            profile_pic_layout.setImageBitmap(userImageBitmap);
-            profile_pic_layout.setPadding(0, 0, 0, 0);
-        }
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getImage(userId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            userImageBitmap = getCircularBitmap(userImageBitmap);
+                            if (userImageBitmap != null) {
+                                profile_pic_layout.setImageBitmap(userImageBitmap);
+                                profile_pic_layout.setPadding(0, 0, 0, 0);
+                            }
+                        } else {
+                            Toast.makeText(MainPageActivity.this, "1 Couldn't get user image", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "1 Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        Toast.makeText(MainPageActivity.this, "2 Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "2 Couldn't get user image: " + t.getMessage());
+                    }
+                });
+
+
     }
 
     private Bitmap getCircularBitmap(Bitmap bitmap) {
@@ -646,7 +670,13 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
         rent_room_intent.putExtra("rental_id", rentalId);
         rent_room_intent.putExtra("check_in_date", checkInDate.getText().toString());
         rent_room_intent.putExtra("check_out_date", checkOutDate.getText().toString());
-        rent_room_intent.putExtra("num_of_guests", Integer.parseInt(numGuestsSpinner.getSelectedItem().toString()));
+        Integer numGuests;
+        try {
+            numGuests = Integer.parseInt(numGuestsSpinner.getSelectedItem().toString());
+        } catch (NumberFormatException e) {
+            numGuests = null;
+        }
+        rent_room_intent.putExtra("num_of_guests", numGuests);
         startActivity(rent_room_intent);
     }
 }
