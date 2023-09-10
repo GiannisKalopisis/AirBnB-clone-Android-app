@@ -18,13 +18,13 @@ public class ImageController {
     @Autowired
     private ImageService imageService;
 
-    @GetMapping("/image/{userId}")
+    @GetMapping("/image/user/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getUserRegImage(@PathVariable(value = "userId") Long userId) throws FileNotFoundException {
         return imageService.getUserImage(userId);
     }
 
-    @GetMapping("/image/{apartmentId}")
+    @GetMapping("/image/apartment/{apartmentId}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getApartmentImages(@PathVariable(value = "apartmentId") Long apartmentId) throws FileNotFoundException {
         return imageService.getApartmentImages(apartmentId);

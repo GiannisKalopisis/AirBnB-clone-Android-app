@@ -32,12 +32,12 @@ public class ApartmentController {
 
     @PostMapping( "/apartment")
     @PreAuthorize("hasAuthority('ROLE_HOST')")
-    public ResponseEntity<?> createApartment(@Valid @RequestParam String apartmentRequest,
-                                             @RequestParam(value = "images") List<MultipartFile> images,
+    public ResponseEntity<?> createApartment(@Valid @RequestParam(value = "apartmentRequest") String apartmentRequest,
+                                             @RequestParam(value = "image") List<MultipartFile> image,
                                              @Valid @CurrentUser UserDetailsImpl currentUser)
         throws JsonParseException, JsonMappingException, IOException {
         ApartmentRequest apartmentRequestReal = objectMapper.readValue(apartmentRequest, ApartmentRequest.class);
-        return apartmentService.createApartment(currentUser, apartmentRequestReal, images);
+        return apartmentService.createApartment(currentUser, apartmentRequestReal, image);
     }
 
     @PutMapping("/apartment/{apartmentId}")
