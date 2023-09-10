@@ -29,6 +29,8 @@ public class PopulateDBService {
     private static final String BOOKING_DATA_FILE_PATH = "src/main/resources/static/csv_data/booking_data.csv";
     private static final String BOOKING_REVIEW_DATA_FILE_PATH = "src/main/resources/static/csv_data/booking_review_data.csv";
 
+    private static final String IMAGE_DEFAULT_PATH = "src/main/resources/static/images/static_image.png";
+
     @Autowired
     private UserRegRepository userRegRepository;
 
@@ -52,6 +54,12 @@ public class PopulateDBService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ImageService imageService;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     private static final long FIRST_ID = 1;
 
@@ -99,6 +107,11 @@ public class PopulateDBService {
                     userReg.addRole(userRoleUser);
                     userReg.addRole(userRoleHost);
                 }
+
+                // Store image
+                Image imageIn = new Image(IMAGE_DEFAULT_PATH);
+                imageIn.setUserReg(userReg);
+                imageRepository.save(imageIn);
 
                 userRegRepository.save(userReg);
             }

@@ -155,7 +155,7 @@ public class ChatService {
                 message.setSeen(true);
                 messageRepository.save(message);
             }
-            messageResponses.add(new MessageResponse(message.getSenderUserReg().getUsername(), message.getContent()));
+            messageResponses.add(new MessageResponse(message.getSenderUserReg().getId(), message.getSenderUserReg().getUsername(), message.getContent()));
         }
 
         return new PagedResponse<>(messageResponses, messagePage.getNumber(),
