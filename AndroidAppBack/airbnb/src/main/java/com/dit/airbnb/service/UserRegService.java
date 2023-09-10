@@ -81,6 +81,12 @@ public class UserRegService {
 
         // Store image
         String imageName = imageService.store(image);
+        if (imageName.contains(".png")) {
+            imageName = imageName.split(".png")[0] + (ImageService.imageCounter) + ".png";
+            ImageService.imageCounter++;
+        } else {
+            imageName = imageName + (ImageService.imageCounter++);
+        }
         Image imageIn = new Image(imageName);
         imageIn.setUserReg(userReg);
         imageRepository.save(imageIn);

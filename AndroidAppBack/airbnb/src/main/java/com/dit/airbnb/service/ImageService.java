@@ -49,6 +49,8 @@ public class ImageService {
     @Autowired
     private ImageRepository imageRepository;
 
+    public static int imageCounter = 1;
+
     @Autowired
     public ImageService(StorageProperties properties) {
         this.rootLocation = Paths.get(properties.getLocation());
