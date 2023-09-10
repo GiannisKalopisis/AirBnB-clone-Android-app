@@ -85,6 +85,8 @@ public class UserRegService {
         imageIn.setUserReg(userReg);
         imageRepository.save(imageIn);
 
+        userReg.setImage(imageIn);
+
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/{userId}")
                 .buildAndExpand(userReg.getId()).toUri();
