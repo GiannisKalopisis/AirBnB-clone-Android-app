@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/app")
@@ -24,8 +27,8 @@ public class UserRegController {
     private UserRegService userRegService;
 
     @PostMapping("/user/signUp")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) {
-        return userRegService.signUpUser(signUpRequest);
+    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest, @RequestParam("file") MultipartFile file) {
+        return userRegService.signUpUser(signUpRequest, file);
     }
 
     @PostMapping("/user/signIn")

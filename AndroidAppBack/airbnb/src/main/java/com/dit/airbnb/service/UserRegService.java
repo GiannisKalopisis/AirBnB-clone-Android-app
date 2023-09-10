@@ -1,11 +1,13 @@
 package com.dit.airbnb.service;
 
+import com.dit.airbnb.dto.Image;
 import com.dit.airbnb.dto.Role;
 import com.dit.airbnb.dto.UserReg;
 import com.dit.airbnb.dto.enums.RoleName;
 import com.dit.airbnb.exception.AppException;
 import com.dit.airbnb.exception.ResourceNotFoundException;
 import com.dit.airbnb.exception.UserExistsException;
+import com.dit.airbnb.repository.ImageRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.user_reg.SignInRequest;
 import com.dit.airbnb.request.user_reg.SignUpRequest;
@@ -23,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -47,7 +50,13 @@ public class UserRegService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public ResponseEntity<?> signUpUser(SignUpRequest signUpRequest) {
+    @Autowired
+    private ImageService imageService;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
+    public ResponseEntity<?> signUpUser(SignUpRequest signUpRequest, MultipartFile image) {
         userRegRepository.findByUsername(signUpRequest.getUsername())
                 .ifPresent((s) -> {
                     throw new UserExistsException("A user with the same username already exists");
@@ -69,6 +78,12 @@ public class UserRegService {
         }
         userReg.setRoles(new HashSet<>(){{addAll(roleSet);}});
         userRegRepository.save(userReg);
+
+        // Store image
+        String imageName = imageService.store(image);
+        Image imageIn = new Image(imageName);
+        imageIn.setUserReg(userReg);
+        imageRepository.save(imageIn);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/{userId}")

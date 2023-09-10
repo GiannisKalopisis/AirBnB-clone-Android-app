@@ -32,5 +32,7 @@ public class Image {
     @JoinColumn(name = "apartment_id")
     private Apartment apartment;
 
-
+    public Image(String path) {
+        this.path = path;
+    }
 }
