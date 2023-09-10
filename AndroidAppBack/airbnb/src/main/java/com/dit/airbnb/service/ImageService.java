@@ -69,10 +69,10 @@ public class ImageService {
         String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         if (filename.contains(".png")) {
             filename = filename.split(".png")[0] + (ImageService.IMAGE_COUNTER) + ".png";
-            ImageService.IMAGE_COUNTER++;
         } else {
-            filename = filename + (ImageService.IMAGE_COUNTER++);
+            filename = filename + (ImageService.IMAGE_COUNTER) + ".png";
         }
+        ImageService.IMAGE_COUNTER++;
         try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file " + filename);
