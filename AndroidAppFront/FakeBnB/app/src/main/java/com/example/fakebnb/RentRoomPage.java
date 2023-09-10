@@ -140,7 +140,7 @@ public class RentRoomPage extends AppCompatActivity {
         bottomBarClickListeners();
         buttonClickListener();
 
-        if (checkInDate == null || checkInDate.isEmpty() || checkOutDate == null || checkOutDate.isEmpty()) {
+        if (checkInDate == null || checkInDate.isEmpty() || checkOutDate == null || checkOutDate.isEmpty() || numOfGuests == null) {
             makeReservationButton.setVisibility(View.GONE);
         }
 

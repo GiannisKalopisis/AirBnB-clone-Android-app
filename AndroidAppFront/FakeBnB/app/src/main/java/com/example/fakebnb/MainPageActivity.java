@@ -646,7 +646,13 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
         rent_room_intent.putExtra("rental_id", rentalId);
         rent_room_intent.putExtra("check_in_date", checkInDate.getText().toString());
         rent_room_intent.putExtra("check_out_date", checkOutDate.getText().toString());
-        rent_room_intent.putExtra("num_of_guests", Integer.parseInt(numGuestsSpinner.getSelectedItem().toString()));
+        Integer numGuests;
+        try {
+            numGuests = Integer.parseInt(numGuestsSpinner.getSelectedItem().toString());
+        } catch (NumberFormatException e) {
+            numGuests = null;
+        }
+        rent_room_intent.putExtra("num_of_guests", numGuests);
         startActivity(rent_room_intent);
     }
 }
