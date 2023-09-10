@@ -27,7 +27,7 @@ public class ImageUtils {
         byte[] imageBytes = byteArrayOutputStream.toByteArray();
 
         // Create a MultipartBody.Part for the image
-        return MultipartBody.Part.createFormData("image", "test_image.png", RequestBody.create(MediaType.parse("image/*"), imageBytes));
+        return MultipartBody.Part.createFormData("image", "image", RequestBody.create(MediaType.parse("image/*"), imageBytes));
     }
 
     public static List<MultipartBody.Part> getImageParts(List<Bitmap> bitmapList, List<String> imagePaths) {
