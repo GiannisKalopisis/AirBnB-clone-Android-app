@@ -32,7 +32,6 @@ public class SearchRequest {
     @Enumerated
     private RentalType rentalType;
 
-    @NotNull
     private Integer numberOfGuests;
 
 }

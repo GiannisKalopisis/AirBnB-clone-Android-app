@@ -30,4 +30,6 @@ public class SearchResponse {
     private String district;
 
     private String description;
+
+    private Integer maxVisitors;
 }

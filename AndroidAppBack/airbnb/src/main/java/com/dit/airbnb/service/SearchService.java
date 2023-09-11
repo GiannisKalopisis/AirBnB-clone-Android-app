@@ -66,17 +66,23 @@ public class SearchService {
             Double totalRating = 0.0;
             Set<Booking> bookings = apartment.getBookings();
             int bookingReviewCard = 0;
+            BigDecimal totalCost = BigDecimal.valueOf(0.0);
             // NOTE(geo): MM impl
-            for (Booking booking: bookings) {
-                for (BookingReview bookingReview: booking.getBookingReviews()) {
-                    totalRating += bookingReview.getRating();
-                    bookingReviewCard++;
+            if (searchRequest.getNumberOfGuests() != null) {
+                for (Booking booking : bookings) {
+                    for (BookingReview bookingReview : booking.getBookingReviews()) {
+                        totalRating += bookingReview.getRating();
+                        bookingReviewCard++;
+                    }
                 }
+
+                // = minRetailPrice + numOfGuests*extraCostPerPerson)
+                BigDecimal extraCostPerPerson = apartment.getExtraCostPerPerson();
+                BigDecimal minRetailPrice = apartment.getMinRetailPrice();
+                totalCost = extraCostPerPerson != null && minRetailPrice != null ? extraCostPerPerson.multiply(new BigDecimal((searchRequest.getNumberOfGuests()))).add(apartment.getMinRetailPrice()) : BigDecimal.valueOf(0.0);
             }
-            // = minRetailPrice + numOfGuests*extraCostPerPerson)
-            BigDecimal totalCost = apartment.getExtraCostPerPerson().multiply(new BigDecimal((searchRequest.getNumberOfGuests()))).add(apartment.getMinRetailPrice());
             searchResponses.add(new SearchResponse(apartment.getId(), totalCost,  bookingReviewCard != 0 ? Precision.round((totalRating / (double) bookingReviewCard), 2) : 0.0,
-                    apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getDescription()));
+                    apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getDescription(), apartment.getMaxVisitors()));
         }
 
         // Define a custom comparator based on the totalCost attribute
@@ -126,7 +132,7 @@ public class SearchService {
             }
 
             if (searchRequest.getNumberOfGuests() != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("maxVisitors"), searchRequest.getNumberOfGuests()));
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("maxVisitors"), searchRequest.getNumberOfGuests()));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
