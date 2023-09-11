@@ -1,7 +1,6 @@
 package com.example.fakebnb.rest;
 
-import java.io.FileNotFoundException;
-import java.util.List;
+import com.example.fakebnb.model.response.ApartmentImageIdsResponse;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -13,6 +12,9 @@ public interface ImageAPI {
     @GET("/app/image/user/{userId}")
     Call<ResponseBody> getImage(@Path(value = "userId") Long userId);
 
-    @GET("/app/image/apartment/{apartmentId}")
-    Call<List<ResponseBody>> getApartmentImages(@Path(value = "apartmentId") Long apartmentId);
+    @GET("/app/image/apartment/{imageId}")
+    Call<ResponseBody> getApartmentImageByImageId(@Path(value = "imageId") Long imageId);
+
+    @GET("/app/image/{apartmentId}")
+    Call<ApartmentImageIdsResponse> getApartmentImageIds(@Path(value = "apartmentId") Long apartmentId);
 }

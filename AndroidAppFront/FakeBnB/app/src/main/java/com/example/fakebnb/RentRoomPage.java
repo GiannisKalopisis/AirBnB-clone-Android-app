@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -28,14 +29,15 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.denzcoskun.imageslider.ImageSlider;
-import com.denzcoskun.imageslider.constants.ScaleTypes;
-import com.denzcoskun.imageslider.models.SlideModel;
+import com.example.fakebnb.Callbacks.ApartmentImageLoadCallback;
+import com.example.fakebnb.Callbacks.ImageLoadCallback;
 import com.example.fakebnb.adapter.RulesAdapter;
+import com.example.fakebnb.adapter.SliderAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.BookingRequest;
 import com.example.fakebnb.model.request.ChatSenderReceiverRequest;
 import com.example.fakebnb.model.response.AbleToReviewResponse;
+import com.example.fakebnb.model.response.ApartmentImageIdsResponse;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.BookingResponse;
 import com.example.fakebnb.model.response.ChatIdResponse;
@@ -54,6 +56,9 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.smarteist.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType;
+import com.smarteist.autoimageslider.SliderAnimations;
+import com.smarteist.autoimageslider.SliderView;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -101,7 +106,7 @@ public class RentRoomPage extends AppCompatActivity {
 
     private TextView rentRoomReviewTitle;
 
-    private ArrayList<SlideModel> slideModels;
+//    private ArrayList<SlideModel> slideModels;
 
     // search dates
     private String checkInDate, checkOutDate;
@@ -225,9 +230,6 @@ public class RentRoomPage extends AppCompatActivity {
                                         }
                                     });
                                 }
-
-                                fetchApartmentImages(apartmentId, apartmentAPI);
-                                fetchHostImage(apartmentId, apartmentAPI);
                             } else {
                                 showToast("Could not get rental info");
                                 goToMainPage();
@@ -275,33 +277,6 @@ public class RentRoomPage extends AppCompatActivity {
                 Toast.makeText(this, "Not rendering map", Toast.LENGTH_SHORT).show();
             }
         }
-    }
-
-    private void fetchApartmentImages(long apartmentId, ApartmentAPI apartmentAPI) {
-        /*
-        apartmentAPI.callOfImages()...
-        if (success) {
-            slideModels.addAllImages();
-        }
-        else {
-            showToast("Could not get rental images");
-            continue;
-        }
-         */
-    }
-
-    private void fetchHostImage(long hostId, ApartmentAPI apartmentAPI) {
-        /*
-        // get host id of the apartment
-        apartmentAPI.callOfHostImage()...
-        if (success) {
-            slideModels.addHostImage();
-        }
-        else {
-            showToast("Could not get host image");
-            continue;
-        }
-         */
     }
 
     private void showToast(String message) {
@@ -394,9 +369,6 @@ public class RentRoomPage extends AppCompatActivity {
      * Data manipulation methods
      */
     private void renderFetchedData() {
-        // get the data
-        // parse the data
-
         renderRoomInfoSection();
         renderPriceSection();
         renderDescriptionSection();
@@ -562,14 +534,90 @@ public class RentRoomPage extends AppCompatActivity {
 
     private void createSlider() {
         // get images from database
-        ImageSlider imageSlider = findViewById(R.id.cardImageSlider);
-        slideModels = new ArrayList<>();
+//        ImageSlider imageSlider = findViewById(R.id.cardImageSlider);
+        ArrayList<Bitmap> sliderBitmapArrayList = new ArrayList<>();
 
-        slideModels.add(new SlideModel(R.drawable.login_image, ScaleTypes.FIT));
-        slideModels.add(new SlideModel(R.drawable.register_image, ScaleTypes.FIT));
-        slideModels.add(new SlideModel(R.drawable.start_image, ScaleTypes.FIT));
+        SliderAdapter imageSliderAdapter = new SliderAdapter();
+        SliderView sliderView = findViewById(R.id.cardImageSlider);
+        sliderView.setSliderAdapter(imageSliderAdapter);
+        sliderView.setIndicatorEnabled(true);
+        sliderView.setIndicatorVisibility(true);
+        sliderView.setIndicatorAnimation(IndicatorAnimationType.WORM); //set indicator animation by using IndicatorAnimationType. :WORM or THIN_WORM or COLOR or DROP or FILL or NONE or SCALE or SCALE_DOWN or SLIDE and SWAP!!
+        sliderView.setSliderTransformAnimation(SliderAnimations.SIMPLETRANSFORMATION);
+        sliderView.setAutoCycleDirection(SliderView.AUTO_CYCLE_DIRECTION_BACK_AND_FORTH);
+        sliderView.setIndicatorSelectedColor(Color.WHITE);
+        sliderView.setIndicatorUnselectedColor(Color.GRAY);
+        sliderView.setScrollTimeInSec(3);
+        sliderView.setAutoCycle(true);
+        sliderView.startAutoCycle();
+//        slideModels = new ArrayList<>();
 
-        imageSlider.setImageList(slideModels, ScaleTypes.FIT);
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getApartmentImageIds(apartmentId)
+                .enqueue(new Callback<ApartmentImageIdsResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApartmentImageIdsResponse> call, @NonNull Response<ApartmentImageIdsResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            for (Long imageId : response.body().getObject()) {
+                                getApartmentImage(imageId, new ApartmentImageLoadCallback() {
+                                    @Override
+                                    public void onImageLoaded(Bitmap apartmentImageBitmap) {
+                                        imageSliderAdapter.addItem(apartmentImageBitmap);
+                                    }
+
+                                    @Override
+                                    public void onError(String errorMessage) {
+                                        Toast.makeText(RentRoomPage.this, "Error while downloading image: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        } else {
+                            Toast.makeText(RentRoomPage.this, "1 Couldn't get apartment images", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "1 Couldn't get apartment images");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApartmentImageIdsResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(RentRoomPage.this, "2 Couldn't get apartment images:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "2 Couldn't get apartment images: " + t.getMessage());
+                    }
+                });
+
+//        slideModels.add(new SlideModel(R.drawable.login_image, ScaleTypes.FIT));
+//        slideModels.add(new SlideModel(R.drawable.register_image, ScaleTypes.FIT));
+//        slideModels.add(new SlideModel(R.drawable.start_image, ScaleTypes.FIT));
+//
+//        imageSlider.setImageList(slideModels, ScaleTypes.FIT);
+    }
+
+    private void getApartmentImage(Long imageId, ApartmentImageLoadCallback callback) {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getApartmentImageByImageId(imageId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            if (userImageBitmap != null) {
+                                callback.onImageLoaded(userImageBitmap);
+                            } else {
+                                callback.onError("Couldn't process user image");
+                            }
+                        } else {
+                            callback.onError("Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        callback.onError("Couldn't get user image: " + t.getMessage());
+                    }
+                });
     }
 
     private void initView() {
