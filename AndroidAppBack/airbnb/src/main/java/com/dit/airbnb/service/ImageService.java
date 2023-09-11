@@ -8,6 +8,7 @@ import com.dit.airbnb.exception.StorageException;
 import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.ImageRepository;
 import com.dit.airbnb.repository.UserRegRepository;
+import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import com.dit.airbnb.storage.StorageProperties;
 import jakarta.annotation.PostConstruct;
@@ -190,30 +191,21 @@ public class ImageService {
                 .body(resource);
     }
 
-    public ResponseEntity<?> getApartmentImages(@RequestParam Long apartmentId) throws IOException {
-        List<Image> images = imageRepository.findByApartmentId(apartmentId);
-        if (images == null || images.isEmpty()) {
+    public ResponseEntity<?> getApartmentImageByImageId(@RequestParam Long imageId) throws IOException {
+        Optional<Image> images = imageRepository.findById(imageId);
+        if (images.isEmpty()) {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; filename=\"" + "emptyImage" + "\"")
                     .body(null);
         }
-        List<Resource> resources = new ArrayList<>();
-        for (Image image : images) {
-            Optional<Resource> optionalResource = Optional.of(loadAsResource(image.getPath()));
-            optionalResource.ifPresent(resources::add);
-        }
 
-        // Convert the resources to a serializable format, e.g., byte arrays
-        List<byte[]> resourceBytes = new ArrayList<>();
-        for (Resource resource : resources) {
-            resourceBytes.add(IOUtils.toByteArray(resource.getInputStream()));
-        }
+        Resource resource = loadAsResource(images.get().getPath());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + "multipleImages" + "\"")
-                .body(resourceBytes);
+                .body(resource);
     }
 
     // Store images
@@ -241,5 +233,9 @@ public class ImageService {
             imageRepository.save(imageIn);
         }
         return apartment;
+    }
+    public ResponseEntity<?> getApartmentImageIds(Long apartmentId) {
+        List<Long> ids = imageRepository.findByApartmentId(apartmentId);
+        return ResponseEntity.ok(new ApiResponse(true, "getApartmentImageIds succeed", ids));
     }
 }

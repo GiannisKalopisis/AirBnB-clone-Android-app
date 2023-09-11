@@ -25,9 +25,15 @@ public class ImageController {
         return imageService.getUserImage(userId);
     }
 
-    @GetMapping("/image/apartment/{apartmentId}")
+    @GetMapping("/image/apartment/{imageId}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
-    public ResponseEntity<?> getApartmentImages(@PathVariable(value = "apartmentId") Long apartmentId) throws IOException {
-        return imageService.getApartmentImages(apartmentId);
+    public ResponseEntity<?> getApartmentImageByImageId(@PathVariable(value = "imageId") Long imageId) throws IOException {
+        return imageService.getApartmentImageByImageId(imageId);
+    }
+
+    @GetMapping("/image/{apartmentId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
+    public ResponseEntity<?> getApartmentImageIds(@PathVariable(value = "apartmentId") Long apartmentId) throws IOException {
+        return imageService.getApartmentImageIds(apartmentId);
     }
 }
