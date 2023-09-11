@@ -226,6 +226,7 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "imagePath: " + imagePath, Toast.LENGTH_SHORT).show();
                         imageBitmap = BitmapFactory.decodeFile(imagePath);
                         imageView.setImageBitmap(imageBitmap);
+                        saveProfileInfoChangesButton.setVisibility(View.VISIBLE);
                     }
                 }
         );
