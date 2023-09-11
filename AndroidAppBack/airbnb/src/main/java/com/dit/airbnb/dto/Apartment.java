@@ -128,6 +128,7 @@ public class Apartment {
         this.geoLat= apartmentRequest.getGeoLat();
         this.geoLong = apartmentRequest.getGeoLong();
         this.rentalType = apartmentRequest.getRentalType();
+        this.rules = apartmentRequest.getRules();
     }
 
     public Apartment(ApartmentCSV apartmentCSV) {
