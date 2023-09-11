@@ -35,12 +35,15 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.Callbacks.ApartmentImageLoadCallback;
 import com.example.fakebnb.adapter.ImageDeleteAdapter;
 import com.example.fakebnb.enums.RentalType;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.ApartmentRequest;
+import com.example.fakebnb.model.response.ApartmentImageIdsResponse;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
+import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.utils.RealPathUtil;
 import com.google.android.gms.common.ConnectionResult;
@@ -51,8 +54,6 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -68,6 +69,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -126,6 +128,9 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     private RecyclerView imagesRecyclerView;
     private ImageDeleteAdapter imageAdapter;
 
+    private List<Long> imageIdsToDelete = new ArrayList<>();
+    private List<Long> imageIds = new ArrayList<>();
+
     // Permissions for accessing the storage
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -165,10 +170,45 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
          * Variables for MULTIPLE IMAGES
          */
         imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
-        imagesRecyclerView = findViewById(R.id.modifyImageRecyclerView);
-        imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         imageAdapter = new ImageDeleteAdapter(imageBitmapList);
+        imagesRecyclerView = findViewById(R.id.modifyImageRecyclerView);
+        imagesRecyclerView.setLayoutManager(new LinearLayoutManager(PlaceModificationPageActivity.this));
         imagesRecyclerView.setAdapter(imageAdapter);
+
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getApartmentImageIds(rentalId)
+                .enqueue(new Callback<ApartmentImageIdsResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApartmentImageIdsResponse> call, @NonNull Response<ApartmentImageIdsResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            imageIds.addAll(response.body().getObject());
+                            for (Long imageId : response.body().getObject()) {
+                                getApartmentImage(imageId, new ApartmentImageLoadCallback() {
+                                    @Override
+                                    public void onImageLoaded(Bitmap apartmentImageBitmap) {
+                                        imageAdapter.addItem(apartmentImageBitmap);
+                                    }
+
+                                    @Override
+                                    public void onError(String errorMessage) {
+                                        Toast.makeText(PlaceModificationPageActivity.this, "Error while downloading image: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        } else {
+                            Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't get apartment images", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "1 Couldn't get apartment images");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApartmentImageIdsResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't get apartment images:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "2 Couldn't get apartment images: " + t.getMessage());
+                    }
+                });
 
         imageClickListener();
         setImagePickerLauncher();
@@ -177,7 +217,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         checkGoogleAPIAvailability();
         modifyPlaceMapView.onCreate(savedInstanceState);
 
-        RestClient restClient = new RestClient(jwtToken);
+//        RestClient restClient = new RestClient(jwtToken);
         ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
 
         apartmentAPI.getApartmentInfo(rentalId)
@@ -232,6 +272,36 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                     }
                 });
 
+    }
+
+    /**
+     * Get images of apartment from server
+     */
+    private void getApartmentImage(Long imageId, ApartmentImageLoadCallback callback) {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getApartmentImageByImageId(imageId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            if (userImageBitmap != null) {
+                                callback.onImageLoaded(userImageBitmap);
+                            } else {
+                                callback.onError("Couldn't process user image");
+                            }
+                        } else {
+                            callback.onError("Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        callback.onError("Couldn't get user image: " + t.getMessage());
+                    }
+                });
     }
 
     /**
@@ -1137,9 +1207,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modifyPlaceMinPrice = findViewById(R.id.modifyPlaceMinPriceEditText);
         modifyPlaceExtraCost = findViewById(R.id.modifyPlaceExtraCostEditText);
         modifyPlaceRentalTypeRadioGroup = findViewById(R.id.modifyPlaceRentalTypeRadioGroup);
-
-        // TODO: change the photo uploader
-//        modifyPlacePhotoUpload = findViewById(R.id.modifyPlacePhotoUploadEditText);
 
         /**
          * PHOTO ONLY

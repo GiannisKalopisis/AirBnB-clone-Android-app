@@ -11,7 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.R;
+import com.example.fakebnb.model.MessageModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ImageDeleteAdapter extends RecyclerView.Adapter<ImageDeleteAdapter.ImageViewHolder> {
@@ -47,6 +49,11 @@ public class ImageDeleteAdapter extends RecyclerView.Adapter<ImageDeleteAdapter.
     @Override
     public int getItemCount() {
         return imageBitmapList.size();
+    }
+
+    public void addItem(Bitmap bitmap) {
+        imageBitmapList.add(bitmap);
+        notifyDataSetChanged();
     }
 
     public class ImageViewHolder extends RecyclerView.ViewHolder {
