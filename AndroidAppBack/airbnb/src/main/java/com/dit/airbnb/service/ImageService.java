@@ -204,7 +204,7 @@ public class ImageService {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + "multipleImages" + "\"")
+                        "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
     }
 
