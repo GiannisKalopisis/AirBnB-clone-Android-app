@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/app")
@@ -26,7 +27,7 @@ public class ImageController {
 
     @GetMapping("/image/apartment/{apartmentId}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
-    public ResponseEntity<?> getApartmentImages(@PathVariable(value = "apartmentId") Long apartmentId) throws FileNotFoundException {
+    public ResponseEntity<?> getApartmentImages(@PathVariable(value = "apartmentId") Long apartmentId) throws IOException {
         return imageService.getApartmentImages(apartmentId);
     }
 }

@@ -11,6 +11,7 @@ import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import com.dit.airbnb.storage.StorageProperties;
 import jakarta.annotation.PostConstruct;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -30,10 +31,23 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
 import org.springframework.util.FileSystemUtils;
+
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ImageService {
@@ -176,25 +190,31 @@ public class ImageService {
                 .body(resource);
     }
 
-    public ResponseEntity<?> getApartmentImages(Long apartmentId) throws FileNotFoundException {
+    public ResponseEntity<?> getApartmentImages(@RequestParam Long apartmentId) throws IOException {
         List<Image> images = imageRepository.findByApartmentId(apartmentId);
-        if (images == null) {
+        if (images == null || images.isEmpty()) {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; filename=\"" + "emptyImage" + "\"")
                     .body(null);
         }
         List<Resource> resources = new ArrayList<>();
-        for (Image image: images) {
-            resources.add(loadAsResource(image.getPath()));
+        for (Image image : images) {
+            Optional<Resource> optionalResource = Optional.of(loadAsResource(image.getPath()));
+            optionalResource.ifPresent(resources::add);
         }
+
+        // Convert the resources to a serializable format, e.g., byte arrays
+        List<byte[]> resourceBytes = new ArrayList<>();
+        for (Resource resource : resources) {
+            resourceBytes.add(IOUtils.toByteArray(resource.getInputStream()));
+        }
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + "multipleImages" + "\"")
-                .body(resources);
+                .body(resourceBytes);
     }
-
-
 
     // Store images
     public UserReg userRegMultiSaveImage(Long userId, MultipartFile image) {
