@@ -7,6 +7,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -30,6 +34,7 @@ import androidx.core.app.ActivityCompat;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.request.UserRegUpdateRequest;
 import com.example.fakebnb.model.response.UserRegResponse;
+import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 import com.example.fakebnb.utils.RealPathUtil;
@@ -38,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -56,6 +62,9 @@ public class ProfileActivity extends AppCompatActivity {
     // warning text fields
     private TextView profileUserUsernameView, profileUserEmailView;
     private TextView profileFirstNameWarn, profileLastNameWarn, profilePhoneWarn, profilePhotoWarn;
+    private ImageView userImageView;
+
+
     // editable text
     private EditText profileFirstNameEditText, profileLastNameEditText, profilePhoneEditText;
     // Linear View buttons
@@ -114,6 +123,7 @@ public class ProfileActivity extends AppCompatActivity {
                             if (userRegResponse != null) {
                                 Log.d("API_CALL", "GetUserReg successful");
                                 userRegData = userRegResponse.getObject();
+                                downloadUserImage();
                                 bottomBarClickListeners();
                                 setData();
                                 saveProfileInfoChangesButton.setVisibility(View.GONE);
@@ -146,6 +156,59 @@ public class ProfileActivity extends AppCompatActivity {
         imageClickListener();
         setImagePickerLauncher();
     }
+
+    /**
+     * User Image download
+     */
+    private void downloadUserImage() {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getImage(userId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            userImageBitmap = getCircularBitmap(userImageBitmap);
+                            if (userImageBitmap != null) {
+                                userImageView.setImageBitmap(userImageBitmap);
+                                userImageView.setPadding(0, 0, 0, 0);
+                            }
+                        } else {
+                            Toast.makeText(ProfileActivity.this, "1 Couldn't get user image", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "1 Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        Toast.makeText(ProfileActivity.this, "2 Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "2 Couldn't get user image: " + t.getMessage());
+                    }
+                });
+    }
+
+    private Bitmap getCircularBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outputBitmap);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+
+        canvas.drawCircle(width / 2f, height / 2f, width / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        bitmap.recycle();
+
+        return outputBitmap;
+    }
+
 
     /**
      * Image picker launcher for SINGLE IMAGE
@@ -460,6 +523,7 @@ public class ProfileActivity extends AppCompatActivity {
         Log.d(TAG, "initViews: started");
 
         // Initializing uneditable text
+        userImageView = findViewById(R.id.profile_user_image_view);
         profileUserUsernameView = findViewById(R.id.profileUserUsernameView);
         profileUserEmailView = findViewById(R.id.profileUserEmailView);
 

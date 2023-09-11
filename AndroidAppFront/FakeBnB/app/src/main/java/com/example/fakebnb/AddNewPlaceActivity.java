@@ -12,6 +12,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -36,8 +38,6 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.fakebnb.Callbacks.AddApartmentCallback;
-import com.example.fakebnb.adapter.ImageAdapter;
 import com.example.fakebnb.adapter.ImageDeleteAdapter;
 import com.example.fakebnb.enums.RentalType;
 import com.example.fakebnb.enums.RoleName;
@@ -45,6 +45,7 @@ import com.example.fakebnb.model.request.ApartmentRequest;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.ImageUtils;
 import com.example.fakebnb.utils.RealPathUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -54,6 +55,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -68,6 +70,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -416,10 +419,18 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningAddress.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningAddress.setVisibility(View.GONE);
-                    addressToShowOnMap = concatAddressToShowOnMap();
-                    if (isMapReady && googleMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            addressToShowOnMap = concatAddressToShowOnMap();
+                            if (isMapReady && googleMap != null) {
+                                showAddressOnMap(addressToShowOnMap);
+                            }
+                        }
+                    });
+//                    if (isMapReady && googleMap != null) {
+//                        showAddressOnMap(addressToShowOnMap);
+//                    }
                 }
             }
         };
@@ -440,10 +451,15 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningDistrict.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningDistrict.setVisibility(View.GONE);
-                    addressToShowOnMap = concatAddressToShowOnMap();
-                    if (isMapReady && googleMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            addressToShowOnMap = concatAddressToShowOnMap();
+                            if (isMapReady && googleMap != null) {
+                                showAddressOnMap(addressToShowOnMap);
+                            }
+                        }
+                    });
                 }
             }
         };
@@ -464,10 +480,15 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningCity.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningCity.setVisibility(View.GONE);
-                    addressToShowOnMap = concatAddressToShowOnMap();
-                    if (isMapReady && googleMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            addressToShowOnMap = concatAddressToShowOnMap();
+                            if (isMapReady && googleMap != null) {
+                                showAddressOnMap(addressToShowOnMap);
+                            }
+                        }
+                    });
                 }
             }
         };
@@ -488,10 +509,15 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningCountry.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningCountry.setVisibility(View.GONE);
-                    addressToShowOnMap = concatAddressToShowOnMap();
-                    if (isMapReady && googleMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            addressToShowOnMap = concatAddressToShowOnMap();
+                            if (isMapReady && googleMap != null) {
+                                showAddressOnMap(addressToShowOnMap);
+                            }
+                        }
+                    });
                 }
             }
         };
@@ -895,26 +921,42 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     return;
                 }
 
-                sendDataToDatabase(apartmentRequest, new AddApartmentCallback() {
-                    @Override
-                    public void onSuccess() {
-                        Toast.makeText(view.getContext(), "Apartment added successfully", Toast.LENGTH_SHORT).show();
-                        Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                        host_main_page_intent.putExtra("user_id", userId);
-                        host_main_page_intent.putExtra("user_jwt", jwtToken);
-                        ArrayList<String> roleList = new ArrayList<>();
-                        for (RoleName role : roles) {
-                            roleList.add(role.toString());
-                        }
-                        host_main_page_intent.putStringArrayListExtra("user_roles", roleList);
-                        startActivity(host_main_page_intent);
-                    }
+                Gson gson = new Gson();
 
-                    @Override
-                    public void onFailure(String errorMessage) {
-                        Toast.makeText(view.getContext(), "Error adding apartment, please try again.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                RestClient restClient = new RestClient(jwtToken);
+                ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
+
+                Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(apartmentRequest));
+                List<MultipartBody.Part> image = ImageUtils.getImageParts(imageBitmapList);
+
+                apartmentAPI.createApartment(gson.toJson(apartmentRequest), image)
+                        .enqueue(new Callback<ApartmentResponse>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                                if (response.isSuccessful()) {
+                                    Log.d(TAG, "Apartment added successfully");
+                                    Toast.makeText(view.getContext(), "Apartment added successfully", Toast.LENGTH_SHORT).show();
+                                    Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
+                                    host_main_page_intent.putExtra("user_id", userId);
+                                    host_main_page_intent.putExtra("user_jwt", jwtToken);
+                                    ArrayList<String> roleList = new ArrayList<>();
+                                    for (RoleName role : roles) {
+                                        roleList.add(role.toString());
+                                    }
+                                    host_main_page_intent.putStringArrayListExtra("user_roles", roleList);
+                                    startActivity(host_main_page_intent);
+                                } else {
+                                    Toast.makeText(AddNewPlaceActivity.this, "1 Error adding apartment", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "1 Error adding apartment");
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                                Toast.makeText(AddNewPlaceActivity.this, "2 Error adding apartment: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "2 Error adding apartment: " + t.getMessage());
+                            }
+                        });
             }
         });
     }
@@ -1028,31 +1070,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         apartmentRequest.setRentalType(addPlaceRentalTypeRadioGroup.getCheckedRadioButtonId() == R.id.roomTypeRadioButton ? RentalType.RENTAL_ROOM : RentalType.RENTAL_HOUSE);
 
         return apartmentRequest;
-    }
-
-    private void sendDataToDatabase(ApartmentRequest apartmentRequest, AddApartmentCallback apartmentCallback) {
-        RestClient restClient = new RestClient(jwtToken);
-        ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
-
-        apartmentAPI.createApartment(apartmentRequest)
-                .enqueue(new Callback<ApartmentResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
-                        if (response.isSuccessful()) {
-                            Log.d(TAG, "Apartment added successfully");
-                            apartmentCallback.onSuccess();
-                        } else {
-                            Log.d(TAG, "Error adding apartment");
-                            apartmentCallback.onFailure("Error adding apartment");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
-                        Log.d(TAG, "Error adding apartment: " + t.getMessage());
-                        apartmentCallback.onFailure(t.getMessage());
-                    }
-        });
     }
 
     private boolean validateFields() {

@@ -1,11 +1,18 @@
 package com.example.fakebnb;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.Callbacks.ImageLoadCallback;
 import com.example.fakebnb.adapter.MessageRecyclerAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.MessageModel;
@@ -23,6 +31,7 @@ import com.example.fakebnb.model.response.ChatInfoResponse;
 import com.example.fakebnb.model.response.MessageResponse;
 import com.example.fakebnb.model.response.SingleMessageResponse;
 import com.example.fakebnb.rest.ChatAPI;
+import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 
 import java.util.ArrayList;
@@ -32,6 +41,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,6 +54,7 @@ public class IndividualChatActivity extends AppCompatActivity {
     private ImageButton message_send_btn, back_btn;
     private TextView receiver_username;
     private RecyclerView chat_recycler_view;
+    private ImageView message_user_image_view;
 
     // intent variables
     private Long userId;
@@ -123,6 +134,17 @@ public class IndividualChatActivity extends AppCompatActivity {
                                 messageRecyclerAdapter.setSenderUsername(senderUsername);
                                 messageRecyclerAdapter.setReceiverUsername(receiverUsername);
                                 messageRecyclerAdapter.notifyNamesChanged();
+                                getUserImage(receiverId, new ImageLoadCallback() {
+                                    @Override
+                                    public void onImageLoaded(Bitmap bitmap) {
+                                        message_user_image_view.setImageBitmap(bitmap);
+                                    }
+
+                                    @Override
+                                    public void onError(String error) {
+                                        Log.d(TAG, "Error getting user image: " + error);
+                                    }
+                                });
                             } else {
                                 Toast.makeText(IndividualChatActivity.this, "Couldn't get chat info", Toast.LENGTH_SHORT).show();
                                 goToMainPage();
@@ -140,6 +162,54 @@ public class IndividualChatActivity extends AppCompatActivity {
                         goToMainPage();
                     }
                 });
+    }
+
+    private void getUserImage(Long userId, ImageLoadCallback callback) {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getImage(userId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            userImageBitmap = getCircularBitmap(userImageBitmap);
+                            if (userImageBitmap != null) {
+                                callback.onImageLoaded(userImageBitmap);
+                            } else {
+                                callback.onError("Couldn't process user image");
+                            }
+                        } else {
+                            callback.onError("Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        callback.onError("Couldn't get user image: " + t.getMessage());
+                    }
+                });
+    }
+
+    private Bitmap getCircularBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outputBitmap);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+
+        canvas.drawCircle(width / 2f, height / 2f, width / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        bitmap.recycle();
+
+        return outputBitmap;
     }
 
     private void goToMainPage() {
@@ -290,6 +360,7 @@ public class IndividualChatActivity extends AppCompatActivity {
         back_btn = findViewById(R.id.back_btn);
         receiver_username = findViewById(R.id.other_username);
         chat_recycler_view = findViewById(R.id.chat_recycler_view);
+        message_user_image_view = findViewById(R.id.message_user_image_view);
     }
 
     private void backButtonOnClickListener() {

@@ -43,6 +43,9 @@ public class ApartmentResponse implements Serializable {
 
     public class ApartmentData implements Serializable {
 
+        @SerializedName("id")
+        private Long id;
+
         @SerializedName("amenities")
         private String amenities;
 
@@ -102,6 +105,14 @@ public class ApartmentResponse implements Serializable {
 
         @SerializedName("rentalType")
         private RentalType rentalType;
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
 
         public String getAmenities() {
             return amenities;
