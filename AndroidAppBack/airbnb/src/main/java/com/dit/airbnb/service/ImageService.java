@@ -9,6 +9,7 @@ import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.ImageRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.response.generic.ApiResponse;
+import com.dit.airbnb.security.user.CurrentUser;
 import com.dit.airbnb.security.user.UserDetailsImpl;
 import com.dit.airbnb.storage.StorageProperties;
 import jakarta.annotation.PostConstruct;
@@ -209,6 +210,40 @@ public class ImageService {
             Image imageDel = image.get();
             imageRepository.delete(imageDel);
             Files.delete(Paths.get("src/main/resources/static/images/" + imageDel.getPath()));
+        }
+    }
+
+    public ResponseEntity<?> updateUserImage(UserDetailsImpl currentUser, MultipartFile image) throws IOException {
+        UserReg userReg = userRegRepository.findById(currentUser.getId()).orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", currentUser.getId()));
+
+        if (image != null && !image.isEmpty()) {
+            // delete image
+            List<Image> images = imageRepository.findByUserRegId(currentUser.getId());
+            Image firstImage = images.get(0);
+            imageRepository.delete(firstImage);
+
+            if (!firstImage.getPath().equals(PopulateDBService.IMAGE_DEFAULT_PATH)) Files.delete(Paths.get("src/main/resources/static/images/" + firstImage.getPath()));
+
+            // store the new
+            String imageName = store(image);
+            Image imageIn = new Image(imageName);
+            imageIn.setUserReg(userReg);
+            imageRepository.save(imageIn);
+        }
+
+        return ResponseEntity.ok().body(new ApiResponse(true, "updateUserImage succeed", userReg));
+    }
+
+    public ResponseEntity<?> updateApartmentImages(Long apartmentId, List<MultipartFile> images) {
+
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
+
+        // Store image
+        for (var image: images) {
+            String imageName = store(image);
+            Image imageIn = new Image(imageName);
+            imageIn.setApartment(apartment);
+            imageRepository.save(imageIn);
         }
     }
 

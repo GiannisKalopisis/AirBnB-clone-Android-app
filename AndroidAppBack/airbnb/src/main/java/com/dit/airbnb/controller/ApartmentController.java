@@ -44,11 +44,10 @@ public class ApartmentController {
     @PreAuthorize("hasAuthority('ROLE_HOST')")
     public ResponseEntity<?> updateApartment(@PathVariable(value = "apartmentId") Long apartmentId,
                                              @Valid @RequestParam(value = "apartmentRequest") String apartmentRequest,
-                                             @RequestPart(value = "image", required = false) List<MultipartFile> image,
                                              @Valid @CurrentUser UserDetailsImpl currentUser)
         throws JsonParseException, JsonMappingException, IOException {
         ApartmentRequest apartmentRequestReal = objectMapper.readValue(apartmentRequest, ApartmentRequest.class);
-        return apartmentService.updateApartmentById(apartmentId, currentUser, apartmentRequestReal, image);
+        return apartmentService.updateApartmentById(apartmentId, currentUser, apartmentRequestReal);
     }
 
     @GetMapping("/apartment/{apartmentId}")

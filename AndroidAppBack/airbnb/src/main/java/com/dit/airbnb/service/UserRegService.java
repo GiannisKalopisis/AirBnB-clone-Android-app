@@ -153,21 +153,6 @@ public class UserRegService {
             userRegRepository.save(userReg);
         }
 
-        if (image != null && !image.isEmpty()) {
-            // delete image
-            List<Image> images = imageRepository.findByUserRegId(userRegId);
-            Image firstImage = images.get(0);
-            imageRepository.delete(firstImage);
-
-            if (!firstImage.getPath().equals(PopulateDBService.IMAGE_DEFAULT_PATH)) Files.delete(Paths.get("src/main/resources/static/images/" + firstImage.getPath()));
-
-            // store the new
-            String imageName = imageService.store(image);
-            Image imageIn = new Image(imageName);
-            imageIn.setUserReg(userReg);
-            imageRepository.save(imageIn);
-        }
-
         userRegRepository.save(userReg);
 
         return ResponseEntity.ok(new ApiResponse(true, "updateUserReg succeed", userReg));
