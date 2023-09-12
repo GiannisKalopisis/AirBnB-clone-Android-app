@@ -48,9 +48,9 @@ public class UserRegController {
     }
 
 
-    @PutMapping("/user/{userId}")
+    @PutMapping("/user/image/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
-    public ResponseEntity<?> updateUserReg(@PathVariable(value = "userId") Long userId,
+    public ResponseEntity<?> updateUserRegWithImage(@PathVariable(value = "userId") Long userId,
                                            @RequestParam String userRegUpdateRequest,
                                            @RequestParam(value = "image") MultipartFile image,
                                            @Valid @CurrentUser UserDetailsImpl currentUser)
