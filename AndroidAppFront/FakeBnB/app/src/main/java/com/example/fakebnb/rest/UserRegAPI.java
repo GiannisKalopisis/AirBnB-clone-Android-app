@@ -28,9 +28,11 @@ public interface UserRegAPI {
     @POST("/app/user/signIn")
     Call<SignInResponse> singInUser(@Body UserLoginModel userLoginModel);
 
+    @Multipart
     @PUT("/app/user/{userId}")
     Call<Void> updateUserReg(@Path("userId") Long userId,
-                             @Body UserRegUpdateRequest userRegUpdateRequest);
+                             @Query(value = "userRegUpdateRequest") String userRegUpdateRequest,
+                             @Part MultipartBody.Part image);
 
     @GET("/app/user/{userId}")
     Call<UserRegResponse> getUserReg(@Path("userId") Long userId);
