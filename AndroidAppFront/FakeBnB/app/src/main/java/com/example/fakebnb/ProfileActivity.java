@@ -37,7 +37,6 @@ import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
-import com.example.fakebnb.utils.AndroidUtil;
 import com.example.fakebnb.utils.ImageUtils;
 import com.example.fakebnb.utils.NavigationUtils;
 import com.example.fakebnb.utils.RealPathUtil;
@@ -45,8 +44,10 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -162,7 +163,11 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
+        if (currentRole.equals(RoleName.ROLE_HOST)) {
+            NavigationUtils.goToHostMainPage(ProfileActivity.this, userId, jwtToken, roles);
+        } else if (currentRole.equals(RoleName.ROLE_USER)) {
+            NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
+        }
     }
 
     /**
@@ -325,7 +330,7 @@ public class ProfileActivity extends AppCompatActivity {
                 RestClient restClient = new RestClient(jwtToken);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
-                userRegAPI.updateUserReg(userId, gson.toJson(userRegUpdateRequest), null)
+                userRegAPI.updateUserReg(userId, gson.toJson(userRegUpdateRequest))
                         .enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
@@ -387,27 +392,59 @@ public class ProfileActivity extends AppCompatActivity {
                 RestClient restClient = new RestClient(jwtToken);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
-                userRegAPI.updateUserReg(userId, gson.toJson(userRegUpdateRequest), ImageUtils.getImagePart(imageBitmap))
-                    .enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                            if (response.isSuccessful()) {
-                                Log.d("API_CALL", "User's info updated successfully");
-                                Toast.makeText(ProfileActivity.this, "User's info updated successfully", Toast.LENGTH_SHORT).show();
-                                saveProfileInfoChangesButton.setVisibility(View.GONE);
-                                NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
-                            } else {
-                                Log.e("API_CALL", "Couldn't update the user's info");
-                                Toast.makeText(ProfileActivity.this, "Couldn't update the user's info", Toast.LENGTH_SHORT).show();
-                            }
-                        }
+                if (imageBitmap != null) {
+                    userRegAPI.updateUserRegWithImage(userId, gson.toJson(userRegUpdateRequest), ImageUtils.getImagePart(imageBitmap))
+                            .enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                    if (response.isSuccessful()) {
+                                        Log.d("API_CALL", "User's info updated successfully");
+                                        Toast.makeText(ProfileActivity.this, "User's info updated successfully", Toast.LENGTH_SHORT).show();
+                                        saveProfileInfoChangesButton.setVisibility(View.GONE);
+                                        if (currentRole.equals(RoleName.ROLE_HOST))
+                                            NavigationUtils.goToHostMainPage(ProfileActivity.this, userId, jwtToken, roles);
+                                        else if (currentRole.equals(RoleName.ROLE_USER))
+                                            NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
+                                    } else {
+                                        Log.e("API_CALL", "Couldn't update the user's info");
+                                        Toast.makeText(ProfileActivity.this, "Couldn't update the user's info", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
 
-                        @Override
-                        public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                            Log.e("API_CALL", "Error: " + t.getMessage());
-                            Toast.makeText(ProfileActivity.this, "Error at update user's info", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                                @Override
+                                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                                    Log.e("API_CALL", "Error: " + t.getMessage());
+                                    Toast.makeText(ProfileActivity.this, "Error at update user's info", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                } else {
+                    userRegAPI.updateUserReg(userId, gson.toJson(userRegUpdateRequest))
+                            .enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                    if (response.isSuccessful()) {
+                                        Log.d("API_CALL", "User's info updated successfully");
+                                        Toast.makeText(ProfileActivity.this, "User's info updated successfully", Toast.LENGTH_SHORT).show();
+                                        saveProfileInfoChangesButton.setVisibility(View.GONE);
+                                        if (currentRole.equals(RoleName.ROLE_HOST))
+                                            NavigationUtils.goToHostMainPage(ProfileActivity.this, userId, jwtToken, roles);
+                                        else if (currentRole.equals(RoleName.ROLE_USER))
+                                            NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
+                                    } else {
+                                        Log.e("API_CALL", "Couldn't update the user's info");
+                                        Toast.makeText(ProfileActivity.this, "Couldn't update the user's info", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                                    Log.e("API_CALL", "Error: " + t.getMessage());
+                                    Toast.makeText(ProfileActivity.this, "Error at update user's info", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
+
+
             }
         });
     }
@@ -600,18 +637,6 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(ProfileActivity.this, "Already in Profile page", Toast.LENGTH_SHORT).show();
-//                resetWarnVisibility();
-//                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-//                Intent profile_intent = new Intent(ProfileActivity.this, ProfileActivity.class);
-//                profile_intent.putExtra("user_id", userId);
-//                profile_intent.putExtra("user_jwt", jwtToken);
-//                profile_intent.putExtra("user_current_role", currentRole.toString());
-//                ArrayList<String> roleList = new ArrayList<>();
-//                for (RoleName role : roles) {
-//                    roleList.add(role.toString());
-//                }
-//                profile_intent.putStringArrayListExtra("user_roles", roleList);
-//                startActivity(profile_intent);
             }
         });
 
@@ -624,25 +649,9 @@ public class ProfileActivity extends AppCompatActivity {
                 if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                     resetWarnVisibility();
                     if (currentRole == RoleName.ROLE_USER) {
-                        Intent host_main_page_intent = new Intent(ProfileActivity.this, HostMainPageActivity.class);
-                        host_main_page_intent.putExtra("user_id", userId);
-                        host_main_page_intent.putExtra("user_jwt", jwtToken);
-                        ArrayList<String> roleList = new ArrayList<>();
-                        for (RoleName role : roles) {
-                            roleList.add(role.toString());
-                        }
-                        host_main_page_intent.putExtra("user_roles", roleList);
-                        startActivity(host_main_page_intent);
+                        NavigationUtils.goToHostMainPage(ProfileActivity.this, userId, jwtToken, roles);
                     } else if (currentRole == RoleName.ROLE_HOST) {
-                        Intent main_page_intent = new Intent(ProfileActivity.this, MainPageActivity.class);
-                        main_page_intent.putExtra("user_id", userId);
-                        main_page_intent.putExtra("user_jwt", jwtToken);
-                        ArrayList<String> roleList = new ArrayList<>();
-                        for (RoleName role : roles) {
-                            roleList.add(role.toString());
-                        }
-                        main_page_intent.putExtra("user_roles", roleList);
-                        startActivity(main_page_intent);
+                        NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
                     }
                 } else {
                     Toast.makeText(ProfileActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();

@@ -250,8 +250,9 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                         imageBitmap = BitmapFactory.decodeFile(imagePath);
 
                         // Add the selected image to the layout
-                        imageBitmapList.add(imageBitmap);
-                        imageAdapter.notifyDataSetChanged();
+//                        imageBitmapList.add(imageBitmap);
+//                        imageAdapter.notifyDataSetChanged();
+                        imageAdapter.addNewImage(imageBitmap);
                     }
                 }
         );

@@ -1,13 +1,11 @@
 package com.example.fakebnb.rest;
 
-import com.example.fakebnb.model.request.UserRegUpdateRequest;
 import com.example.fakebnb.model.response.SignInResponse;
 import com.example.fakebnb.model.request.UserLoginModel;
 import com.example.fakebnb.model.request.UserRegisterModel;
 import com.example.fakebnb.model.response.UserRegResponse;
 
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -29,10 +27,14 @@ public interface UserRegAPI {
     Call<SignInResponse> singInUser(@Body UserLoginModel userLoginModel);
 
     @Multipart
+    @PUT("/app/user/image/{userId}")
+    Call<Void> updateUserRegWithImage(@Path("userId") Long userId,
+                                      @Query(value = "userRegUpdateRequest") String userRegUpdateRequest,
+                                      @Part MultipartBody.Part image);
+
     @PUT("/app/user/{userId}")
     Call<Void> updateUserReg(@Path("userId") Long userId,
-                             @Query(value = "userRegUpdateRequest") String userRegUpdateRequest,
-                             @Part MultipartBody.Part image);
+                             @Query(value = "userRegUpdateRequest") String userRegUpdateRequest);
 
     @GET("/app/user/{userId}")
     Call<UserRegResponse> getUserReg(@Path("userId") Long userId);

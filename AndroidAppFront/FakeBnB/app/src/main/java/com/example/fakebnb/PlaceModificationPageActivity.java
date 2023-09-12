@@ -45,6 +45,8 @@ import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.ImageUtils;
+import com.example.fakebnb.utils.NavigationUtils;
 import com.example.fakebnb.utils.RealPathUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -54,6 +56,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -125,10 +128,10 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     private String imagePath;
     private Bitmap imageBitmap;
     private List<Bitmap> imageBitmapList;
+    private List<Bitmap> newImages = new ArrayList<>();
     private RecyclerView imagesRecyclerView;
     private ImageDeleteAdapter imageAdapter;
 
-    private List<Long> imageIdsToDelete = new ArrayList<>();
     private List<Long> imageIds = new ArrayList<>();
 
     // Permissions for accessing the storage
@@ -188,7 +191,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                 getApartmentImage(imageId, new ApartmentImageLoadCallback() {
                                     @Override
                                     public void onImageLoaded(Bitmap apartmentImageBitmap) {
-                                        imageAdapter.addItem(apartmentImageBitmap);
+                                        imageAdapter.addStoredItem(apartmentImageBitmap, imageId);
                                     }
 
                                     @Override
@@ -340,8 +343,10 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                         imageBitmap = BitmapFactory.decodeFile(imagePath);
 
                         // Add the selected image to the layout
-                        imageBitmapList.add(imageBitmap);
-                        imageAdapter.notifyDataSetChanged();
+                        imageAdapter.addNewImage(imageBitmap);
+//                        imageBitmapList.add(imageBitmap);
+//                        newImages.add(imageBitmap);
+//                        imageAdapter.notifyDataSetChanged();
                     }
                 }
         );
@@ -486,7 +491,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modifyPlaceMaxVisitors.setText(String.valueOf(apartmentData.getMaxVisitors()));
         modifyPlaceMinPrice.setText(String.valueOf(apartmentData.getMinRetailPrice()));
         modifyPlaceExtraCost.setText(String.valueOf(apartmentData.getExtraCostPerPerson()));
-//        modifyPlacePhotoUpload.setText("photo.png");
         modifyPlaceRules.setText(apartmentData.getRules());
         modifyPlaceAmenities.setText(apartmentData.getAmenities());
         modifyPlaceDescription.setText(apartmentData.getDescription());
@@ -528,6 +532,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         apartmentRequest.setRules(modifyPlaceRules.getText().toString());
         apartmentRequest.setAmenities(modifyPlaceAmenities.getText().toString());
         apartmentRequest.setDescription(modifyPlaceDescription.getText().toString());
+        apartmentRequest.setDeleteImageIds(imageAdapter.getDeletedImageIds());
 
         try {
             apartmentRequest.setMaxVisitors(Integer.parseInt(modifyPlaceMaxVisitors.getText().toString()));
@@ -1320,6 +1325,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         savePlaceChangesButton.setOnClickListener(view -> {
             resetWarnVisibility();
 
+            Gson gson = new Gson();
             ApartmentRequest apartmentRequest = setUpdateApartmentValues();
             if (apartmentRequest == null) {
                 Toast.makeText(this, "Please fill correctly all the fields", Toast.LENGTH_SHORT).show();
@@ -1328,47 +1334,75 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             RestClient restClient = new RestClient(jwtToken);
             ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
-
-            apartmentAPI.updateApartment(rentalId, apartmentRequest).enqueue(new Callback<ApartmentResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
-                    if (response.isSuccessful()) {
-                        // Handle successful response
-                        ApartmentResponse apartmentResponse = response.body();
-                        if (apartmentResponse != null) {
-                            Log.d("API_CALL", "UpdateApartment successful");
-                            Toast.makeText(PlaceModificationPageActivity.this, "Rental modified correctly", Toast.LENGTH_SHORT).show();
-                            // onBackPressed(); // -> not pressed the back. Have to remake the host main page
-                            Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                            host_main_page_intent.putExtra("user_id", userId);
-                            host_main_page_intent.putExtra("user_jwt", jwtToken);
-                            ArrayList<String> roleList = new ArrayList<>();
-                            for (RoleName role : roles) {
-                                roleList.add(role.toString());
+            if (!imageAdapter.getNewImages().isEmpty()) {
+                apartmentAPI.updateApartmentWithImage(rentalId, gson.toJson(apartmentRequest), ImageUtils.getImageParts(imageAdapter.getNewImages()))
+                        .enqueue(new Callback<ApartmentResponse>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                                if (response.isSuccessful()) {
+                                    // Handle successful response
+                                    ApartmentResponse apartmentResponse = response.body();
+                                    if (apartmentResponse != null) {
+                                        Log.d("API_CALL", "UpdateApartment successful");
+                                        Toast.makeText(PlaceModificationPageActivity.this, "Rental modified correctly", Toast.LENGTH_SHORT).show();
+                                        NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
+                                    } else {
+                                        // Handle unsuccessful response
+                                        Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                        Log.d("API_CALL", "UpdateApartment failed");
+                                    }
+                                } else {
+                                    // Handle unsuccessful response
+                                    Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                    Log.d("API_CALL", "UpdateApartment failed");
+                                }
                             }
-                            host_main_page_intent.putExtra("user_roles", roleList);
-                            startActivity(host_main_page_intent);
-                        } else {
-                            // Handle unsuccessful response
-                            Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
-                            Log.d("API_CALL", "UpdateApartment failed");
-                        }
-                    } else {
-                        // Handle unsuccessful response
-                        Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
-                        Log.d("API_CALL", "UpdateApartment failed");
-                    }
-                }
 
-                @Override
-                public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
-                    // Handle failure
-                    Toast.makeText(PlaceModificationPageActivity.this,
-                            "Failed to communicate with server. Couldn't update apartment.",
-                            Toast.LENGTH_SHORT).show();
-                    Log.e("API_CALL", "Error: " + t.getMessage());
-                }
-            });
+                            @Override
+                            public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                                // Handle failure
+                                Toast.makeText(PlaceModificationPageActivity.this,
+                                        "Failed to communicate with server. Couldn't update apartment.",
+                                        Toast.LENGTH_SHORT).show();
+                                Log.e("API_CALL", "Error: " + t.getMessage());
+                            }
+                        });
+            } else {
+                apartmentAPI.updateApartment(rentalId, gson.toJson(apartmentRequest))
+                        .enqueue(new Callback<ApartmentResponse>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                                if (response.isSuccessful()) {
+                                    // Handle successful response
+                                    ApartmentResponse apartmentResponse = response.body();
+                                    if (apartmentResponse != null) {
+                                        Log.d("API_CALL", "UpdateApartment successful");
+                                        Toast.makeText(PlaceModificationPageActivity.this, "Rental modified correctly", Toast.LENGTH_SHORT).show();
+                                        NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
+                                    } else {
+                                        // Handle unsuccessful response
+                                        Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                        Log.d("API_CALL", "UpdateApartment failed");
+                                    }
+                                } else {
+                                    // Handle unsuccessful response
+                                    Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                    Log.d("API_CALL", "UpdateApartment failed");
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                                // Handle failure
+                                Toast.makeText(PlaceModificationPageActivity.this,
+                                        "Failed to communicate with server. Couldn't update apartment.",
+                                        Toast.LENGTH_SHORT).show();
+                                Log.e("API_CALL", "Error: " + t.getMessage());
+                            }
+                        });
+            }
+
+
         });
 
         deletePlaceButton.setOnClickListener(new View.OnClickListener() {
@@ -1389,15 +1423,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                     if (apartmentResponse != null) {
                                         Toast.makeText(PlaceModificationPageActivity.this, "Rental deleted correctly", Toast.LENGTH_SHORT).show();
                                         Log.d("API_CALL", "UpdateApartment successful");
-                                        Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                                        host_main_page_intent.putExtra("user_id", userId);
-                                        host_main_page_intent.putExtra("user_jwt", jwtToken);
-                                        ArrayList<String> roleList = new ArrayList<>();
-                                        for (RoleName role : roles) {
-                                            roleList.add(role.toString());
-                                        }
-                                        host_main_page_intent.putExtra("user_roles", roleList);
-                                        startActivity(host_main_page_intent);
+                                        NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                                     } else {
                                         // Handle unsuccessful response
                                         Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
