@@ -158,7 +158,8 @@ public class UserRegService {
             List<Image> images = imageRepository.findByUserRegId(userRegId);
             Image firstImage = images.get(0);
             imageRepository.delete(firstImage);
-            Files.delete(Paths.get("src/main/resources/static/images/" + images.get(0).getPath()));
+
+            if (!firstImage.getPath().equals("static_image.png")) Files.delete(Paths.get("src/main/resources/static/images/" + firstImage.getPath()));
 
             // store the new
             String imageName = imageService.store(image);
