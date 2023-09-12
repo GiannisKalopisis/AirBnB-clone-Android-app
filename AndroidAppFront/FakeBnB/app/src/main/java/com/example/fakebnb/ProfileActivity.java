@@ -37,7 +37,11 @@ import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
+import com.example.fakebnb.utils.AndroidUtil;
+import com.example.fakebnb.utils.ImageUtils;
+import com.example.fakebnb.utils.NavigationUtils;
 import com.example.fakebnb.utils.RealPathUtil;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -72,8 +76,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     // bottom bar buttons
     private Button chatButton, profileButton, roleButton;
-
-    private final boolean isAlreadyHost = false;
 
     /**
      * Image TEST
@@ -155,6 +157,12 @@ public class ProfileActivity extends AppCompatActivity {
 
         imageClickListener();
         setImagePickerLauncher();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
     }
 
     /**
@@ -310,13 +318,14 @@ public class ProfileActivity extends AppCompatActivity {
                 newRole.add(RoleName.ROLE_USER);
                 newRole.add(RoleName.ROLE_HOST);
 
+                Gson gson = new Gson();
                 UserRegUpdateRequest userRegUpdateRequest = new UserRegUpdateRequest();
                 userRegUpdateRequest.setRoleNames(newRole);
 
                 RestClient restClient = new RestClient(jwtToken);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
-                userRegAPI.updateUserReg(userId, userRegUpdateRequest)
+                userRegAPI.updateUserReg(userId, gson.toJson(userRegUpdateRequest), null)
                         .enqueue(new Callback<Void>() {
                             @Override
                             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
@@ -372,13 +381,13 @@ public class ProfileActivity extends AppCompatActivity {
 
                 Toast.makeText(ProfileActivity.this, "Saving changes to Database", Toast.LENGTH_SHORT).show();
 
+                Gson gson = new Gson();
                 UserRegUpdateRequest userRegUpdateRequest = setUpdateUserRegRequestValues();
-                // TODO: add photo update
 
                 RestClient restClient = new RestClient(jwtToken);
                 UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
-                userRegAPI.updateUserReg(userId, userRegUpdateRequest)
+                userRegAPI.updateUserReg(userId, gson.toJson(userRegUpdateRequest), ImageUtils.getImagePart(imageBitmap))
                     .enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
@@ -386,6 +395,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 Log.d("API_CALL", "User's info updated successfully");
                                 Toast.makeText(ProfileActivity.this, "User's info updated successfully", Toast.LENGTH_SHORT).show();
                                 saveProfileInfoChangesButton.setVisibility(View.GONE);
+                                NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
                             } else {
                                 Log.e("API_CALL", "Couldn't update the user's info");
                                 Toast.makeText(ProfileActivity.this, "Couldn't update the user's info", Toast.LENGTH_SHORT).show();

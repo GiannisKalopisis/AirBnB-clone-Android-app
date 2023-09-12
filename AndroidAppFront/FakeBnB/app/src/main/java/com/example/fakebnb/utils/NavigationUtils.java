@@ -7,11 +7,12 @@ import com.example.fakebnb.MainPageActivity;
 import com.example.fakebnb.enums.RoleName;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 
 public class NavigationUtils {
 
-    public static void goToMainPage(Context context, String userId, String jwtToken, ArrayList<RoleName> roles) {
+    public static void goToMainPage(Context context, Long userId, String jwtToken, Set<RoleName> roles) {
         Intent main_page_intent = new Intent(context, MainPageActivity.class);
         main_page_intent.putExtra("user_id", userId);
         main_page_intent.putExtra("user_jwt", jwtToken);

@@ -29,7 +29,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FakeBnB">
         <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
+            android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAyxhoEZnOazo4LZ9ZnrYd45Ovg5FxQB8E" />
         <activity
             android:name=".MainActivity"
