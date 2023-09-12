@@ -206,9 +206,9 @@ public class ImageService {
             // delete image
             Optional<Image> image = imageRepository.findById(imageId);
             if (image.isEmpty()) continue;
-            Image firstImage = image.get();
-            imageRepository.delete(firstImage);
-            Files.delete(Paths.get("src/main/resources/static/images/" + firstImage.getPath()));
+            Image imageDel = image.get();
+            imageRepository.delete(imageDel);
+            Files.delete(Paths.get("src/main/resources/static/images/" + imageDel.getPath()));
         }
     }
 
