@@ -213,12 +213,11 @@ public class ImageService {
         }
     }
 
-    public ResponseEntity<?> updateUserImage(UserDetailsImpl currentUser, MultipartFile image) throws IOException {
-        UserReg userReg = userRegRepository.findById(currentUser.getId()).orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", currentUser.getId()));
+    public ResponseEntity<?> updateUserImage(UserReg userReg, MultipartFile image) throws IOException {
 
         if (image != null && !image.isEmpty()) {
             // delete image
-            List<Image> images = imageRepository.findByUserRegId(currentUser.getId());
+            List<Image> images = imageRepository.findByUserRegId(userReg.getId());
             Image firstImage = images.get(0);
             imageRepository.delete(firstImage);
 
@@ -234,9 +233,7 @@ public class ImageService {
         return ResponseEntity.ok().body(new ApiResponse(true, "updateUserImage succeed", userReg));
     }
 
-    public ResponseEntity<?> updateApartmentImages(Long apartmentId, List<MultipartFile> images) {
-
-        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
+    public ResponseEntity<?> updateApartmentImages(Apartment apartment, List<MultipartFile> images) {
 
         // Store image
         for (var image: images) {

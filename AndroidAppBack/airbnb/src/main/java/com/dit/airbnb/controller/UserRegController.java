@@ -59,6 +59,16 @@ public class UserRegController {
         return userRegService.updateUserRegById(userId, currentUser, userRegUpdateReal, image);
     }
 
+    @PutMapping("/user/{userId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
+    public ResponseEntity<?> updateUserReg(@PathVariable(value = "userId") Long userId,
+                                           @RequestParam String userRegUpdateRequest,
+                                           @Valid @CurrentUser UserDetailsImpl currentUser)
+            throws JsonParseException, JsonMappingException, IOException {
+        UserRegUpdateRequest userRegUpdateReal = objectMapper.readValue(userRegUpdateRequest, UserRegUpdateRequest.class);
+        return userRegService.updateUserRegById(userId, currentUser, userRegUpdateReal);
+    }
+
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
     public ResponseEntity<?> getUserReg(@PathVariable(value = "userId") Long userId,

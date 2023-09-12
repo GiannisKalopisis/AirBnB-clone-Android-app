@@ -71,6 +71,23 @@ public class ApartmentService {
         return ResponseEntity.created(uri).body(new ApiResponse(true, "createApartment succeed", apartment));
     }
 
+    public ResponseEntity<?> updateApartmentById(Long apartmentId, UserDetailsImpl currentUser, ApartmentRequest apartmentRequest, List<MultipartFile> images) throws IOException {
+
+        Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
+
+        authorizationService.isHostOfTheApartment(currentUser.getId(), apartmentId);
+
+        apartment.updateApartment(apartmentRequest);
+
+        apartmentRepository.save(apartment);
+
+        imageService.deleteImagesByIds(apartmentRequest.getDeleteImageIds());
+
+        imageService.updateApartmentImages(apartment, images);
+
+        return ResponseEntity.ok().body(new ApiResponse(true, "updateApartment succeed", apartment));
+    }
+
     public ResponseEntity<?> updateApartmentById(Long apartmentId, UserDetailsImpl currentUser, ApartmentRequest apartmentRequest) throws IOException {
 
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));

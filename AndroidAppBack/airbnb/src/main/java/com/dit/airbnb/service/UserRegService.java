@@ -125,7 +125,42 @@ public class UserRegService {
 
     }
 
-    public ResponseEntity<?> updateUserRegById(Long userRegId, UserDetailsImpl userDetails, UserRegUpdateRequest userRegUpdateRequest, MultipartFile image) throws IOException {
+    public ResponseEntity<?> updateUserRegById(Long userRegId, UserDetailsImpl currentUser, UserRegUpdateRequest userRegUpdateRequest, MultipartFile image) throws IOException {
+        if (!userRegId.equals(currentUser.getId())) {
+            throw new ResourceNotFoundException("UserReg", "id", userRegId);
+        }
+        UserReg userReg = userRegRepository.findById(userRegId).orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", userRegId));
+
+        if (userRegUpdateRequest.getFirstName() != null) {
+            userReg.setFirstName(userRegUpdateRequest.getFirstName());
+        }
+
+        if (userRegUpdateRequest.getLastName() != null) {
+            userReg.setLastName(userRegUpdateRequest.getLastName());
+        }
+
+        if (userRegUpdateRequest.getPhone() != null) {
+            userReg.setPhone(userRegUpdateRequest.getPhone());
+        }
+
+        if (userRegUpdateRequest.getRoleNames() != null) {
+            Set<Role> roleSet = new HashSet<>(userReg.getRoles());
+            for (RoleName roleName: userRegUpdateRequest.getRoleNames()) {
+                Role role = roleService.findByName(roleName).orElseThrow(() -> new AppException("Role not found."));
+                roleSet.add(role);
+            }
+            userReg.setRoles(roleSet);
+            userRegRepository.save(userReg);
+        }
+
+        imageService.updateUserImage(userReg, image);
+
+        userRegRepository.save(userReg);
+
+        return ResponseEntity.ok(new ApiResponse(true, "updateUserReg succeed", userReg));
+    }
+
+    public ResponseEntity<?> updateUserRegById(Long userRegId, UserDetailsImpl userDetails, UserRegUpdateRequest userRegUpdateRequest) throws IOException {
         if (!userRegId.equals(userDetails.getId())) {
             throw new ResourceNotFoundException("UserReg", "id", userRegId);
         }
