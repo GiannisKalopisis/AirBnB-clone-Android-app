@@ -245,6 +245,8 @@ public class ImageService {
             imageIn.setApartment(apartment);
             imageRepository.save(imageIn);
         }
+
+        return ResponseEntity.ok().body(new ApiResponse(true, "updateApartmentImages succeed", apartment));
     }
 
 }

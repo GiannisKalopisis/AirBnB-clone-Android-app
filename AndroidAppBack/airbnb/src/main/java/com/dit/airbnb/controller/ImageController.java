@@ -47,5 +47,11 @@ public class ImageController {
     }
 
     @PutMapping("/image/apartment/{apartmentId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
+    public ResponseEntity<?> updateUserImage(@PathVariable(value = "apartmentId") Long apartmentId,
+                                             @RequestParam(value = "image") List<MultipartFile> image,
+                                             @Valid @CurrentUser UserDetailsImpl currentUser) throws IOException {
+        return imageService.updateApartmentImages(apartmentId, image);
+    }
 
 }
