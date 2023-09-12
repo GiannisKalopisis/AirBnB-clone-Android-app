@@ -164,18 +164,6 @@ public class ImageService {
         return imageResources;
     }
 
-    public List<Long> getApartmentImageResources(Long apartmentId) {
-        List<Image> images = imageRepository.findByApartmentId(apartmentId);
-        List<Long> imageResources = new ArrayList<>();
-        for (Image image : images) {
-            imageResources.add(image.getId());
-        }
-        if (imageResources.isEmpty()) {
-            imageResources.add((long) 0);
-        }
-        return imageResources;
-    }
-
     public ResponseEntity<?> getUserImage(Long userId) throws FileNotFoundException {
         List<Image> images = imageRepository.findByUserRegId(userId);
         if (images == null) {
