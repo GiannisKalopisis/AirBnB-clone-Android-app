@@ -159,7 +159,7 @@ public class UserRegService {
             Image firstImage = images.get(0);
             imageRepository.delete(firstImage);
 
-            if (!firstImage.getPath().equals("static_image.png")) Files.delete(Paths.get("src/main/resources/static/images/" + firstImage.getPath()));
+            if (!firstImage.getPath().equals(PopulateDBService.IMAGE_DEFAULT_PATH)) Files.delete(Paths.get("src/main/resources/static/images/" + firstImage.getPath()));
 
             // store the new
             String imageName = imageService.store(image);
