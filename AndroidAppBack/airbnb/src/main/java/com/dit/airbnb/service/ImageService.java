@@ -196,34 +196,20 @@ public class ImageService {
                 .body(resource);
     }
 
-    // Store images
-    public UserReg userRegMultiSaveImage(Long userId, MultipartFile image) {
-        UserReg userReg = userRegRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-        // insert photos
-        String imageName = store(image);
-        Image imageIn = new Image(imageName);
-        imageIn.setUserReg(userReg);
-        imageRepository.save(imageIn);
-
-        return userReg;
-    }
-
-    // Store images
-    public Apartment apartmentMultiSaveImages(Long apartmentId, List<MultipartFile> files) {
-        Apartment apartment = apartmentRepository.findById(apartmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
-        // insert photos
-        for (MultipartFile image : files) {
-            String imageName = store(image);
-            Image imageIn = new Image(imageName);
-            imageIn.setApartment(apartment);
-            imageRepository.save(imageIn);
-        }
-        return apartment;
-    }
     public ResponseEntity<?> getApartmentImageIds(Long apartmentId) {
         List<Long> ids = imageRepository.findByApartmentId(apartmentId);
         return ResponseEntity.ok(new ApiResponse(true, "getApartmentImageIds succeed", ids));
     }
+
+    public void deleteImagesByIds(List<Long> ids) throws IOException {
+        for (Long imageId: ids) {
+            // delete image
+            Optional<Image> image = imageRepository.findById(imageId);
+            if (image.isEmpty()) continue;
+            Image firstImage = image.get();
+            imageRepository.delete(firstImage);
+            Files.delete(Paths.get("src/main/resources/static/images/" + firstImage.getPath()));
+        }
+    }
+
 }

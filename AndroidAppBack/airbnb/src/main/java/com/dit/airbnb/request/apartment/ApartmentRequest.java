@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Setter
 @Getter
@@ -56,5 +57,7 @@ public class ApartmentRequest {
 
     @Enumerated
     private RentalType rentalType;
+
+    List<Long> deleteImageIds;
 
 }

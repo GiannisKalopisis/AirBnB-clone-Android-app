@@ -21,11 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 @Service
 public class ApartmentService {
@@ -71,7 +71,7 @@ public class ApartmentService {
         return ResponseEntity.created(uri).body(new ApiResponse(true, "createApartment succeed", apartment));
     }
 
-    public ResponseEntity<?> updateApartmentById(Long apartmentId, UserDetailsImpl currentUser, ApartmentRequest apartmentRequest) {
+    public ResponseEntity<?> updateApartmentById(Long apartmentId, UserDetailsImpl currentUser, ApartmentRequest apartmentRequest, List<MultipartFile> images) throws IOException {
 
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
 
@@ -80,6 +80,16 @@ public class ApartmentService {
         apartment.updateApartment(apartmentRequest);
 
         apartmentRepository.save(apartment);
+
+        imageService.deleteImagesByIds(apartmentRequest.getDeleteImageIds());
+
+        // Store image
+        for (var image: images) {
+            String imageName = imageService.store(image);
+            Image imageIn = new Image(imageName);
+            imageIn.setApartment(apartment);
+            imageRepository.save(imageIn);
+        }
 
         return ResponseEntity.ok().body(new ApiResponse(true, "updateApartment succeed", apartment));
     }
