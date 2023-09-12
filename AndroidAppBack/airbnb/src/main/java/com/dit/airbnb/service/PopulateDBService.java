@@ -29,7 +29,7 @@ public class PopulateDBService {
     private static final String BOOKING_DATA_FILE_PATH = "src/main/resources/static/csv_data/booking_data.csv";
     private static final String BOOKING_REVIEW_DATA_FILE_PATH = "src/main/resources/static/csv_data/booking_review_data.csv";
 
-    private static final String IMAGE_DEFAULT_PATH = "static_image.png";
+    public static final String IMAGE_DEFAULT_PATH = "static_image.png";
 
     @Autowired
     private UserRegRepository userRegRepository;
