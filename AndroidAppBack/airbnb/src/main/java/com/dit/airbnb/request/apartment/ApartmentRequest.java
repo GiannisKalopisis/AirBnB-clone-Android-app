@@ -58,6 +58,6 @@ public class ApartmentRequest {
     @Enumerated
     private RentalType rentalType;
 
-    List<Long> deleteImageIds;
+    private List<Long> deleteImageIds;
 
 }
