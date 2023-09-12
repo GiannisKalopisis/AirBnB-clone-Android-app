@@ -28,7 +28,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +125,7 @@ public class UserRegService {
 
     }
 
-    public ResponseEntity<?> updateUserRegById(Long userRegId, UserDetailsImpl userDetails, UserRegUpdateRequest userRegUpdateRequest) {
+    public ResponseEntity<?> updateUserRegById(Long userRegId, UserDetailsImpl userDetails, UserRegUpdateRequest userRegUpdateRequest, MultipartFile image) throws IOException {
         if (!userRegId.equals(userDetails.getId())) {
             throw new ResourceNotFoundException("UserReg", "id", userRegId);
         }
@@ -147,6 +151,20 @@ public class UserRegService {
             }
             userReg.setRoles(roleSet);
             userRegRepository.save(userReg);
+        }
+
+        if (image != null && !image.isEmpty()) {
+            // delete image
+            List<Image> images = imageRepository.findByUserRegId(userRegId);
+            Image firstImage = images.get(0);
+            imageRepository.delete(firstImage);
+            Files.delete(Paths.get("src/main/resources/static/images/" + images.get(0).getPath()));
+
+            // store the new
+            String imageName = imageService.store(image);
+            Image imageIn = new Image(imageName);
+            imageIn.setUserReg(userReg);
+            imageRepository.save(imageIn);
         }
 
         userRegRepository.save(userReg);
