@@ -1,6 +1,5 @@
 package com.example.fakebnb.rest;
 
-import com.example.fakebnb.model.request.ApartmentRequest;
 import com.example.fakebnb.model.response.ApartmentPagedResponse;
 import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
@@ -9,7 +8,6 @@ import java.util.List;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
@@ -26,9 +24,15 @@ public interface ApartmentAPI {
     Call<ApartmentResponse> createApartment(@Query(value = "apartmentRequest") String apartmentRequest,
                                             @Part List<MultipartBody.Part> image);
 
+    @Multipart
+    @PUT("/app/apartment/image/{apartmentId}")
+    Call<ApartmentResponse> updateApartmentWithImage(@Path("apartmentId") Long apartmentId,
+                                                     @Query(value = "apartmentRequest") String apartmentRequest,
+                                                     @Part List<MultipartBody.Part> image);
+
     @PUT("/app/apartment/{apartmentId}")
     Call<ApartmentResponse> updateApartment(@Path("apartmentId") Long apartmentId,
-                                            @Body ApartmentRequest apartmentRequest);
+                                            @Query(value = "apartmentRequest") String apartmentRequest);
 
     @GET("/app/apartment/{apartmentId}")
     Call<ApartmentResponse> getApartmentInfo(@Path("apartmentId") Long apartmentId);

@@ -20,7 +20,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +44,8 @@ import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.ImageUtils;
+import com.example.fakebnb.utils.NavigationUtils;
 import com.example.fakebnb.utils.RealPathUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -54,6 +55,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -97,8 +99,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     // EditTexts fields
     private EditText modifyPlaceAddress, modifyPlaceStartDate, modifyPlaceEndDate,
             modifyPlaceMaxVisitors, modifyPlaceMinPrice, modifyPlaceExtraCost,
-            modifyPlacePhotoUpload, modifyPlaceRules,
-            modifyPlaceDescription, modifyPlaceBeds, modifyPlaceBedrooms,
+            modifyPlaceRules, modifyPlaceDescription, modifyPlaceBeds, modifyPlaceBedrooms,
             modifyPlaceBathrooms, modifyPlaceLivingRooms, modifyPlaceArea,
             modifyPlaceDistrict, modifyPlaceCity, modifyPlaceCountry, modifyPlaceAmenities;
 
@@ -120,15 +121,14 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
      * Variables for IMAGE UPLOAD
      */
     private Button selectImageButton;
-    private ImageView imageView;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private String imagePath;
     private Bitmap imageBitmap;
     private List<Bitmap> imageBitmapList;
+    private List<Bitmap> newImages = new ArrayList<>();
     private RecyclerView imagesRecyclerView;
     private ImageDeleteAdapter imageAdapter;
 
-    private List<Long> imageIdsToDelete = new ArrayList<>();
     private List<Long> imageIds = new ArrayList<>();
 
     // Permissions for accessing the storage
@@ -188,7 +188,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                 getApartmentImage(imageId, new ApartmentImageLoadCallback() {
                                     @Override
                                     public void onImageLoaded(Bitmap apartmentImageBitmap) {
-                                        imageAdapter.addItem(apartmentImageBitmap);
+                                        imageAdapter.addStoredItem(apartmentImageBitmap, imageId);
                                     }
 
                                     @Override
@@ -340,8 +340,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                         imageBitmap = BitmapFactory.decodeFile(imagePath);
 
                         // Add the selected image to the layout
-                        imageBitmapList.add(imageBitmap);
-                        imageAdapter.notifyDataSetChanged();
+                        imageAdapter.addNewImage(imageBitmap);
                     }
                 }
         );
@@ -486,7 +485,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modifyPlaceMaxVisitors.setText(String.valueOf(apartmentData.getMaxVisitors()));
         modifyPlaceMinPrice.setText(String.valueOf(apartmentData.getMinRetailPrice()));
         modifyPlaceExtraCost.setText(String.valueOf(apartmentData.getExtraCostPerPerson()));
-//        modifyPlacePhotoUpload.setText("photo.png");
         modifyPlaceRules.setText(apartmentData.getRules());
         modifyPlaceAmenities.setText(apartmentData.getAmenities());
         modifyPlaceDescription.setText(apartmentData.getDescription());
@@ -516,6 +514,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private ApartmentRequest setUpdateApartmentValues() {
         ApartmentRequest apartmentRequest = new ApartmentRequest();
 
@@ -528,11 +527,14 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         apartmentRequest.setRules(modifyPlaceRules.getText().toString());
         apartmentRequest.setAmenities(modifyPlaceAmenities.getText().toString());
         apartmentRequest.setDescription(modifyPlaceDescription.getText().toString());
+        apartmentRequest.setDeleteImageIds(imageAdapter.getDeletedImageIds());
 
         try {
             apartmentRequest.setMaxVisitors(Integer.parseInt(modifyPlaceMaxVisitors.getText().toString()));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Max visitors must be a number", Toast.LENGTH_SHORT).show();
+            modifyPlaceWarningMaxVisitors.setText("Max visitors must be a number");
+            modifyPlaceWarningMaxVisitors.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -540,6 +542,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             apartmentRequest.setMinRetailPrice(new BigDecimal(modifyPlaceMinPrice.getText().toString()));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Minimum rental price must be a number", Toast.LENGTH_SHORT).show();
+            modifyPlaceWarningMinPrice.setText("Minimum rental price must be a number");
+            modifyPlaceWarningMinPrice.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -547,6 +551,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             apartmentRequest.setExtraCostPerPerson(new BigDecimal(modifyPlaceExtraCost.getText().toString()));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Extra cost per person must be a number", Toast.LENGTH_SHORT).show();
+            modifyPlaceWarningExtraCost.setText("Extra cost per person must be a number");
+            modifyPlaceWarningExtraCost.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -554,6 +560,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             apartmentRequest.setNumberOfBeds(Short.parseShort(modifyPlaceBeds.getText().toString()));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Number of beds must be a number", Toast.LENGTH_SHORT).show();
+            modifyPlaceWarningBeds.setText("Number of beds must be a number");
+            modifyPlaceWarningBeds.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -561,6 +569,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             apartmentRequest.setNumberOfBedrooms(Short.parseShort(modifyPlaceBedrooms.getText().toString()));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Number of bedrooms must be a number", Toast.LENGTH_SHORT).show();
+            modifyPlaceWarningBedrooms.setText("Number of bedrooms must be a number");
+            modifyPlaceWarningBedrooms.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -568,6 +578,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             apartmentRequest.setNumberOfBathrooms(Short.parseShort(modifyPlaceBathrooms.getText().toString()));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Number of bathrooms must be a number", Toast.LENGTH_SHORT).show();
+            modifyPlaceWarningBathrooms.setText("Number of bathrooms must be a number");
+            modifyPlaceWarningBathrooms.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -575,6 +587,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             apartmentRequest.setNumberOfLivingRooms(Short.parseShort(modifyPlaceLivingRooms.getText().toString()));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Number of living rooms must be a number", Toast.LENGTH_SHORT).show();
+            modifyPlaceWarningLivingRooms.setText("Number of living rooms must be a number");
+            modifyPlaceWarningLivingRooms.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -582,6 +596,8 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             apartmentRequest.setArea(new BigDecimal(modifyPlaceArea.getText().toString()));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Area must be a number", Toast.LENGTH_SHORT).show();
+            modifyPlaceWarningArea.setText("Area must be a number");
+            modifyPlaceWarningArea.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -621,7 +637,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         setTextWatcherMaxVisitors();
         setTextWatcherMinPrice();
         setTextWatcherExtraCost();
-//        setTextWatcherPhotoUpload();
         setTextWatcherRules();
         setTextWatcherAmenities();
         setTextWatcherDescription();
@@ -644,9 +659,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceAddress.getText().toString().isEmpty()) {
+                    modifyPlaceWarningAddress.setText("Please enter the rental's address");
                     modifyPlaceWarningAddress.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -676,9 +693,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceDistrict.getText().toString().isEmpty()) {
+                    modifyPlaceWarningDistrict.setText("Please enter the rental's district");
                     modifyPlaceWarningDistrict.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -708,9 +727,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceCity.getText().toString().isEmpty()) {
+                    modifyPlaceWarningCity.setText("Please enter the rental's city");
                     modifyPlaceWarningCity.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -740,9 +761,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceCountry.getText().toString().isEmpty()) {
+                    modifyPlaceWarningCountry.setText("Please enter the rental's country");
                     modifyPlaceWarningCountry.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -770,9 +793,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceStartDate.getText().toString().isEmpty()) {
+                    modifyPlaceWarningDates.setText("Please enter check-in and check-out dates");
                     modifyPlaceWarningDates.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -796,9 +821,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceEndDate.getText().toString().isEmpty()) {
+                    modifyPlaceWarningDates.setText("Please enter check-in and check-out dates");
                     modifyPlaceWarningDates.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -822,9 +849,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceMaxVisitors.getText().toString().isEmpty()) {
+                    modifyPlaceWarningMaxVisitors.setText("Please enter maximum number of visitors");
                     modifyPlaceWarningMaxVisitors.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -848,9 +877,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceMinPrice.getText().toString().isEmpty()) {
+                    modifyPlaceWarningMinPrice.setText("Please enter minimum rental price");
                     modifyPlaceWarningMinPrice.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -874,9 +905,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceExtraCost.getText().toString().isEmpty()) {
+                    modifyPlaceWarningExtraCost.setText("Please enter extra cost per person");
                     modifyPlaceWarningExtraCost.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -886,32 +919,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             }
         };
         modifyPlaceExtraCost.addTextChangedListener(textWatcher);
-    }
-
-    private void setTextWatcherPhotoUpload() {
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence editable, int start, int count, int after) {
-                if (!modifyPlacePhotoUpload.getText().toString().isEmpty()) {
-                    modifyPlaceWarningPhotoUpload.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onTextChanged(CharSequence editable, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (modifyPlacePhotoUpload.getText().toString().isEmpty()) {
-                    modifyPlaceWarningPhotoUpload.setVisibility(View.VISIBLE);
-                    savePlaceChangesButton.setVisibility(View.GONE);
-                } else {
-                    modifyPlaceWarningPhotoUpload.setVisibility(View.GONE);
-                    savePlaceChangesButton.setVisibility(View.VISIBLE);
-                }
-            }
-        };
-        modifyPlacePhotoUpload.addTextChangedListener(textWatcher);
     }
 
     private void setTextWatcherRules() {
@@ -926,9 +933,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceRules.getText().toString().isEmpty()) {
+                    modifyPlaceWarningRules.setText("Please enter rules");
                     modifyPlaceWarningRules.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -954,9 +963,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceAmenities.getText().toString().isEmpty()) {
+                    modifyPlaceWarningAmenities.setText("Please enter amenities");
                     modifyPlaceWarningAmenities.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -980,9 +991,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceDescription.getText().toString().isEmpty()) {
+                    modifyPlaceWarningDescription.setText("Please enter description");
                     modifyPlaceWarningDescription.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -1006,9 +1019,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceBeds.getText().toString().isEmpty()) {
+                    modifyPlaceWarningBeds.setText("Please enter number of beds");
                     modifyPlaceWarningBeds.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -1032,9 +1047,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceBedrooms.getText().toString().isEmpty()) {
+                    modifyPlaceWarningBedrooms.setText("Please enter number of bedrooms");
                     modifyPlaceWarningBedrooms.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -1058,10 +1075,12 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
 
                 if (modifyPlaceBathrooms.getText().toString().isEmpty()) {
+                    modifyPlaceWarningBathrooms.setText("Please enter number of bathrooms");
                     modifyPlaceWarningBathrooms.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -1085,9 +1104,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceLivingRooms.getText().toString().isEmpty()) {
+                    modifyPlaceWarningLivingRooms.setText("Please enter number of living rooms");
                     modifyPlaceWarningLivingRooms.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -1111,9 +1132,11 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence editable, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (modifyPlaceArea.getText().toString().isEmpty()) {
+                    modifyPlaceWarningArea.setText("Please enter area");
                     modifyPlaceWarningArea.setVisibility(View.VISIBLE);
                     savePlaceChangesButton.setVisibility(View.GONE);
                 } else {
@@ -1208,9 +1231,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modifyPlaceExtraCost = findViewById(R.id.modifyPlaceExtraCostEditText);
         modifyPlaceRentalTypeRadioGroup = findViewById(R.id.modifyPlaceRentalTypeRadioGroup);
 
-        /**
-         * PHOTO ONLY
-         */
         selectImageButton = findViewById(R.id.modifySelectImageButton);
 
         modifyPlaceRules = findViewById(R.id.modifyPlaceRulesEditText);
@@ -1313,13 +1333,119 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("SetTextI18n")
+    private boolean validateFields() {
+        boolean isValid = true;
+        if (modifyPlaceAddress.getText().toString().isEmpty()) {
+            modifyPlaceWarningAddress.setText("Please enter the rental's address");
+            modifyPlaceWarningAddress.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceDistrict.getText().toString().isEmpty()) {
+            modifyPlaceWarningDistrict.setText("Please enter the rental's district");
+            modifyPlaceWarningDistrict.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceCity.getText().toString().isEmpty()) {
+            modifyPlaceWarningCity.setText("Please enter the rental's city");
+            modifyPlaceWarningCity.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceCountry.getText().toString().isEmpty()) {
+            modifyPlaceWarningCountry.setText("Please enter the rental's country");
+            modifyPlaceWarningCountry.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceStartDate.getText().toString().isEmpty()) {
+            if (modifyPlaceEndDate.getText().toString().isEmpty()) {
+                modifyPlaceWarningDates.setText("Please enter the rental's check-in and check-out dates");
+                modifyPlaceWarningDates.setVisibility(View.VISIBLE);
+            } else {
+                modifyPlaceWarningDates.setText("Please enter the rental's check-in date");
+                modifyPlaceWarningDates.setVisibility(View.VISIBLE);
+            }
+            isValid = false;
+        }
+        if (modifyPlaceEndDate.getText().toString().isEmpty()) {
+            if (modifyPlaceStartDate.getText().toString().isEmpty()) {
+                modifyPlaceWarningDates.setText("Please enter the rental's check-in and check-out dates");
+                modifyPlaceWarningDates.setVisibility(View.VISIBLE);
+            } else {
+                modifyPlaceWarningDates.setText("Please enter the rental's check-out date");
+                modifyPlaceWarningDates.setVisibility(View.VISIBLE);
+            }
+            isValid = false;
+        }
+        if (modifyPlaceMaxVisitors.getText().toString().isEmpty()) {
+            modifyPlaceWarningMaxVisitors.setText("Please enter maximum number of visitors");
+            modifyPlaceWarningMaxVisitors.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceMinPrice.getText().toString().isEmpty()) {
+            modifyPlaceWarningMinPrice.setText("Please enter minimum price of rental per night");
+            modifyPlaceWarningMinPrice.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceExtraCost.getText().toString().isEmpty()) {
+            modifyPlaceWarningExtraCost.setText("Please enter extra cost per person");
+            modifyPlaceWarningExtraCost.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (imageBitmapList == null || imageBitmapList.isEmpty()) {
+            modifyPlaceWarningPhotoUpload.setText("Please upload at least one photograph of rental");
+            modifyPlaceWarningPhotoUpload.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceRules.getText().toString().isEmpty()) {
+            modifyPlaceWarningRules.setText("Please enter the rental's rules");
+            modifyPlaceWarningRules.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceDescription.getText().toString().isEmpty()) {
+            modifyPlaceWarningDescription.setText("Please enter the rental's description");
+            modifyPlaceWarningDescription.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceBeds.getText().toString().isEmpty()) {
+            modifyPlaceWarningBeds.setText("Please enter number of beds");
+            modifyPlaceWarningBeds.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceBedrooms.getText().toString().isEmpty()) {
+            modifyPlaceWarningBedrooms.setText("Please enter number of bedrooms");
+            modifyPlaceWarningBedrooms.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceBathrooms.getText().toString().isEmpty()) {
+            modifyPlaceWarningBathrooms.setText("Please enter number of bathrooms");
+            modifyPlaceWarningBathrooms.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceLivingRooms.getText().toString().isEmpty()) {
+            modifyPlaceWarningLivingRooms.setText("Please enter number of living rooms");
+            modifyPlaceWarningLivingRooms.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (modifyPlaceArea.getText().toString().isEmpty()) {
+            modifyPlaceWarningArea.setText("Please enter area");
+            modifyPlaceWarningArea.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        return isValid;
+    }
+
     private void modificationButtonsClickListener() {
         Log.d(TAG, "modificationButtonsClickListener: started");
 
 
         savePlaceChangesButton.setOnClickListener(view -> {
             resetWarnVisibility();
+            if (!validateFields()) {
+                Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
+            Gson gson = new Gson();
             ApartmentRequest apartmentRequest = setUpdateApartmentValues();
             if (apartmentRequest == null) {
                 Toast.makeText(this, "Please fill correctly all the fields", Toast.LENGTH_SHORT).show();
@@ -1328,47 +1454,75 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             RestClient restClient = new RestClient(jwtToken);
             ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
-
-            apartmentAPI.updateApartment(rentalId, apartmentRequest).enqueue(new Callback<ApartmentResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
-                    if (response.isSuccessful()) {
-                        // Handle successful response
-                        ApartmentResponse apartmentResponse = response.body();
-                        if (apartmentResponse != null) {
-                            Log.d("API_CALL", "UpdateApartment successful");
-                            Toast.makeText(PlaceModificationPageActivity.this, "Rental modified correctly", Toast.LENGTH_SHORT).show();
-                            // onBackPressed(); // -> not pressed the back. Have to remake the host main page
-                            Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                            host_main_page_intent.putExtra("user_id", userId);
-                            host_main_page_intent.putExtra("user_jwt", jwtToken);
-                            ArrayList<String> roleList = new ArrayList<>();
-                            for (RoleName role : roles) {
-                                roleList.add(role.toString());
+            if (!imageAdapter.getNewImages().isEmpty()) {
+                apartmentAPI.updateApartmentWithImage(rentalId, gson.toJson(apartmentRequest), ImageUtils.getImageParts(imageAdapter.getNewImages()))
+                        .enqueue(new Callback<ApartmentResponse>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                                if (response.isSuccessful()) {
+                                    // Handle successful response
+                                    ApartmentResponse apartmentResponse = response.body();
+                                    if (apartmentResponse != null) {
+                                        Log.d("API_CALL", "UpdateApartment successful");
+                                        Toast.makeText(PlaceModificationPageActivity.this, "Rental modified correctly", Toast.LENGTH_SHORT).show();
+                                        NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
+                                    } else {
+                                        // Handle unsuccessful response
+                                        Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                        Log.d("API_CALL", "UpdateApartment failed");
+                                    }
+                                } else {
+                                    // Handle unsuccessful response
+                                    Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                    Log.d("API_CALL", "UpdateApartment failed");
+                                }
                             }
-                            host_main_page_intent.putExtra("user_roles", roleList);
-                            startActivity(host_main_page_intent);
-                        } else {
-                            // Handle unsuccessful response
-                            Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
-                            Log.d("API_CALL", "UpdateApartment failed");
-                        }
-                    } else {
-                        // Handle unsuccessful response
-                        Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
-                        Log.d("API_CALL", "UpdateApartment failed");
-                    }
-                }
 
-                @Override
-                public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
-                    // Handle failure
-                    Toast.makeText(PlaceModificationPageActivity.this,
-                            "Failed to communicate with server. Couldn't update apartment.",
-                            Toast.LENGTH_SHORT).show();
-                    Log.e("API_CALL", "Error: " + t.getMessage());
-                }
-            });
+                            @Override
+                            public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                                // Handle failure
+                                Toast.makeText(PlaceModificationPageActivity.this,
+                                        "Failed to communicate with server. Couldn't update apartment.",
+                                        Toast.LENGTH_SHORT).show();
+                                Log.e("API_CALL", "Error: " + t.getMessage());
+                            }
+                        });
+            } else {
+                apartmentAPI.updateApartment(rentalId, gson.toJson(apartmentRequest))
+                        .enqueue(new Callback<ApartmentResponse>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                                if (response.isSuccessful()) {
+                                    // Handle successful response
+                                    ApartmentResponse apartmentResponse = response.body();
+                                    if (apartmentResponse != null) {
+                                        Log.d("API_CALL", "UpdateApartment successful");
+                                        Toast.makeText(PlaceModificationPageActivity.this, "Rental modified correctly", Toast.LENGTH_SHORT).show();
+                                        NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
+                                    } else {
+                                        // Handle unsuccessful response
+                                        Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                        Log.d("API_CALL", "UpdateApartment failed");
+                                    }
+                                } else {
+                                    // Handle unsuccessful response
+                                    Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                    Log.d("API_CALL", "UpdateApartment failed");
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                                // Handle failure
+                                Toast.makeText(PlaceModificationPageActivity.this,
+                                        "Failed to communicate with server. Couldn't update apartment.",
+                                        Toast.LENGTH_SHORT).show();
+                                Log.e("API_CALL", "Error: " + t.getMessage());
+                            }
+                        });
+            }
+
+
         });
 
         deletePlaceButton.setOnClickListener(new View.OnClickListener() {
@@ -1389,15 +1543,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                     if (apartmentResponse != null) {
                                         Toast.makeText(PlaceModificationPageActivity.this, "Rental deleted correctly", Toast.LENGTH_SHORT).show();
                                         Log.d("API_CALL", "UpdateApartment successful");
-                                        Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                                        host_main_page_intent.putExtra("user_id", userId);
-                                        host_main_page_intent.putExtra("user_jwt", jwtToken);
-                                        ArrayList<String> roleList = new ArrayList<>();
-                                        for (RoleName role : roles) {
-                                            roleList.add(role.toString());
-                                        }
-                                        host_main_page_intent.putExtra("user_roles", roleList);
-                                        startActivity(host_main_page_intent);
+                                        NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                                     } else {
                                         // Handle unsuccessful response
                                         Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
@@ -1463,16 +1609,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
             if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                // to be at this activity he has the user role
-                Intent main_page_intent = new Intent(PlaceModificationPageActivity.this, MainPageActivity.class);
-                main_page_intent.putExtra("user_id", userId);
-                main_page_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                main_page_intent.putExtra("user_roles", roleList);
-                startActivity(main_page_intent);
+                NavigationUtils.goToMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
             } else {
                 Toast.makeText(PlaceModificationPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }

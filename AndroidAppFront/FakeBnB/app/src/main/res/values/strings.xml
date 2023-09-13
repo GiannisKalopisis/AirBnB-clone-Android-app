@@ -37,4 +37,23 @@
     <string name="country">Country</string>
     <string name="default_username">Username</string>
     <string name="email_gmail_com">email@gmail.com</string>
+    <string name="rules">Rules</string>
+    <string name="description">Description</string>
+    <string name="beds">Beds</string>
+    <string name="bedrooms">Bedrooms</string>
+    <string name="bathrooms">Bathrooms</string>
+    <string name="living_rooms">Living rooms</string>
+    <string name="area">Area</string>
+    <string name="house">House</string>
+    <string name="room">Room</string>
+    <string name="extra_cost_per_person">Extra cost per person</string>
+    <string name="minimum_rental_price">Minimum rental price</string>
+    <string name="maximum_visitors">Maximum visitors</string>
+    <string name="check_out_date">Check-out date</string>
+    <string name="check_in_date">Check-in date</string>
+    <string name="dates">Dates</string>
+    <string name="modify_your_place_in_fakebnb">Modify your place in FakeBnB</string>
+    <string name="rental_type">Rental type</string>
+    <string name="photos_of_rental">Photos of rental</string>
+    <string name="add_image">Add Image</string>
 </resources>

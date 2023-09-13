@@ -173,6 +173,7 @@ public class Apartment {
         if (apartmentRequest.getArea() != null) this.area = apartmentRequest.getArea();
         if (apartmentRequest.getGeoLat() != null) this.geoLat = apartmentRequest.getGeoLat();
         if (apartmentRequest.getGeoLong() != null) this.geoLong = apartmentRequest.getGeoLong();
+        if (apartmentRequest.getRules() != null) this.rules = apartmentRequest.getRules();
         if (apartmentRequest.getRentalType() != null) this.rentalType = apartmentRequest.getRentalType();
     }
 

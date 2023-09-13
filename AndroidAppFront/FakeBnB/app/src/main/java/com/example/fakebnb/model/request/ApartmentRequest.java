@@ -4,6 +4,7 @@ import com.example.fakebnb.enums.RentalType;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 public class ApartmentRequest {
 
@@ -27,6 +28,7 @@ public class ApartmentRequest {
     private BigDecimal geoLong;
     private String rules;
     private RentalType rentalType;
+    private List<Long> deleteImageIds;
 
     public String getAmenities() {
         return amenities;
@@ -186,5 +188,13 @@ public class ApartmentRequest {
 
     public void setRentalType(RentalType rentalType) {
         this.rentalType = rentalType;
+    }
+
+    public List<Long> getDeleteImageIds() {
+        return deleteImageIds;
+    }
+
+    public void setDeleteImageIds(List<Long> deleteImageIds) {
+        this.deleteImageIds = deleteImageIds;
     }
 }
