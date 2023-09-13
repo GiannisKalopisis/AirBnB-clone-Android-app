@@ -72,21 +72,24 @@ public class ChatService {
             resMessage.setChat(message.getChat());
             messageRepository.save(resMessage);
         } else {
-
-            Optional<Chat> chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(senderUserRegId, receiverRegUserId);
             Chat chat;
-            if (chatOptional.isPresent()) {
-                chat = chatOptional.get();
-            } else {
-                chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(receiverRegUserId, senderUserRegId);
+            if (messageRequest.getCurrentSenderRole().equals(RoleName.ROLE_USER)) {
+                Optional<Chat> chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(senderUserReg.getId(), receiverUserReg.getId());
                 if (chatOptional.isPresent()) {
                     chat = chatOptional.get();
                 } else {
                     chat = new Chat(senderUserReg, receiverUserReg);
                     chatRepository.save(chat);
                 }
+            } else {
+                Optional<Chat> chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(receiverUserReg.getId(), senderUserReg.getId());
+                if (chatOptional.isPresent()) {
+                    chat = chatOptional.get();
+                } else {
+                    chat = new Chat(receiverUserReg, senderUserReg);
+                    chatRepository.save(chat);
+                }
             }
-
             resMessage = new Message(messageRequest.getContent());
             resMessage.setChat(chat);
             resMessage.setSenderUserReg(senderUserReg);
@@ -185,7 +188,6 @@ public class ChatService {
 
         Optional<Chat> optionalChat = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(chatSenderReceiverRequest.getSenderId(), chatSenderReceiverRequest.getReceiverId());
         Chat chat;
-
         if (optionalChat.isEmpty()) {
             chat = new Chat(sender, receiver);
             chatRepository.save(chat);
