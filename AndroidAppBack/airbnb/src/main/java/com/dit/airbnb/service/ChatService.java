@@ -58,44 +58,46 @@ public class ChatService {
         UserReg receiverUserReg = userRegRepository.findById(receiverRegUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("ReceiverUserReg", "id", receiverRegUserId));
 
-        Optional<Message> optMessage = messageRepository.findLastMessageWithSendUserIdAndReceiverUserId(senderUserRegId, receiverRegUserId);
+        Chat chat;
+        if (messageRequest.getCurrentSenderRole().equals(RoleName.ROLE_USER)) {
+            Optional<Chat> chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(senderUserReg.getId(), receiverUserReg.getId());
+            if (chatOptional.isPresent()) {
+                chat = chatOptional.get();
+            } else {
+                chat = new Chat(senderUserReg, receiverUserReg);
+                chatRepository.save(chat);
+            }
+        } else {
+            Optional<Chat> chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(receiverUserReg.getId(), senderUserReg.getId());
+            if (chatOptional.isPresent()) {
+                chat = chatOptional.get();
+            } else {
+                chat = new Chat(receiverUserReg, senderUserReg);
+                chatRepository.save(chat);
+            }
+        }
 
+        Optional<Message> optMessage = messageRepository.findLastMessageWithSendUserIdAndReceiverUserId(senderUserRegId, receiverRegUserId);
         Message resMessage;
         if (optMessage.isPresent()) {
             Message message = optMessage.get();
             message.setIsLastMessage(false);
             message.setSeen(true);
             messageRepository.save(message);
-
-            resMessage = new Message(messageRequest.getContent());
-            resMessage.setSenderUserReg(senderUserReg);
-            resMessage.setChat(message.getChat());
-            messageRepository.save(resMessage);
         } else {
-            Chat chat;
-            if (messageRequest.getCurrentSenderRole().equals(RoleName.ROLE_USER)) {
-                Optional<Chat> chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(senderUserReg.getId(), receiverUserReg.getId());
-                if (chatOptional.isPresent()) {
-                    chat = chatOptional.get();
-                } else {
-                    chat = new Chat(senderUserReg, receiverUserReg);
-                    chatRepository.save(chat);
-                }
-            } else {
-                Optional<Chat> chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(receiverUserReg.getId(), senderUserReg.getId());
-                if (chatOptional.isPresent()) {
-                    chat = chatOptional.get();
-                } else {
-                    chat = new Chat(receiverUserReg, senderUserReg);
-                    chatRepository.save(chat);
-                }
+            Optional<Message> optRevMessage = messageRepository.findLastMessageWithSendUserIdAndReceiverUserId(receiverRegUserId, senderUserRegId);
+            if (optRevMessage.isPresent()) {
+                Message revMessage = optRevMessage.get();
+                revMessage.setIsLastMessage(false);
+                revMessage.setSeen(true);
+                messageRepository.save(revMessage);
             }
-            resMessage = new Message(messageRequest.getContent());
-            resMessage.setChat(chat);
-            resMessage.setSenderUserReg(senderUserReg);
-            messageRepository.save(resMessage);
         }
 
+        resMessage = new Message(messageRequest.getContent());
+        resMessage.setSenderUserReg(senderUserReg);
+        resMessage.setChat(chat);
+        messageRepository.save(resMessage);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/{chatId}")
