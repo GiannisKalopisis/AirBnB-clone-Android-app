@@ -25,8 +25,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_gravity="center"
-                android:gravity="center"
-                android:layout_weight="1">
+                android:gravity="center">
 
                 <TextView
                     android:id="@+id/addNewPlaceBoldText"
@@ -176,17 +175,10 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Dates"
+                    android:text="@string/dates"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
-<!--                <EditText-->
-<!--                    android:id="@+id/addPlaceDatesEditText"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_margin="20dp"-->
-<!--                    android:background="@drawable/edittext_border" />-->
-                <!-- Check-in date -->
                 <EditText
                     android:id="@+id/startDateEditText"
                     android:layout_width="match_parent"
@@ -199,7 +191,7 @@
                     android:cursorVisible="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:hint="Check-in date"/>
+                    android:hint="@string/check_in_date"/>
 
                 <!-- Check-out date -->
                 <EditText
@@ -214,7 +206,7 @@
                     android:cursorVisible="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:hint="Check-out date" />
+                    android:hint="@string/check_out_date" />
 
                 <!-- Maximum visitors -->
                 <TextView
@@ -233,7 +225,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Maximum visitors"
+                    android:text="@string/maximum_visitors"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
@@ -263,7 +255,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Minimum rental price"
+                    android:text="@string/minimum_rental_price"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
@@ -293,7 +285,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Extra cost per person"
+                    android:text="@string/extra_cost_per_person"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
@@ -323,7 +315,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Rental type"
+                    android:text="@string/rental_type"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
@@ -339,14 +331,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20dp"
                         android:layout_marginEnd="10dp"
-                        android:text="Room"
+                        android:text="@string/room"
                         android:checked="true" />
 
                     <RadioButton
                         android:id="@+id/houseTypeRadioButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="House" />
+                        android:text="@string/house" />
 
                 </RadioGroup>
 
@@ -367,16 +359,9 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Photo upload"
+                    android:text="@string/photos_of_rental"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
-
-<!--                <EditText-->
-<!--                    android:id="@+id/addPlacePhotoUploadEditText"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_margin="20dp"-->
-<!--                    android:background="@drawable/edittext_border" />-->
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/imagesRecyclerView"
@@ -396,7 +381,7 @@
                         android:id="@+id/selectImageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Add Image"/>
+                        android:text="@string/add_image"/>
                 </LinearLayout>
 
                 <!-- Rules -->
@@ -416,8 +401,19 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Rules"
+                    android:text="@string/rules"
                     android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="1dp"
+                    android:paddingStart="20dp"
+                    android:text="*Rules will be separated by period (.) character or new line.
+                    Every rule will be displayed in a new line."
+                    android:textStyle="normal"
+                    android:textSize="12sp"
                     tools:ignore="RtlSymmetry" />
 
                 <EditText
@@ -444,8 +440,19 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Amenities"
+                    android:text="@string/amenities"
                     android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="1dp"
+                    android:paddingStart="20dp"
+                    android:text="*Amenities will be separated by period (.) character or new line.
+                    Every amenity will be displayed in a new line."
+                    android:textStyle="normal"
+                    android:textSize="12sp"
                     tools:ignore="RtlSymmetry" />
 
                 <EditText
@@ -472,8 +479,18 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Description"
+                    android:text="@string/description"
                     android:textSize="18sp"
+                    tools:ignore="RtlSymmetry" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="1dp"
+                    android:paddingStart="20dp"
+                    android:text="*Description will be displayed at the rental preview card."
+                    android:textStyle="normal"
+                    android:textSize="12sp"
                     tools:ignore="RtlSymmetry" />
 
                 <EditText
@@ -500,7 +517,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Beds"
+                    android:text="@string/beds"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
@@ -530,7 +547,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Bedrooms"
+                    android:text="@string/bedrooms"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
@@ -560,7 +577,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Bathrooms"
+                    android:text="@string/bathrooms"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
@@ -590,7 +607,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Living rooms"
+                    android:text="@string/living_rooms"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 
@@ -620,7 +637,7 @@
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
                     android:paddingStart="20dp"
-                    android:text="Area"
+                    android:text="@string/area"
                     android:textSize="18sp"
                     tools:ignore="RtlSymmetry" />
 

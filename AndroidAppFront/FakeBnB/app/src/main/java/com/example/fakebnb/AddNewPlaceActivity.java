@@ -46,6 +46,7 @@ import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.utils.ImageUtils;
+import com.example.fakebnb.utils.NavigationUtils;
 import com.example.fakebnb.utils.RealPathUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -395,7 +396,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         setTextWatcherMaxVisitors();
         setTextWatcherMinPrice();
         setTextWatcherExtraCost();
-//        setTextWatcherPhotoUpload();
         setTextWatcherRules();
         setTextWatcherAmenities();
         setTextWatcherDescription();
@@ -414,9 +414,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceAddressEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningAddress.setText("Please enter the rental's address");
                     addPlaceWarningAddress.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningAddress.setVisibility(View.GONE);
@@ -429,9 +431,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                             }
                         }
                     });
-//                    if (isMapReady && googleMap != null) {
-//                        showAddressOnMap(addressToShowOnMap);
-//                    }
                 }
             }
         };
@@ -446,9 +445,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceDistrictEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningDistrict.setText("Please enter the rental's district");
                     addPlaceWarningDistrict.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningDistrict.setVisibility(View.GONE);
@@ -475,9 +476,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceCityEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningCity.setText("Please enter the rental's city");
                     addPlaceWarningCity.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningCity.setVisibility(View.GONE);
@@ -504,9 +507,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceCountryEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningCountry.setText("Please enter the rental's country");
                     addPlaceWarningCountry.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningCountry.setVisibility(View.GONE);
@@ -533,9 +538,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (startDateEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningDates.setText("Please enter check-in and check-out dates");
                     addPlaceWarningDates.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningDates.setVisibility(View.GONE);
@@ -553,9 +560,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (endDateEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningDates.setText("Please enter check-in and check-out dates");
                     addPlaceWarningDates.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningDates.setVisibility(View.GONE);
@@ -573,9 +582,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceMaxVisitorsEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningMaxVisitors.setText("Please enter maximum number of visitors");
                     addPlaceWarningMaxVisitors.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningMaxVisitors.setVisibility(View.GONE);
@@ -593,9 +604,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceMinPriceEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningMinPrice.setText("Please enter minimum price of rental per night");
                     addPlaceWarningMinPrice.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningMinPrice.setVisibility(View.GONE);
@@ -613,9 +626,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceExtraCostEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningExtraCost.setText("Please enter extra cost per person");
                     addPlaceWarningExtraCost.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningExtraCost.setVisibility(View.GONE);
@@ -625,26 +640,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         addPlaceExtraCostEditText.addTextChangedListener(textWatcher);
     }
 
-//    private void setTextWatcherPhotoUpload() {
-//        TextWatcher textWatcher = new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-//
-//            @Override
-//            public void afterTextChanged(Editable editable) {
-//                if (addPlacePhotoUploadEditText.getText().toString().isEmpty()) {
-//                    addPlaceWarningPhotoUpload.setVisibility(View.VISIBLE);
-//                } else {
-//                    addPlaceWarningPhotoUpload.setVisibility(View.GONE);
-//                }
-//            }
-//        };
-//        addPlacePhotoUploadEditText.addTextChangedListener(textWatcher);
-//    }
-
     private void setTextWatcherRules() {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -653,9 +648,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceRulesEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningRules.setText("Please enter rules");
                     addPlaceWarningRules.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningRules.setVisibility(View.GONE);
@@ -673,9 +670,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceAmenitiesEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningAmenities.setText("Please enter amenities");
                     addPlaceWarningAmenities.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningAmenities.setVisibility(View.GONE);
@@ -693,9 +692,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceDescriptionEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningDescription.setText("Please enter description");
                     addPlaceWarningDescription.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningDescription.setVisibility(View.GONE);
@@ -713,9 +714,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceBedsEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningBeds.setText("Please enter number of beds");
                     addPlaceWarningBeds.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningBeds.setVisibility(View.GONE);
@@ -733,9 +736,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceBedroomsEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningBedrooms.setText("Please enter number of bedrooms");
                     addPlaceWarningBedrooms.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningBedrooms.setVisibility(View.GONE);
@@ -753,9 +758,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceBathroomsEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningBathrooms.setText("Please enter number of bathrooms");
                     addPlaceWarningBathrooms.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningBathrooms.setVisibility(View.GONE);
@@ -773,9 +780,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceLivingRoomsEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningLivingRooms.setText("Please enter number of living rooms");
                     addPlaceWarningLivingRooms.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningLivingRooms.setVisibility(View.GONE);
@@ -793,9 +802,11 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (addPlaceAreaEditText.getText().toString().isEmpty()) {
+                    addPlaceWarningArea.setText("Please enter area");
                     addPlaceWarningArea.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningArea.setVisibility(View.GONE);
@@ -937,15 +948,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                                 if (response.isSuccessful()) {
                                     Log.d(TAG, "Apartment added successfully");
                                     Toast.makeText(view.getContext(), "Apartment added successfully", Toast.LENGTH_SHORT).show();
-                                    Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                                    host_main_page_intent.putExtra("user_id", userId);
-                                    host_main_page_intent.putExtra("user_jwt", jwtToken);
-                                    ArrayList<String> roleList = new ArrayList<>();
-                                    for (RoleName role : roles) {
-                                        roleList.add(role.toString());
-                                    }
-                                    host_main_page_intent.putStringArrayListExtra("user_roles", roleList);
-                                    startActivity(host_main_page_intent);
+                                    NavigationUtils.goToHostMainPage(getApplicationContext(), userId, jwtToken, roles);
                                 } else {
                                     Toast.makeText(AddNewPlaceActivity.this, "1 Error adding apartment", Toast.LENGTH_SHORT).show();
                                     Log.d(TAG, "1 Error adding apartment");
@@ -962,6 +965,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressLint("SetTextI18n")
     @Nullable
     private ApartmentRequest setApartmentRequestData(View view) {
 
@@ -979,6 +983,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             apartmentRequest.setMaxVisitors(maxVisitors);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Max visitors must be a number", Toast.LENGTH_SHORT).show();
+            addPlaceWarningMaxVisitors.setText("Max visitors must be a number");
+            addPlaceWarningMaxVisitors.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -987,7 +993,9 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             BigDecimal minPrice = new BigDecimal(addPlaceMinPriceEditText.getText().toString());
             apartmentRequest.setMinRetailPrice(minPrice);
         } catch (NumberFormatException e) {
-            Toast.makeText(view.getContext(), "Min price must be a number", Toast.LENGTH_SHORT).show();
+            Toast.makeText(view.getContext(), "Minimum price must be a number", Toast.LENGTH_SHORT).show();
+            addPlaceWarningMinPrice.setText("Minimum price must be a number");
+            addPlaceWarningMinPrice.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -997,6 +1005,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             apartmentRequest.setExtraCostPerPerson(extraCost);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Extra cost must be a number", Toast.LENGTH_SHORT).show();
+            addPlaceWarningExtraCost.setText("Extra cost must be a number");
+            addPlaceWarningExtraCost.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -1010,6 +1020,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             apartmentRequest.setNumberOfBeds(beds);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Beds must be a number", Toast.LENGTH_SHORT).show();
+            addPlaceWarningBeds.setText("Beds must be a number");
+            addPlaceWarningBeds.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -1019,6 +1031,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             apartmentRequest.setNumberOfBedrooms(bedrooms);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Bedrooms must be a number", Toast.LENGTH_SHORT).show();
+            addPlaceWarningBedrooms.setText("Bedrooms must be a number");
+            addPlaceWarningBedrooms.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -1028,6 +1042,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             apartmentRequest.setNumberOfBathrooms(bathrooms);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Bathrooms must be a number", Toast.LENGTH_SHORT).show();
+            addPlaceWarningBathrooms.setText("Bathrooms must be a number");
+            addPlaceWarningBathrooms.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -1037,6 +1053,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             apartmentRequest.setNumberOfLivingRooms(livingRooms);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Living rooms must be a number", Toast.LENGTH_SHORT).show();
+            addPlaceWarningLivingRooms.setText("Living rooms must be a number");
+            addPlaceWarningLivingRooms.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -1046,6 +1064,8 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             apartmentRequest.setArea(area);
         } catch (NumberFormatException e) {
             Toast.makeText(view.getContext(), "Area must be a number", Toast.LENGTH_SHORT).show();
+            addPlaceWarningArea.setText("Area must be a number");
+            addPlaceWarningArea.setVisibility(View.VISIBLE);
             return null;
         }
 
@@ -1073,61 +1093,101 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         return apartmentRequest;
     }
 
+    @SuppressLint("SetTextI18n")
     private boolean validateFields() {
         boolean isValid = true;
         if (addPlaceAddressEditText.getText().toString().isEmpty()) {
+            addPlaceWarningAddress.setText("Please enter the rental's address");
             addPlaceWarningAddress.setVisibility(View.VISIBLE);
             isValid = false;
         }
+        if (addPlaceDistrictEditText.getText().toString().isEmpty()) {
+            addPlaceWarningDistrict.setText("Please enter the rental's district");
+            addPlaceWarningDistrict.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (addPlaceCityEditText.getText().toString().isEmpty()) {
+            addPlaceWarningCity.setText("Please enter the rental's city");
+            addPlaceWarningCity.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
+        if (addPlaceCountryEditText.getText().toString().isEmpty()) {
+            addPlaceWarningCountry.setText("Please enter the rental's country");
+            addPlaceWarningCountry.setVisibility(View.VISIBLE);
+            isValid = false;
+        }
         if (startDateEditText.getText().toString().isEmpty()) {
-            addPlaceWarningDates.setVisibility(View.VISIBLE);
+            if (endDateEditText.getText().toString().isEmpty()) {
+                addPlaceWarningDates.setText("Please enter the rental's check-in and check-out dates");
+                addPlaceWarningDates.setVisibility(View.VISIBLE);
+            } else {
+                addPlaceWarningDates.setText("Please enter the rental's check-in date");
+                addPlaceWarningDates.setVisibility(View.VISIBLE);
+            }
             isValid = false;
         }
         if (endDateEditText.getText().toString().isEmpty()) {
-            addPlaceWarningDates.setVisibility(View.VISIBLE);
+            if (startDateEditText.getText().toString().isEmpty()) {
+                addPlaceWarningDates.setText("Please enter the rental's check-in and check-out dates");
+                addPlaceWarningDates.setVisibility(View.VISIBLE);
+            } else {
+                addPlaceWarningDates.setText("Please enter the rental's check-out date");
+                addPlaceWarningDates.setVisibility(View.VISIBLE);
+            }
             isValid = false;
         }
         if (addPlaceMaxVisitorsEditText.getText().toString().isEmpty()) {
+            addPlaceWarningMaxVisitors.setText("Please enter maximum number of visitors");
             addPlaceWarningMaxVisitors.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceMinPriceEditText.getText().toString().isEmpty()) {
+            addPlaceWarningMinPrice.setText("Please enter minimum price of rental per night");
             addPlaceWarningMinPrice.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceExtraCostEditText.getText().toString().isEmpty()) {
+            addPlaceWarningExtraCost.setText("Please enter extra cost per person");
             addPlaceWarningExtraCost.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (imageBitmapList == null || imageBitmapList.isEmpty()) {
+            addPlaceWarningPhotoUpload.setText("Please upload at least one photograph of rental");
             addPlaceWarningPhotoUpload.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceRulesEditText.getText().toString().isEmpty()) {
+            addPlaceWarningRules.setText("Please enter the rental's rules");
             addPlaceWarningRules.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceDescriptionEditText.getText().toString().isEmpty()) {
+            addPlaceWarningDescription.setText("Please enter the rental's description");
             addPlaceWarningDescription.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceBedsEditText.getText().toString().isEmpty()) {
+            addPlaceWarningBeds.setText("Please enter number of beds");
             addPlaceWarningBeds.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceBedroomsEditText.getText().toString().isEmpty()) {
+            addPlaceWarningBedrooms.setText("Please enter number of bedrooms");
             addPlaceWarningBedrooms.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceBathroomsEditText.getText().toString().isEmpty()) {
+            addPlaceWarningBathrooms.setText("Please enter number of bathrooms");
             addPlaceWarningBathrooms.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceLivingRoomsEditText.getText().toString().isEmpty()) {
+            addPlaceWarningLivingRooms.setText("Please enter number of living rooms");
             addPlaceWarningLivingRooms.setVisibility(View.VISIBLE);
             isValid = false;
         }
         if (addPlaceAreaEditText.getText().toString().isEmpty()) {
+            addPlaceWarningArea.setText("Please enter area");
             addPlaceWarningArea.setVisibility(View.VISIBLE);
             isValid = false;
         }
