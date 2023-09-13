@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ImageRepository  extends JpaRepository<Image, Long>  {
@@ -18,5 +19,7 @@ public interface ImageRepository  extends JpaRepository<Image, Long>  {
     @Query("select im from Image im where im.userReg.id = :userId")
     List<Image> findByUserRegId(@Param("userId") Long userId);
 
+    @Query("select im from Image im where im.apartment.id = :apartmentId limit 1")
+    Optional<Image> findFirstImageByApartmentId(@Param("apartmentId") Long apartmentId);
 
 }

@@ -39,4 +39,11 @@ public class ImageController {
         return imageService.getApartmentImageIds(apartmentId);
     }
 
+    @GetMapping("/image/single/{apartmentId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_HOST')")
+    public ResponseEntity<?> getSingleApartmentImage(@PathVariable(value = "apartmentId") Long apartmentId) throws IOException {
+        return imageService.getSingleApartmentImage(apartmentId);
+    }
+
+
 }
