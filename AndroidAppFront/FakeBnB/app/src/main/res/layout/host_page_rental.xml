@@ -3,13 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardBackgroundColor="@color/cardview_dark_background"
     android:layout_margin="8dp"
     app:cardCornerRadius="10dp">
 
     <RelativeLayout
+        android:id="@+id/relativeLayoutHostRentalHomePage"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="@drawable/start_image">
+        android:layout_height="300dp">
+
+
+        <ImageView
+            android:id="@+id/singleImageHostRentalView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/image_of_rental" />
 
         <LinearLayout
             android:id="@+id/textContainer"
