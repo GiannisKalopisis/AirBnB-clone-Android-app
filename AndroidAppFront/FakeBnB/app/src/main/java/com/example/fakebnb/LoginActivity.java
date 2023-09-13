@@ -1,7 +1,6 @@
 package com.example.fakebnb;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,8 +19,8 @@ import com.example.fakebnb.model.response.SignInResponse;
 import com.example.fakebnb.model.request.UserLoginModel;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
+import com.example.fakebnb.utils.NavigationUtils;
 
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,39 +75,15 @@ public class LoginActivity extends AppCompatActivity {
 
                                 // has both roles, so login as USER
                                 if (userData.getRoleNames().contains(RoleName.ROLE_USER) && userData.getRoleNames().contains(RoleName.ROLE_HOST)) {
-                                    Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-                                    main_page_intent.putExtra("user_id", userData.getId());
-                                    main_page_intent.putExtra("user_jwt", userData.getJwtToken());
-                                    ArrayList<String> roleList = new ArrayList<>();
-                                    for (RoleName role : userData.getRoleNames()) {
-                                        roleList.add(role.toString());
-                                    }
-                                    main_page_intent.putStringArrayListExtra("user_roles", roleList);
-                                    startActivity(main_page_intent);
+                                    NavigationUtils.goToMainPage(LoginActivity.this, userData.getId(), userData.getJwtToken(), userData.getRoleNames());
                                 }
                                 // has only user role, so login as USER
                                 else if (userData.getRoleNames().contains(RoleName.ROLE_USER)) {
-                                    Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-                                    main_page_intent.putExtra("user_id", userData.getId());
-                                    main_page_intent.putExtra("user_jwt", userData.getJwtToken());
-                                    ArrayList<String> roleList = new ArrayList<>();
-                                    for (RoleName role : userData.getRoleNames()) {
-                                        roleList.add(role.toString());
-                                    }
-                                    main_page_intent.putStringArrayListExtra("user_roles", roleList);
-                                    startActivity(main_page_intent);
+                                    NavigationUtils.goToMainPage(LoginActivity.this, userData.getId(), userData.getJwtToken(), userData.getRoleNames());
                                 }
                                 // has only host role, so login as HOST
                                 else if (userData.getRoleNames().contains(RoleName.ROLE_HOST)) {
-                                    Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                                    host_main_page_intent.putExtra("user_id", userData.getId());
-                                    host_main_page_intent.putExtra("user_jwt", userData.getJwtToken());
-                                    ArrayList<String> roleList = new ArrayList<>();
-                                    for (RoleName role : userData.getRoleNames()) {
-                                        roleList.add(role.toString());
-                                    }
-                                    host_main_page_intent.putExtra("user_roles", roleList);
-                                    startActivity(host_main_page_intent);
+                                    NavigationUtils.goToHostMainPage(LoginActivity.this, userData.getId(), userData.getJwtToken(), userData.getRoleNames());
                                 }
                                 // Error at roles
                                 else {

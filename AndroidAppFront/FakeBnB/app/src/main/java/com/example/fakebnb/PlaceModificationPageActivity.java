@@ -252,13 +252,13 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                 // Handle unsuccessful response
                                 Toast.makeText(PlaceModificationPageActivity.this, "Couldn't get info of apartment.", Toast.LENGTH_SHORT).show();
                                 Log.d("API_CALL", "GetApartmentInfo failed");
-                                goToHostMainPage();
+                                NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                             }
                         } else {
                             // Handle unsuccessful response
                             Toast.makeText(PlaceModificationPageActivity.this, "Couldn't get info of apartment.", Toast.LENGTH_SHORT).show();
                             Log.d("API_CALL", "GetApartmentInfo failed");
-                            goToHostMainPage();
+                            NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                         }
                     }
 
@@ -268,7 +268,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                         // Handle failure
                         Toast.makeText(PlaceModificationPageActivity.this, "Failed to communicate with server. Couldn't get info of apartment.", Toast.LENGTH_SHORT).show();
                         Log.e("API_CALL", "Error: " + t.getMessage());
-                        goToHostMainPage();
+                        NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                     }
                 });
 
@@ -346,18 +346,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         );
     }
 
-    private void goToHostMainPage() {
-        Intent host_main_page_intent = new Intent(PlaceModificationPageActivity.this, HostMainPageActivity.class);
-        host_main_page_intent.putExtra("user_id", userId);
-        host_main_page_intent.putExtra("user_jwt", jwtToken);
-        ArrayList<String> roleList = new ArrayList<>();
-        for (RoleName role : roles) {
-            roleList.add(role.toString());
-        }
-        host_main_page_intent.putExtra("user_roles", roleList);
-        startActivity(host_main_page_intent);
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -386,15 +374,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 imagePickerLauncher.launch(intent);
             } else {
                 Toast.makeText(this, "Access to images is necessary", Toast.LENGTH_SHORT).show();
-                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                host_main_page_intent.putExtra("user_id", userId);
-                host_main_page_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                host_main_page_intent.putExtra("user_roles", roleList);
-                startActivity(host_main_page_intent);
+                NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
             }
         }
     }
@@ -1576,31 +1556,13 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         chatButton.setOnClickListener(view -> {
             resetWarnVisibility();
             Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-            Intent chat_intent = new Intent(PlaceModificationPageActivity.this, ChatActivity.class);
-            chat_intent.putExtra("user_id", userId);
-            chat_intent.putExtra("user_jwt", jwtToken);
-            chat_intent.putExtra("user_current_role", RoleName.ROLE_HOST.toString());
-            ArrayList<String> roleList = new ArrayList<>();
-            for (RoleName role : roles) {
-                roleList.add(role.toString());
-            }
-            chat_intent.putExtra("user_roles", roleList);
-            startActivity(chat_intent);
+            NavigationUtils.goToChatPage(PlaceModificationPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
         profileButton.setOnClickListener(view -> {
             resetWarnVisibility();
             Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-            Intent profile_intent = new Intent(PlaceModificationPageActivity.this, ProfileActivity.class);
-            profile_intent.putExtra("user_id", userId);
-            profile_intent.putExtra("user_jwt", jwtToken);
-            profile_intent.putExtra("user_current_role", RoleName.ROLE_HOST.toString());
-            ArrayList<String> roleList = new ArrayList<>();
-            for (RoleName role : roles) {
-                roleList.add(role.toString());
-            }
-            profile_intent.putStringArrayListExtra("user_roles", roleList);
-            startActivity(profile_intent);
+            NavigationUtils.goToProfilePage(PlaceModificationPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
         roleButton.setOnClickListener(view -> {

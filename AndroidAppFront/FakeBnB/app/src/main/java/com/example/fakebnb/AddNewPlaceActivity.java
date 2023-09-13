@@ -224,15 +224,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                 imagePickerLauncher.launch(intent);
             } else {
                 Toast.makeText(this, "Access to images is necessary", Toast.LENGTH_SHORT).show();
-                Intent host_main_page_intent = new Intent(getApplicationContext(), HostMainPageActivity.class);
-                host_main_page_intent.putExtra("user_id", userId);
-                host_main_page_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                host_main_page_intent.putExtra("user_roles", roleList);
-                startActivity(host_main_page_intent);
+                NavigationUtils.goToHostMainPage(AddNewPlaceActivity.this, userId, jwtToken, roles);
             }
         }
     }
@@ -1260,16 +1252,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(AddNewPlaceActivity.this, ChatActivity.class);
-                chat_intent.putExtra("user_id", userId);
-                chat_intent.putExtra("user_jwt", jwtToken);
-                chat_intent.putExtra("user_current_role", RoleName.ROLE_HOST.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                chat_intent.putExtra("user_roles", roleList);
-                startActivity(chat_intent);
+                NavigationUtils.goToChatPage(AddNewPlaceActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
             }
         });
 
@@ -1277,16 +1260,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(AddNewPlaceActivity.this, ProfileActivity.class);
-                profile_intent.putExtra("user_id", userId);
-                profile_intent.putExtra("user_jwt", jwtToken);
-                profile_intent.putExtra("user_current_role", RoleName.ROLE_HOST.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                profile_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(profile_intent);
+                NavigationUtils.goToProfilePage(AddNewPlaceActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
             }
         });
 
@@ -1297,16 +1271,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
                 if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    // to be at this activity he has the user role
-                    Intent main_page_intent = new Intent(AddNewPlaceActivity.this, MainPageActivity.class);
-                    main_page_intent.putExtra("user_id", userId);
-                    main_page_intent.putExtra("user_jwt", jwtToken);
-                    ArrayList<String> roleList = new ArrayList<>();
-                    for (RoleName role : roles) {
-                        roleList.add(role.toString());
-                    }
-                    main_page_intent.putExtra("user_roles", roleList);
-                    startActivity(main_page_intent);
+                    NavigationUtils.goToMainPage(AddNewPlaceActivity.this, userId, jwtToken, roles);
                 } else {
                     Toast.makeText(AddNewPlaceActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
                 }
