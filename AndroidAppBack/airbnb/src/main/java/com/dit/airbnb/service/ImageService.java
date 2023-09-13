@@ -16,6 +16,8 @@ import jakarta.annotation.PostConstruct;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -248,7 +250,7 @@ public class ImageService {
 
     public ResponseEntity<?> getSingleApartmentImage(Long apartmentId) throws FileNotFoundException {
 
-        Optional<Image> image = imageRepository.findFirstImageByApartmentId(apartmentId);
+        Optional<Image> image = imageRepository.findFirstByApartmentId(apartmentId);
         if (image.isEmpty()) {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
