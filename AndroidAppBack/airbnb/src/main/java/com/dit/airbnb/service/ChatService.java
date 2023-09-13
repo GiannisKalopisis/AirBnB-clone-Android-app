@@ -123,7 +123,7 @@ public class ChatService {
             messagePage = messageRepository.findByUserRegIdForHost(userId, PageRequest.of(page, size));
         }
 
-        PagedResponse<OverviewMessageResponse> overviewMessageResponsePagedResponse = createOverviewMessagePagedResponse(messagePage);
+        PagedResponse<OverviewMessageResponse> overviewMessageResponsePagedResponse = createOverviewMessagePagedResponse(currentUser.getId(), messagePage);
 
         return ResponseEntity.ok(new ApiResponse(true, "getOverviewMessagesByRegUserId succeed", overviewMessageResponsePagedResponse));
 
@@ -142,7 +142,7 @@ public class ChatService {
     }
 
     // constructs paged response
-    private PagedResponse<OverviewMessageResponse> createOverviewMessagePagedResponse(Page<Message> messagePage) {
+    private PagedResponse<OverviewMessageResponse> createOverviewMessagePagedResponse(Long currentUserId, Page<Message> messagePage) {
         if (messagePage.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), messagePage.getNumber(),
                     messagePage.getSize(), messagePage.getTotalElements(),
@@ -151,8 +151,10 @@ public class ChatService {
 
         List<OverviewMessageResponse> messageResponses = new ArrayList<>();
         for (Message message : messagePage) {
-            UserReg userReg = message.getSenderUserReg();
-            messageResponses.add(new OverviewMessageResponse(message.getChat().getId(), userReg.getId(), userReg.getUsername(), message.getContent(), message.getSeen()));
+            Chat chat = message.getChat();
+            UserReg sender = chat.getFirstSenderUserReg();
+            UserReg resUser = sender.getId().equals(currentUserId) ? chat.getFirstReceiverUserReg() : sender;
+            messageResponses.add(new OverviewMessageResponse(message.getChat().getId(), resUser.getId(), resUser.getUsername(), message.getContent(), message.getSeen()));
         }
 
         return new PagedResponse<>(messageResponses, messagePage.getNumber(),
