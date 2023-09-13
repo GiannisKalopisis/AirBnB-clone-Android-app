@@ -246,4 +246,21 @@ public class ImageService {
         return ResponseEntity.ok().body(new ApiResponse(true, "updateApartmentImages succeed", apartment));
     }
 
+    public ResponseEntity<?> getSingleApartmentImage(Long apartmentId) throws FileNotFoundException {
+
+        Optional<Image> image = imageRepository.findFirstImageByApartmentId(apartmentId);
+        if (image.isEmpty()) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + "emptyImage" + "\"")
+                    .body(null);
+        }
+
+        Resource resource = loadAsResource(image.get().getPath());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
 }
