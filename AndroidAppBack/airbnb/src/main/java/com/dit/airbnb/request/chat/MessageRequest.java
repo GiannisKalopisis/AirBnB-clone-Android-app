@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @Setter
 @Getter
@@ -15,6 +16,7 @@ public class MessageRequest {
 
     private Long receiverUserRegId;
 
+    @NotNull
     @Enumerated
     private RoleName currentSenderRole;
 
