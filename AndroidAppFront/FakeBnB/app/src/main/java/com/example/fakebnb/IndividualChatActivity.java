@@ -33,6 +33,7 @@ import com.example.fakebnb.model.response.SingleMessageResponse;
 import com.example.fakebnb.rest.ChatAPI;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.NavigationUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +62,7 @@ public class IndividualChatActivity extends AppCompatActivity {
     private String jwtToken;
     private Set<RoleName> roles;
     private Long chatId;
+    private RoleName currentRole;
 
     // pagination
     private ArrayList<MessageModel> messageModel = new ArrayList<>();
@@ -87,6 +89,7 @@ public class IndividualChatActivity extends AppCompatActivity {
             userId = intent.getSerializableExtra("user_id", Long.class);
             jwtToken = intent.getSerializableExtra("user_jwt", String.class);
             chatId = intent.getSerializableExtra("chat_id", Long.class);
+            currentRole = RoleName.valueOf(intent.getStringExtra("user_current_role"));
             ArrayList<String> roleList = intent.getStringArrayListExtra("user_roles");
             if (roleList != null) {
                 roles = new HashSet<>();
@@ -126,10 +129,18 @@ public class IndividualChatActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<ChatInfoResponse> call, @NonNull Response<ChatInfoResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             if (response.body().getSuccess()) {
-                                senderUsername = response.body().getObject().getSenderUsername();
-                                receiverUsername = response.body().getObject().getReceiverUsername();
-                                senderId = response.body().getObject().getSenderId();
-                                receiverId = response.body().getObject().getReceiverId();
+                                if (currentRole == RoleName.ROLE_USER) {
+                                    senderUsername = response.body().getObject().getSenderUsername();
+                                    receiverUsername = response.body().getObject().getReceiverUsername();
+                                    senderId = response.body().getObject().getSenderId();
+                                    receiverId = response.body().getObject().getReceiverId();
+                                } else if (currentRole == RoleName.ROLE_HOST) {
+                                    // sender is always the user who started the conversation
+                                    receiverUsername = response.body().getObject().getSenderUsername();
+                                    senderUsername = response.body().getObject().getReceiverUsername();
+                                    receiverId = response.body().getObject().getSenderId();
+                                    senderId = response.body().getObject().getReceiverId();
+                                }
                                 receiver_username.setText(receiverUsername);
                                 messageRecyclerAdapter.setSenderUsername(senderUsername);
                                 messageRecyclerAdapter.setReceiverUsername(receiverUsername);
@@ -147,11 +158,19 @@ public class IndividualChatActivity extends AppCompatActivity {
                                 });
                             } else {
                                 Toast.makeText(IndividualChatActivity.this, "Couldn't get chat info", Toast.LENGTH_SHORT).show();
-                                goToMainPage();
+                                if (currentRole == RoleName.ROLE_USER) {
+                                    NavigationUtils.goToMainPage(IndividualChatActivity.this, userId, jwtToken, roles);
+                                } else {
+                                    NavigationUtils.goToHostMainPage(IndividualChatActivity.this, userId, jwtToken, roles);
+                                }
                             }
                         } else {
                             Toast.makeText(IndividualChatActivity.this, "Couldn't get chat info", Toast.LENGTH_SHORT).show();
-                            goToMainPage();
+                            if (currentRole == RoleName.ROLE_USER) {
+                                NavigationUtils.goToMainPage(IndividualChatActivity.this, userId, jwtToken, roles);
+                            } else {
+                                NavigationUtils.goToHostMainPage(IndividualChatActivity.this, userId, jwtToken, roles);
+                            }
                         }
                     }
 
@@ -159,7 +178,11 @@ public class IndividualChatActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Call<ChatInfoResponse> call, @NonNull Throwable t) {
                         Log.d(TAG, "Failed to connect to server and get chat info: " + t.getMessage());
                         Toast.makeText(IndividualChatActivity.this, "Failed to connect to server and get chat info", Toast.LENGTH_SHORT).show();
-                        goToMainPage();
+                        if (currentRole == RoleName.ROLE_USER) {
+                            NavigationUtils.goToMainPage(IndividualChatActivity.this, userId, jwtToken, roles);
+                        } else {
+                            NavigationUtils.goToHostMainPage(IndividualChatActivity.this, userId, jwtToken, roles);
+                        }
                     }
                 });
     }
@@ -212,18 +235,6 @@ public class IndividualChatActivity extends AppCompatActivity {
         return outputBitmap;
     }
 
-    private void goToMainPage() {
-        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-        main_page_intent.putExtra("user_id", userId);
-        main_page_intent.putExtra("user_jwt", jwtToken);
-        ArrayList<String> roleList = new ArrayList<>();
-        for (RoleName role : roles) {
-            roleList.add(role.toString());
-        }
-        main_page_intent.putStringArrayListExtra("user_roles", roleList);
-        startActivity(main_page_intent);
-    }
-
     /**
      * Load older data when scrolling up
      */
@@ -272,6 +283,7 @@ public class IndividualChatActivity extends AppCompatActivity {
                                     if (lastVisibleItemPosition != RecyclerView.NO_POSITION) {
                                         layoutManager.scrollToPosition(0);
                                     }
+                                    sendMessage = false;
                                 }
                             } else {
                                 Toast.makeText(IndividualChatActivity.this, "1 Couldn't get messages", Toast.LENGTH_SHORT).show();
@@ -300,6 +312,7 @@ public class IndividualChatActivity extends AppCompatActivity {
     /**
      * Send message to backend
      */
+    boolean sendMessage = false;
     private void sendMessageToUser(MessageRequest messageRequest) {
         RestClient restClient = new RestClient(jwtToken);
         ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
@@ -312,6 +325,7 @@ public class IndividualChatActivity extends AppCompatActivity {
                             Toast.makeText(IndividualChatActivity.this, "Message sent", Toast.LENGTH_SHORT).show();
                             messageRecyclerAdapter.clearMessages();
                             currentPage = 0;
+                            sendMessage = true;
                             loadOlderData();
                         } else {
                             Toast.makeText(IndividualChatActivity.this, "Couldn't send message", Toast.LENGTH_SHORT).show();
@@ -330,6 +344,7 @@ public class IndividualChatActivity extends AppCompatActivity {
         MessageRequest messageRequest = new MessageRequest();
         messageRequest.setReceiverUserRegId(receiverId);
         messageRequest.setContent(chat_message_input.getText().toString());
+        messageRequest.setCurrentRole(currentRole);
         if (messageRequest.getContent().isEmpty()) {
             return null;
         }
@@ -348,10 +363,6 @@ public class IndividualChatActivity extends AppCompatActivity {
                 sendMessageToUser(messageRequest);
             }
         });
-    }
-
-    private void resetDisplayedMessageAndDisplayFirstPage() {
-
     }
 
     private void initView() {

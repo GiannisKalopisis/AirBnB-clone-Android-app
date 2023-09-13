@@ -26,7 +26,6 @@ public class ReservationDoneActivity extends AppCompatActivity {
     private Long userId;
     private String jwtToken;
     private Set<RoleName> roles;
-    private Long apartmentId;
 
     private Button reservationDoneHomeButton;
 
@@ -47,7 +46,6 @@ public class ReservationDoneActivity extends AppCompatActivity {
                     roles.add(RoleName.valueOf(role));
                 }
             }
-            apartmentId = intent.getSerializableExtra("apartment_id", Long.class);
         }
 
         initView();

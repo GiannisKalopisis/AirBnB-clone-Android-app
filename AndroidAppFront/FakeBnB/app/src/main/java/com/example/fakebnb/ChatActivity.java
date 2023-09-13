@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,13 +22,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fakebnb.Callbacks.ImageLoadCallback;
 import com.example.fakebnb.adapter.ChatRecyclerAdapter;
 import com.example.fakebnb.enums.RoleName;
-import com.example.fakebnb.model.MessageModel;
 import com.example.fakebnb.model.OverviewChatModel;
 import com.example.fakebnb.model.request.OverviewMessageRequest;
 import com.example.fakebnb.model.response.OverviewChatResponse;
 import com.example.fakebnb.rest.ChatAPI;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.NavigationUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -249,16 +248,7 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(ChatActivity.this, ProfileActivity.class);
-                profile_intent.putExtra("user_id", userId);
-                profile_intent.putExtra("user_jwt", jwtToken);
-                profile_intent.putExtra("user_current_role", currentRole.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                profile_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(profile_intent);
+                NavigationUtils.goToProfilePage(ChatActivity.this, userId, jwtToken, roles, currentRole.toString());
             }
         });
 
@@ -270,25 +260,9 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
 
                 if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                     if (currentRole == RoleName.ROLE_USER) {
-                        Intent host_main_page_intent = new Intent(ChatActivity.this, HostMainPageActivity.class);
-                        host_main_page_intent.putExtra("user_id", userId);
-                        host_main_page_intent.putExtra("user_jwt", jwtToken);
-                        ArrayList<String> roleList = new ArrayList<>();
-                        for (RoleName role : roles) {
-                            roleList.add(role.toString());
-                        }
-                        host_main_page_intent.putExtra("user_roles", roleList);
-                        startActivity(host_main_page_intent);
+                        NavigationUtils.goToHostMainPage(ChatActivity.this, userId, jwtToken, roles);
                     } else if (currentRole == RoleName.ROLE_HOST) {
-                        Intent main_page_intent = new Intent(ChatActivity.this, MainPageActivity.class);
-                        main_page_intent.putExtra("user_id", userId);
-                        main_page_intent.putExtra("user_jwt", jwtToken);
-                        ArrayList<String> roleList = new ArrayList<>();
-                        for (RoleName role : roles) {
-                            roleList.add(role.toString());
-                        }
-                        main_page_intent.putExtra("user_roles", roleList);
-                        startActivity(main_page_intent);
+                        NavigationUtils.goToMainPage(ChatActivity.this, userId, jwtToken, roles);
                     }
                 } else {
                     Toast.makeText(ChatActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
@@ -299,15 +273,6 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
 
     @Override
     public void onItemClick(long chatId) {
-        Intent individual_chat_intent = new Intent(ChatActivity.this, IndividualChatActivity.class);
-        individual_chat_intent.putExtra("user_id", userId);
-        individual_chat_intent.putExtra("user_jwt", jwtToken);
-        individual_chat_intent.putExtra("chat_id", chatId);
-        ArrayList<String> roleList = new ArrayList<>();
-        for (RoleName role : roles) {
-            roleList.add(role.toString());
-        }
-        individual_chat_intent.putExtra("user_roles", roleList);
-        startActivity(individual_chat_intent);
+        NavigationUtils.goToIndividualChatPage(ChatActivity.this, userId, jwtToken, roles, chatId, currentRole);
     }
 }

@@ -18,6 +18,7 @@ import com.example.fakebnb.model.request.BookingReviewRequest;
 import com.example.fakebnb.model.response.BookingReviewResponse;
 import com.example.fakebnb.rest.BookingReviewAPI;
 import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.NavigationUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,7 +33,7 @@ public class WriteReviewActivity extends AppCompatActivity {
     private static final String TAG = "WriteReviewPage";
 
     // user intent data
-    private Long userId, rentalId;
+    private Long userId, rentalId, hostId;
     private String jwtToken;
     private Set<RoleName> roles;
 
@@ -61,6 +62,7 @@ public class WriteReviewActivity extends AppCompatActivity {
                 }
             }
             rentalId = intent.getSerializableExtra("rental_id", Long.class);
+            hostId = intent.getSerializableExtra("host_id", Long.class);
         }
 
         initView();
@@ -102,7 +104,7 @@ public class WriteReviewActivity extends AppCompatActivity {
                                     if (response.body() != null) {
                                         if (response.body().getSuccess()) {
                                             Toast.makeText(WriteReviewActivity.this, "Review submitted successfully", Toast.LENGTH_SHORT).show();
-                                            goToMainPage();
+                                            NavigationUtils.goToMainPage(WriteReviewActivity.this, userId, jwtToken, roles);
                                         } else {
                                             Toast.makeText(WriteReviewActivity.this, "Failed to submit review", Toast.LENGTH_SHORT).show();
                                         }
@@ -132,53 +134,20 @@ public class WriteReviewActivity extends AppCompatActivity {
         return bookingReviewRequest;
     }
 
-    private void goToMainPage() {
-        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-        main_page_intent.putExtra("user_id", userId);
-        main_page_intent.putExtra("user_jwt", jwtToken);
-        ArrayList<String> roleList = new ArrayList<>();
-        for (RoleName role : roles) {
-            roleList.add(role.toString());
-        }
-        main_page_intent.putStringArrayListExtra("user_roles", roleList);
-        startActivity(main_page_intent);
-    }
-
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
-        // only user_role can be here
 
         chatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(WriteReviewActivity.this, ChatActivity.class);
-                chat_intent.putExtra("user_id", userId);
-                chat_intent.putExtra("user_jwt", jwtToken);
-                chat_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                chat_intent.putExtra("user_roles", roleList);
-                startActivity(chat_intent);
+                NavigationUtils.goToChatPage(WriteReviewActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
             }
         });
 
         profileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(WriteReviewActivity.this, ProfileActivity.class);
-                profile_intent.putExtra("user_id", userId);
-                profile_intent.putExtra("user_jwt", jwtToken);
-                profile_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                profile_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(profile_intent);
+                NavigationUtils.goToProfilePage(WriteReviewActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
             }
         });
 
@@ -186,19 +155,8 @@ public class WriteReviewActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: pressed role button");
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
-
                 if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    // to be at this activity he has the user role
-                    Intent host_main_page_intent = new Intent(WriteReviewActivity.this, HostMainPageActivity.class);
-                    host_main_page_intent.putExtra("user_id", userId);
-                    host_main_page_intent.putExtra("user_jwt", jwtToken);
-                    ArrayList<String> roleList = new ArrayList<>();
-                    for (RoleName role : roles) {
-                        roleList.add(role.toString());
-                    }
-                    host_main_page_intent.putExtra("user_roles", roleList);
-                    startActivity(host_main_page_intent);
+                    NavigationUtils.goToHostMainPage(WriteReviewActivity.this, userId, jwtToken, roles);
                 } else {
                     Toast.makeText(WriteReviewActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
                 }

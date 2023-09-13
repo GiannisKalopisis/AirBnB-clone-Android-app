@@ -279,16 +279,11 @@ public class ProfileActivity extends AppCompatActivity {
                 imagePickerLauncher.launch(intent);
             } else {
                 Toast.makeText(this, "Access to images is necessary", Toast.LENGTH_SHORT).show();
-                // TODO: go to user main page
-                Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-                main_page_intent.putExtra("user_id", userId);
-                main_page_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
+                if (currentRole == RoleName.ROLE_USER) {
+                    NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
+                } else if (currentRole == RoleName.ROLE_HOST) {
+                    NavigationUtils.goToHostMainPage(ProfileActivity.this, userId, jwtToken, roles);
                 }
-                main_page_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(main_page_intent);
             }
         }
     }
@@ -340,28 +335,10 @@ public class ProfileActivity extends AppCompatActivity {
 
                                     if (roles.contains(RoleName.ROLE_HOST)) {
                                         roles.add(RoleName.ROLE_USER);
-                                        // add user role so go to user's main page
-                                        Intent main_page_intent = new Intent(ProfileActivity.this, MainPageActivity.class);
-                                        main_page_intent.putExtra("user_id", userId);
-                                        main_page_intent.putExtra("user_jwt", jwtToken);
-                                        ArrayList<String> roleList = new ArrayList<>();
-                                        for (RoleName role : roles) {
-                                            roleList.add(role.toString());
-                                        }
-                                        main_page_intent.putExtra("user_roles", roleList);
-                                        startActivity(main_page_intent);
+                                        NavigationUtils.goToMainPage(ProfileActivity.this, userId, jwtToken, roles);
                                     } else {
                                         roles.add(RoleName.ROLE_HOST);
-                                        // add host role so go to host's main page
-                                        Intent host_main_page_intent = new Intent(ProfileActivity.this, HostMainPageActivity.class);
-                                        host_main_page_intent.putExtra("user_id", userId);
-                                        host_main_page_intent.putExtra("user_jwt", jwtToken);
-                                        ArrayList<String> roleList = new ArrayList<>();
-                                        for (RoleName role : roles) {
-                                            roleList.add(role.toString());
-                                        }
-                                        host_main_page_intent.putExtra("user_roles", roleList);
-                                        startActivity(host_main_page_intent);
+                                        NavigationUtils.goToHostMainPage(ProfileActivity.this, userId, jwtToken, roles);
                                     }
                                 } else {
                                     // Handle unsuccessful response
@@ -620,16 +597,7 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View view) {
                 resetWarnVisibility();
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(ProfileActivity.this, ChatActivity.class);
-                chat_intent.putExtra("user_id", userId);
-                chat_intent.putExtra("user_jwt", jwtToken);
-                chat_intent.putExtra("user_current_role", currentRole.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                chat_intent.putExtra("user_roles", roleList);
-                startActivity(chat_intent);
+                NavigationUtils.goToChatPage(ProfileActivity.this, userId, jwtToken, roles, currentRole.toString());
             }
         });
 

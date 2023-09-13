@@ -48,6 +48,7 @@ import com.example.fakebnb.rest.BookingReviewAPI;
 import com.example.fakebnb.rest.ChatAPI;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
+import com.example.fakebnb.utils.NavigationUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -135,22 +136,6 @@ public class RentRoomPage extends AppCompatActivity {
             numOfGuests = intent.getSerializableExtra("num_of_guests", Integer.class);
         }
 
-        /**
-         * Do all the API calls here:
-         * 1. Get the rental info - Failure is NOT_OK -> go back to main page
-         * 2. Get the rental images - Failure is OK
-         * 3. Get the host image - Failure is OK
-         */
-
-
-        /**
-         * Get RENTAL-INFO. In case of success, do the rest of the work:
-         * a. initialize the map and the rest logic
-         * b. render data
-         * c. get the rental images - failure is OK
-         * d. get the host image - failure is OK
-         */
-
         // Proceed with initializing the MapView and displaying the map
         initView();
         bottomBarClickListeners();
@@ -180,18 +165,18 @@ public class RentRoomPage extends AppCompatActivity {
                                 renderHostSection();
                             } else {
                                 Toast.makeText(RentRoomPage.this, "Could not get host of apartment", Toast.LENGTH_SHORT).show();
-                                goToMainPage();
+                                NavigationUtils.goToMainPage(RentRoomPage.this, userId, jwtToken, roles);
                             }
                         } else {
                             Toast.makeText(RentRoomPage.this, "Could not get host of apartment", Toast.LENGTH_SHORT).show();
-                            goToMainPage();
+                            NavigationUtils.goToMainPage(RentRoomPage.this, userId, jwtToken, roles);
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<UserRegResponse> call, @NonNull Throwable t) {
                         Toast.makeText(RentRoomPage.this, "Failed to connect to server and get host of apartment", Toast.LENGTH_SHORT).show();
-                        goToMainPage();
+                        NavigationUtils.goToMainPage(RentRoomPage.this, userId, jwtToken, roles);
                     }
                 });
 
@@ -232,18 +217,18 @@ public class RentRoomPage extends AppCompatActivity {
                                 }
                             } else {
                                 showToast("Could not get rental info");
-                                goToMainPage();
+                                NavigationUtils.goToMainPage(RentRoomPage.this, userId, jwtToken, roles);
                             }
                         } else {
                             showToast("Could not get rental info");
-                            goToMainPage();
+                            NavigationUtils.goToMainPage(RentRoomPage.this, userId, jwtToken, roles);
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull retrofit2.Call<ApartmentResponse> call, @NonNull Throwable t) {
                         showToast("Failed to connect to server");
-                        goToMainPage();
+                        NavigationUtils.goToMainPage(RentRoomPage.this, userId, jwtToken, roles);
                     }
                 });
     }
@@ -283,23 +268,9 @@ public class RentRoomPage extends AppCompatActivity {
         Toast.makeText(RentRoomPage.this, message, Toast.LENGTH_SHORT).show();
     }
 
-    private void goToMainPage() {
-        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-        main_page_intent.putExtra("user_id", userId);
-        main_page_intent.putExtra("user_jwt", jwtToken);
-        ArrayList<String> roleList = new ArrayList<>();
-        for (RoleName role : roles) {
-            roleList.add(role.toString());
-        }
-        main_page_intent.putStringArrayListExtra("user_roles", roleList);
-        startActivity(main_page_intent);
-    }
-
-
     /**
      * Google Maps methods
      */
-
     private void checkGoogleAPIAvailability() {
         // Check for Google Play Services availability
         GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
@@ -667,16 +638,7 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(RentRoomPage.this, ChatActivity.class);
-                chat_intent.putExtra("user_id", userId);
-                chat_intent.putExtra("user_jwt", jwtToken);
-                chat_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                chat_intent.putExtra("user_roles", roleList);
-                startActivity(chat_intent);
+                NavigationUtils.goToChatPage(RentRoomPage.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
             }
         });
 
@@ -684,16 +646,7 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(RentRoomPage.this, ProfileActivity.class);
-                profile_intent.putExtra("user_id", userId);
-                profile_intent.putExtra("user_jwt", jwtToken);
-                profile_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                profile_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(profile_intent);
+                NavigationUtils.goToProfilePage(RentRoomPage.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
             }
         });
 
@@ -704,16 +657,7 @@ public class RentRoomPage extends AppCompatActivity {
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
                 if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    // to be at this activity he has the user role
-                    Intent host_main_page_intent = new Intent(RentRoomPage.this, HostMainPageActivity.class);
-                    host_main_page_intent.putExtra("user_id", userId);
-                    host_main_page_intent.putExtra("user_jwt", jwtToken);
-                    ArrayList<String> roleList = new ArrayList<>();
-                    for (RoleName role : roles) {
-                        roleList.add(role.toString());
-                    }
-                    host_main_page_intent.putExtra("user_roles", roleList);
-                    startActivity(host_main_page_intent);
+                    NavigationUtils.goToHostMainPage(RentRoomPage.this, userId, jwtToken, roles);
                 } else {
                     Toast.makeText(RentRoomPage.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
                 }
@@ -726,17 +670,7 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed SEE HOST BUTTON", Toast.LENGTH_SHORT).show();
-                Intent see_host_intent = new Intent(getApplicationContext(), HostReviewPageActivity.class);
-                see_host_intent.putExtra("user_id", userId);
-                see_host_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                see_host_intent.putExtra("user_roles", roleList);
-                see_host_intent.putExtra("host_id", hostId);
-                see_host_intent.putExtra("apartment_id", apartmentId);
-                startActivity(see_host_intent);
+                NavigationUtils.goToHostReviewPage(RentRoomPage.this, userId, jwtToken, roles, hostId, apartmentId);
             }
         });
 
@@ -755,17 +689,7 @@ public class RentRoomPage extends AppCompatActivity {
                                     if (response.body().getSuccess()) {
                                         chatId = response.body().getObject();
                                         Toast.makeText(view.getContext(), "Pressed CONTACT HOST BUTTON", Toast.LENGTH_SHORT).show();
-                                        Intent contact_host_intent = new Intent(getApplicationContext(), IndividualChatActivity.class);
-                                        contact_host_intent.putExtra("user_id", userId);
-                                        contact_host_intent.putExtra("user_jwt", jwtToken);
-                                        ArrayList<String> roleList = new ArrayList<>();
-                                        for (RoleName role : roles) {
-                                            roleList.add(role.toString());
-                                        }
-                                        contact_host_intent.putExtra("user_roles", roleList);
-                                        contact_host_intent.putExtra("other_user_id", hostId);
-                                        contact_host_intent.putExtra("chat_id", chatId);
-                                        startActivity(contact_host_intent);
+                                        NavigationUtils.goToIndividualChatPage(RentRoomPage.this, userId, jwtToken, roles, chatId, RoleName.ROLE_USER);
                                     } else {
                                         Toast.makeText(RentRoomPage.this, "1 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
                                     }
@@ -800,16 +724,7 @@ public class RentRoomPage extends AppCompatActivity {
                                     if (response.body() != null) {
                                         if (response.body().getSuccess()) {
                                             Toast.makeText(RentRoomPage.this, "Reservation successful", Toast.LENGTH_SHORT).show();
-                                            Intent make_reservation_intent = new Intent(getApplicationContext(), ReservationDoneActivity.class);
-                                            make_reservation_intent.putExtra("user_id", userId);
-                                            make_reservation_intent.putExtra("user_jwt", jwtToken);
-                                            ArrayList<String> roleList = new ArrayList<>();
-                                            for (RoleName role : roles) {
-                                                roleList.add(role.toString());
-                                            }
-                                            make_reservation_intent.putExtra("user_roles", roleList);
-                                            make_reservation_intent.putExtra("apartment_id", apartmentId);
-                                            startActivity(make_reservation_intent);
+                                            NavigationUtils.goToReservationDonePage(RentRoomPage.this, userId, jwtToken, roles);
                                         } else {
                                             Toast.makeText(RentRoomPage.this, "1 Reservation failed", Toast.LENGTH_SHORT).show();
                                         }
@@ -835,16 +750,7 @@ public class RentRoomPage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
-                Intent write_review_intent = new Intent(getApplicationContext(), WriteReviewActivity.class);
-                write_review_intent.putExtra("user_id", userId);
-                write_review_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                write_review_intent.putExtra("user_roles", roleList);
-                write_review_intent.putExtra("rental_id", apartmentId);
-                startActivity(write_review_intent);
+                NavigationUtils.goToWriteReviewPage(RentRoomPage.this, userId, jwtToken, roles, apartmentId, hostId);
             }
         });
     }

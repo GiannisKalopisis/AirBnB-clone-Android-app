@@ -14,14 +14,16 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <!-- Image of the place -->
-        <ImageView
-            android:id="@+id/writeReviewImage"
+        <TextView
+            android:id="@+id/writeReviewHeader"
             android:layout_width="match_parent"
-            android:layout_height="270dp"
-            android:importantForAccessibility="no"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="70dp"
+            android:layout_marginBottom="30dp"
+            android:text="Here you can write your review,\n and help other users to choose\n the best place for them."
+            android:textSize="24sp"
+            android:gravity="center"
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/writeReviewText"

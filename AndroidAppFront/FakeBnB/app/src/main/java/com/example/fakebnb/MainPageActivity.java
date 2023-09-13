@@ -44,6 +44,7 @@ import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.SearchAPI;
 import com.example.fakebnb.rest.UserRegAPI;
+import com.example.fakebnb.utils.NavigationUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -577,21 +578,9 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 Toast.makeText(MainPageActivity.this, "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
                 searchIsOn = false;
                 isFirstSearch = true;
-                goToMainPage();
+                NavigationUtils.goToMainPage(MainPageActivity.this, userId, jwtToken, roles);
             }
         });
-    }
-
-    private void goToMainPage() {
-        Intent main_page_intent = new Intent(getApplicationContext(), MainPageActivity.class);
-        main_page_intent.putExtra("user_id", userId);
-        main_page_intent.putExtra("user_jwt", jwtToken);
-        ArrayList<String> roleList = new ArrayList<>();
-        for (RoleName role : roles) {
-            roleList.add(role.toString());
-        }
-        main_page_intent.putStringArrayListExtra("user_roles", roleList);
-        startActivity(main_page_intent);
     }
 
     private void bottomBarClickListeners() {
@@ -601,16 +590,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(MainPageActivity.this, ChatActivity.class);
-                chat_intent.putExtra("user_id", userId);
-                chat_intent.putExtra("user_jwt", jwtToken);
-                chat_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                chat_intent.putExtra("user_roles", roleList);
-                startActivity(chat_intent);
+                NavigationUtils.goToChatPage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
             }
         });
 
@@ -618,16 +598,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(MainPageActivity.this, ProfileActivity.class);
-                profile_intent.putExtra("user_id", userId);
-                profile_intent.putExtra("user_jwt", jwtToken);
-                profile_intent.putExtra("user_current_role", RoleName.ROLE_USER.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                profile_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(profile_intent);
+                NavigationUtils.goToProfilePage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
             }
         });
 
@@ -638,16 +609,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
                 if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    // to be at this activity he has the user role
-                    Intent host_main_page_intent = new Intent(MainPageActivity.this, HostMainPageActivity.class);
-                    host_main_page_intent.putExtra("user_id", userId);
-                    host_main_page_intent.putExtra("user_jwt", jwtToken);
-                    ArrayList<String> roleList = new ArrayList<>();
-                    for (RoleName role : roles) {
-                        roleList.add(role.toString());
-                    }
-                    host_main_page_intent.putExtra("user_roles", roleList);
-                    startActivity(host_main_page_intent);
+                    NavigationUtils.goToHostMainPage(MainPageActivity.this, userId, jwtToken, roles);
                 } else {
                     Toast.makeText(MainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
                 }
@@ -657,24 +619,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
     @Override
     public void onItemClick(Long rentalId) {
-        Intent rent_room_intent = new Intent(MainPageActivity.this, RentRoomPage.class);
-        rent_room_intent.putExtra("user_id", userId);
-        rent_room_intent.putExtra("user_jwt", jwtToken);
-        ArrayList<String> roleList = new ArrayList<>();
-        for (RoleName role : roles) {
-            roleList.add(role.toString());
-        }
-        rent_room_intent.putExtra("user_roles", roleList);
-        rent_room_intent.putExtra("rental_id", rentalId);
-        rent_room_intent.putExtra("check_in_date", checkInDate.getText().toString());
-        rent_room_intent.putExtra("check_out_date", checkOutDate.getText().toString());
-        Integer numGuests;
-        try {
-            numGuests = Integer.parseInt(numGuestsSpinner.getSelectedItem().toString());
-        } catch (NumberFormatException e) {
-            numGuests = null;
-        }
-        rent_room_intent.putExtra("num_of_guests", numGuests);
-        startActivity(rent_room_intent);
+        NavigationUtils.goToRentRoomPage(MainPageActivity.this, userId, jwtToken, roles,
+                                            rentalId, checkInDate, checkOutDate, numGuestsSpinner);
     }
 }

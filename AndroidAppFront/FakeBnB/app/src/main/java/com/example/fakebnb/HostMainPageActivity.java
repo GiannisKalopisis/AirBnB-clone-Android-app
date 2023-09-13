@@ -34,6 +34,7 @@ import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
+import com.example.fakebnb.utils.NavigationUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -268,15 +269,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
             @Override
             public void onClick(View view) {
                 Toast.makeText(HostMainPageActivity.this, "Add place button pressed", Toast.LENGTH_SHORT).show();
-                Intent add_new_place_intent = new Intent(HostMainPageActivity.this, AddNewPlaceActivity.class);
-                add_new_place_intent.putExtra("user_id", userId);
-                add_new_place_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                add_new_place_intent.putExtra("user_roles", roleList);
-                startActivity(add_new_place_intent);
+                NavigationUtils.goToAddNewPlacePage(HostMainPageActivity.this, userId, jwtToken, roles);
             }
         });
     }
@@ -307,16 +300,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                Intent chat_intent = new Intent(HostMainPageActivity.this, ChatActivity.class);
-                chat_intent.putExtra("user_id", userId);
-                chat_intent.putExtra("user_jwt", jwtToken);
-                chat_intent.putExtra("user_current_role", RoleName.ROLE_HOST.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                chat_intent.putExtra("user_roles", roleList);
-                startActivity(chat_intent);
+                NavigationUtils.goToChatPage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
             }
         });
 
@@ -324,16 +308,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
             @Override
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                Intent profile_intent = new Intent(HostMainPageActivity.this, ProfileActivity.class);
-                profile_intent.putExtra("user_id", userId);
-                profile_intent.putExtra("user_jwt", jwtToken);
-                profile_intent.putExtra("user_current_role", RoleName.ROLE_HOST.toString());
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                profile_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(profile_intent);
+                NavigationUtils.goToProfilePage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
             }
         });
 
@@ -344,16 +319,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                 Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
                 if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    // to be at this activity he has the user role
-                    Intent main_page_intent = new Intent(HostMainPageActivity.this, MainPageActivity.class);
-                    main_page_intent.putExtra("user_id", userId);
-                    main_page_intent.putExtra("user_jwt", jwtToken);
-                    ArrayList<String> roleList = new ArrayList<>();
-                    for (RoleName role : roles) {
-                        roleList.add(role.toString());
-                    }
-                    main_page_intent.putExtra("user_roles", roleList);
-                    startActivity(main_page_intent);
+                    NavigationUtils.goToMainPage(HostMainPageActivity.this, userId, jwtToken, roles);
                 } else {
                     Toast.makeText(HostMainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
                 }
@@ -363,16 +329,6 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
 
     @Override
     public void onItemClick(Long rentalId) {
-        // DEBUG ONLY: send rental_id just for checking
-        Intent place_modification_intent = new Intent(HostMainPageActivity.this, PlaceModificationPageActivity.class);
-        place_modification_intent.putExtra("user_id", userId);
-        place_modification_intent.putExtra("user_jwt", jwtToken);
-        ArrayList<String> roleList = new ArrayList<>();
-        for (RoleName role : roles) {
-            roleList.add(role.toString());
-        }
-        place_modification_intent.putExtra("user_roles", roleList);
-        place_modification_intent.putExtra("rental_id", rentalId);
-        startActivity(place_modification_intent);
+        NavigationUtils.goToPlaceModificationPage(HostMainPageActivity.this, userId, jwtToken, roles, rentalId);
     }
 }

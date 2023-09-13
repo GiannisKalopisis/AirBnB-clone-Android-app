@@ -129,6 +129,7 @@ public class RegisterActivity extends AppCompatActivity {
 //                        Toast.makeText(this, "imagePath: " + imagePath, Toast.LENGTH_SHORT).show();
                         imageBitmap = BitmapFactory.decodeFile(imagePath);
                         imageView.setImageBitmap(imageBitmap);
+                        photoWarn.setVisibility(View.GONE);
                     }
                 }
         );
@@ -183,6 +184,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 userRegAPI.registerUser(gson.toJson(userRegisterModel), imagePart)
                         .enqueue(new Callback<UserRegisterModel>() {
+                            @SuppressLint("SetTextI18n")
                             @Override
                             public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
                                 if (response.isSuccessful()) {
@@ -342,9 +344,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (firstNameEditText.getText().toString().isEmpty()) {
+                    firstNameWarn.setText("Enter your First Name");
                     firstNameWarn.setVisibility(View.VISIBLE);
                 } else {
                     firstNameWarn.setVisibility(View.GONE);
@@ -362,9 +366,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (lastNameEditText.getText().toString().isEmpty()) {
+                    lastNameWarn.setText("Enter your Last Name");
                     lastNameWarn.setVisibility(View.VISIBLE);
                 } else {
                     lastNameWarn.setVisibility(View.GONE);
@@ -382,9 +388,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (emailEditText.getText().toString().isEmpty()) {
+                    emailWarn.setText("Enter your Email");
                     emailWarn.setVisibility(View.VISIBLE);
                 } else {
                     emailWarn.setVisibility(View.GONE);
@@ -402,9 +410,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (phoneNumberEditText.getText().toString().isEmpty()) {
+                    phoneWarn.setText("Enter your phone number");
                     phoneWarn.setVisibility(View.VISIBLE);
                 } else {
                     phoneWarn.setVisibility(View.GONE);
@@ -422,9 +432,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
                 if (imageBitmap == null) {
+                    photoWarn.setText("Enter your photo");
                     photoWarn.setVisibility(View.VISIBLE);
                 } else {
                     photoWarn.setVisibility(View.GONE);
