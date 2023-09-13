@@ -72,8 +72,20 @@ public class ChatService {
             resMessage.setChat(message.getChat());
             messageRepository.save(resMessage);
         } else {
-            Chat chat = new Chat(senderUserReg, receiverUserReg);
-            chatRepository.save(chat);
+
+            Optional<Chat> chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(senderUserRegId, receiverRegUserId);
+            Chat chat;
+            if (chatOptional.isPresent()) {
+                chat = chatOptional.get();
+            } else {
+                chatOptional = chatRepository.findByFirstSenderUserRegIdAndFirstReceiverUserRegId(receiverRegUserId, senderUserRegId);
+                if (chatOptional.isPresent()) {
+                    chat = chatOptional.get();
+                } else {
+                    chat = new Chat(senderUserReg, receiverUserReg);
+                    chatRepository.save(chat);
+                }
+            }
 
             resMessage = new Message(messageRequest.getContent());
             resMessage.setChat(chat);
