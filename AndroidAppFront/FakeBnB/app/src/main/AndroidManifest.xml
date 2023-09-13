@@ -30,7 +30,7 @@
         android:theme="@style/Theme.FakeBnB">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAyxhoEZnOazo4LZ9ZnrYd45Ovg5FxQB8E" />
+            android:value="AIzaSyCMokodW3zMZ4Cf9ENqkmPhGhUydK1GDms" />
         <activity
             android:name=".MainActivity"
             android:exported="true" >

@@ -2,10 +2,17 @@ package com.example.fakebnb;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,23 +25,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fakebnb.adapter.HostReviewAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.BookingReviewModel;
-import com.example.fakebnb.model.HostReviewModel;
-import com.example.fakebnb.model.MessageModel;
 import com.example.fakebnb.model.response.BookingReviewResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
-import com.example.fakebnb.rest.BookingAPI;
 import com.example.fakebnb.rest.BookingReviewAPI;
-import com.example.fakebnb.rest.ChatAPI;
+import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.UserRegAPI;
 import com.example.fakebnb.utils.NavigationUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -50,10 +54,9 @@ public class HostReviewPageActivity extends AppCompatActivity {
 
     // do it hard coded, then do it with the database and add image
     private TextView hostReviewUsernameView, hostReviewEmailView, hostReviewPhoneView;
-
     private RecyclerView reviewsRecyclerView;
-
     private Button chatButton, profileButton, roleButton;
+    private ImageView hostImageView;
 
     // Pagination
     private HostReviewAdapter reviewAdapter = new HostReviewAdapter();
@@ -88,17 +91,6 @@ public class HostReviewPageActivity extends AppCompatActivity {
 
         bottomBarClickListeners();
         getTopInfo();
-        ArrayList<HostReviewModel> reviews = new ArrayList<>();
-        reviews.add(new HostReviewModel("SakisKarpas", 3.5f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("AlexKarpas", 2f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("Trigkakis", 4.5f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("Stratoulis", 2.5f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("MrBeast", 3f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("Anastasis", 1.5f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("DoctorPatsForTheWin", 5f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("Alina", 4f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("Gatsos", 3.8f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
-        reviews.add(new HostReviewModel("Paparis", 2f, "Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia"));
 
         reviewsRecyclerView.setAdapter(reviewAdapter);
         reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -176,7 +168,6 @@ public class HostReviewPageActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void getTopInfo() {
-        //TODO: get the data from backend -> image
         RestClient restClient = new RestClient(jwtToken);
         UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
 
@@ -189,6 +180,7 @@ public class HostReviewPageActivity extends AppCompatActivity {
                         hostReviewUsernameView.setText(userRegData.getUsername());
                         hostReviewEmailView.setText(userRegData.getEmail());
                         hostReviewPhoneView.setText(userRegData.getPhone());
+                        downloadUserImage();
                     } else {
                         Toast.makeText(HostReviewPageActivity.this, "Error getting user info", Toast.LENGTH_SHORT).show();
                         NavigationUtils.goToMainPage(HostReviewPageActivity.this, userId, jwtToken, roles);
@@ -208,10 +200,63 @@ public class HostReviewPageActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Host Image download
+     */
+    private void downloadUserImage() {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getImage(hostId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap userImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            userImageBitmap = getCircularBitmap(userImageBitmap);
+                            if (userImageBitmap != null) {
+                                hostImageView.setImageBitmap(userImageBitmap);
+                                hostImageView.setPadding(0, 0, 0, 0);
+                            }
+                        } else {
+                            Toast.makeText(HostReviewPageActivity.this, "1 Couldn't get host image", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "1 Couldn't get host image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        Toast.makeText(HostReviewPageActivity.this, "2 Couldn't get host image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "2 Couldn't get host image: " + t.getMessage());
+                    }
+                });
+    }
+
+    private Bitmap getCircularBitmap(Bitmap bitmap) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(outputBitmap);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+
+        canvas.drawCircle(width / 2f, height / 2f, width / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        bitmap.recycle();
+
+        return outputBitmap;
+    }
+
     private void initView() {
         Log.d(TAG, "initViews: started");
 
         // top level info
+        hostImageView = findViewById(R.id.hostReviewImageView);
         hostReviewUsernameView = findViewById(R.id.hostReviewUsernameView);
         hostReviewEmailView = findViewById(R.id.hostReviewEmailView);
         hostReviewPhoneView = findViewById(R.id.hostReviewPhoneView);
