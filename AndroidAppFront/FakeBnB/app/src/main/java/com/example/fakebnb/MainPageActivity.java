@@ -32,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.Callbacks.SingleRentalImageCallback;
 import com.example.fakebnb.adapter.MainPageRentalAdapter;
 import com.example.fakebnb.enums.RentalType;
 import com.example.fakebnb.enums.RoleName;
@@ -305,17 +306,27 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                                 searchRentalResponseList = response.body().getObject().getContent();
                                 isLastPage = response.body().getObject().isLast();
                                 if (isFirstSearch) {
-                                    rentals.clear();
-                                    rentalAdapter.notifyDataSetChanged();
+                                    rentalAdapter.deleteRentals();
                                     isFirstSearch = false;
                                 }
                                 if (searchRentalResponseList != null && !searchRentalResponseList.isEmpty()) {
                                     for (SearchRentalModel searchRentalModel : searchRentalResponseList) {
-                                        rentals.add(new RentalMainPageModel(searchRentalModel.getDescription(),
+                                        rentalAdapter.addNewRental(new RentalMainPageModel(searchRentalModel.getDescription(),
                                                 searchRentalModel.getDistrict() + ", " + searchRentalModel.getCity(),
                                                 searchRentalModel.getTotalCost() + " €",
                                                 searchRentalModel.getAvgRating().floatValue(),
                                                 searchRentalModel.getId()));
+                                        getSingleRentalImage(searchRentalModel.getId(), new SingleRentalImageCallback() {
+                                            @Override
+                                            public void onImageLoaded(Bitmap rentalImageBitmap) {
+                                                rentalAdapter.addNewRentalSingleImage(searchRentalModel.getId(), rentalImageBitmap);
+                                            }
+
+                                            @Override
+                                            public void onError(String errorMessage) {
+                                                Toast.makeText(MainPageActivity.this, "Error while downloading image: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                                     }
                                 }
                                 rentalAdapter.notifyDataSetChanged();
@@ -338,6 +349,33 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
         currentPage++;
         isLoading = false;
+    }
+
+    private void getSingleRentalImage(Long rentalId, SingleRentalImageCallback callback) {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getSingleApartmentImage(rentalId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap rentalImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            if (rentalImageBitmap != null) {
+                                callback.onImageLoaded(rentalImageBitmap);
+                            } else {
+                                callback.onError("Couldn't process user image");
+                            }
+                        } else {
+                            callback.onError("Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        callback.onError("Couldn't get user image: " + t.getMessage());
+                    }
+                });
     }
 
     private SearchRequest createSearchRequest() {
