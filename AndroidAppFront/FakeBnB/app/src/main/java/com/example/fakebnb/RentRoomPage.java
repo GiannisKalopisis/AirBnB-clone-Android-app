@@ -497,8 +497,6 @@ public class RentRoomPage extends AppCompatActivity {
 
     private void createSlider() {
         // get images from database
-//        ImageSlider imageSlider = findViewById(R.id.cardImageSlider);
-        ArrayList<Bitmap> sliderBitmapArrayList = new ArrayList<>();
 
         SliderAdapter imageSliderAdapter = new SliderAdapter();
         SliderView sliderView = findViewById(R.id.cardImageSlider);
@@ -513,7 +511,6 @@ public class RentRoomPage extends AppCompatActivity {
         sliderView.setScrollTimeInSec(3);
         sliderView.setAutoCycle(true);
         sliderView.startAutoCycle();
-//        slideModels = new ArrayList<>();
 
         RestClient restClient = new RestClient(jwtToken);
         ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);

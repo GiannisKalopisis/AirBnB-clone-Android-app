@@ -9,7 +9,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -33,6 +32,7 @@ import com.example.fakebnb.utils.NavigationUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import okhttp3.ResponseBody;
@@ -52,16 +52,16 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
     // bottom bar buttons
     private Button chatButton, profileButton, roleButton;
 
-    private int page = 0, size = 10;
+    private int page = 0;
+    private final int size = 10;
     private List<OverviewChatModel> chats;
 
     private RecyclerView chatRecyclerView;
 
     // pagination
-    private ArrayList<OverviewChatModel> overviewChatModel = new ArrayList<>();
-    private ChatRecyclerAdapter chatRecyclerAdapter = new ChatRecyclerAdapter(this, overviewChatModel);
+    private final ArrayList<OverviewChatModel> overviewChatModel = new ArrayList<>();
+    private final ChatRecyclerAdapter chatRecyclerAdapter = new ChatRecyclerAdapter(this, overviewChatModel);
     private boolean isLoading = false;
-    private int currentPage = 1; // Keeps track of the current page
 
 
     @Override
@@ -107,7 +107,7 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) chatRecyclerView.getLayoutManager();
-                int visibleItemCount = layoutManager.getChildCount();
+                int visibleItemCount = Objects.requireNonNull(layoutManager).getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 

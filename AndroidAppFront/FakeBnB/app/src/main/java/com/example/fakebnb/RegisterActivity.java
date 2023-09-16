@@ -46,7 +46,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import okhttp3.MultipartBody;
 import okhttp3.MultipartBody.Part;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -68,7 +67,6 @@ public class RegisterActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private String imagePath;
     private Bitmap imageBitmap;
-    private Part imagePart;
     /**
      * Variables for MULTIPLE IMAGES
      */
@@ -79,7 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     // Permissions for accessing the storage
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_MEDIA_IMAGES
     };
 
@@ -93,9 +91,6 @@ public class RegisterActivity extends AppCompatActivity {
         initView();
         resetWarnVisibility();
 
-        /**
-         * Variables for MULTIPLE IMAGES
-         */
 //        imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
 //        imagesRecyclerView = findViewById(R.id.imagesRecyclerView);
 //        imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -258,7 +253,6 @@ public class RegisterActivity extends AppCompatActivity {
         setTextWatcherLastName();
         setTextWatcherEmail();
         setTextWatcherPhone();
-        setTextWatcherPhoto();
     }
 
     private void setTextWatcherUsername() {
@@ -418,28 +412,6 @@ public class RegisterActivity extends AppCompatActivity {
         phoneNumberEditText.addTextChangedListener(textWatcher);
     }
 
-    private void setTextWatcherPhoto() {
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {}
-
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (imageBitmap == null) {
-                    photoWarn.setText("Enter your photo");
-                    photoWarn.setVisibility(View.VISIBLE);
-                } else {
-                    photoWarn.setVisibility(View.GONE);
-                }
-            }
-        };
-//        imageView.addTextChangedListener(textWatcher);
-    }
-
     private boolean initRegister() {
         Log.d(TAG, "initRegister: Started");
 
@@ -571,9 +543,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         registerButton = findViewById(R.id.registerButton);
 
-        /**
-         * Necessary for images
-         */
         selectImageButton = findViewById(R.id.selectImageButton);
         imageView = findViewById(R.id.imageView);
 

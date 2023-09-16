@@ -10,7 +10,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,6 +37,7 @@ import com.example.fakebnb.utils.NavigationUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import okhttp3.ResponseBody;
@@ -61,11 +61,12 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     private Button chatButton, profileButton, roleButton, addRentalButton;
 
     // Pagination variables
-    private ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
+    private final ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
     private List<RentalModel> rentalsResponseList = new ArrayList<>();
     private HostMainPageRentalAdapter rentalAdapter;
     private boolean isLoading = false, isLastPage = false;
-    private int currentPage = 0, size = 4; // Keeps track of the current page
+    private int currentPage = 0;
+    private final int size = 4; // Keeps track of the current page
 
 
     @Override
@@ -199,7 +200,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) hostRentalsRecyclerView.getLayoutManager();
-                int visibleItemCount = layoutManager.getChildCount();
+                int visibleItemCount = Objects.requireNonNull(layoutManager).getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
@@ -215,10 +216,6 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
 
     private void loadMoreData() {
         isLoading = true;
-
-        // Calculate the offset before fetching newer data
-        LinearLayoutManager layoutManager = (LinearLayoutManager) hostRentalsRecyclerView.getLayoutManager();
-        int lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
 
         RestClient restClient = new RestClient(jwtToken);
         ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);

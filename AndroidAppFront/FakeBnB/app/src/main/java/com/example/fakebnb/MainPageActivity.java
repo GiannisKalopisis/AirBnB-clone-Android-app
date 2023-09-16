@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -89,10 +88,11 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     private boolean searchIsOn = false, isFirstSearch = true;
 
     // pagination
-    private ArrayList<RentalMainPageModel> rentals = new ArrayList<>();
-    private MainPageRentalAdapter rentalAdapter = new MainPageRentalAdapter(this, rentals);
+    private final ArrayList<RentalMainPageModel> rentals = new ArrayList<>();
+    private final MainPageRentalAdapter rentalAdapter = new MainPageRentalAdapter(this, rentals);
     private boolean isLoading = false, isLastPage = false;
-    private int currentPage = 0, size = 5; // Keeps track of the current page
+    private int currentPage = 0;
+    private final int size = 5; // Keeps track of the current page
 
 
     @Override
@@ -213,7 +213,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) rentalsRecyclerView.getLayoutManager();
-                int visibleItemCount = layoutManager.getChildCount();
+                int visibleItemCount = Objects.requireNonNull(layoutManager).getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
@@ -266,26 +266,23 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
     @SuppressLint("SetTextI18n")
     public void searchFieldsButtonListener() {
-        searchFieldsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (notAllSearchFieldsCompleted()) {
-                    Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Toast.makeText(view.getContext(), "Pressed SEARCH BUTTON", Toast.LENGTH_SHORT).show();
-                isSearchFieldsLayoutVisible = false;
-                searchFieldsLayout.setVisibility(View.GONE);
-                currentPage = 0;
-                searchIsOn = true;
-                rentInfoMessage.setVisibility(View.GONE);
-                rentalsTextView.setText("Top Search Results");
-                homePageButton.setVisibility(View.VISIBLE);
-                rentals.clear();
-                rentalAdapter.notifyDataSetChanged();
-                isFirstSearch = true;
-                fetchSearchRentals();
+        searchFieldsButton.setOnClickListener(view -> {
+            if (notAllSearchFieldsCompleted()) {
+                Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
+                return;
             }
+            Toast.makeText(view.getContext(), "Pressed SEARCH BUTTON", Toast.LENGTH_SHORT).show();
+            isSearchFieldsLayoutVisible = false;
+            searchFieldsLayout.setVisibility(View.GONE);
+            currentPage = 0;
+            searchIsOn = true;
+            rentInfoMessage.setVisibility(View.GONE);
+            rentalsTextView.setText("Top Search Results");
+            homePageButton.setVisibility(View.VISIBLE);
+            rentals.clear();
+            rentalAdapter.notifyDataSetChanged();
+            isFirstSearch = true;
+            fetchSearchRentals();
         });
     }
 

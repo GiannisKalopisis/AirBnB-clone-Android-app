@@ -10,7 +10,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,6 +35,7 @@ import com.example.fakebnb.utils.NavigationUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import okhttp3.ResponseBody;
@@ -59,9 +59,9 @@ public class HostReviewPageActivity extends AppCompatActivity {
     private ImageView hostImageView;
 
     // Pagination
-    private HostReviewAdapter reviewAdapter = new HostReviewAdapter();
+    private final HostReviewAdapter reviewAdapter = new HostReviewAdapter();
     private int currentPage = 0; // Keeps track of the current page
-    private int size = 20; // The number of items fetched per page
+    private final int size = 20; // The number of items fetched per page
     private List<BookingReviewModel> reviewResponseList = new ArrayList<>();
     private boolean isLoading = false;
     private boolean isLastPage = false;
@@ -153,7 +153,7 @@ public class HostReviewPageActivity extends AppCompatActivity {
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) reviewsRecyclerView.getLayoutManager();
-                int visibleItemCount = layoutManager.getChildCount();
+                int visibleItemCount = Objects.requireNonNull(layoutManager).getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 

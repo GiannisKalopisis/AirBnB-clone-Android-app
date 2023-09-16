@@ -21,8 +21,8 @@ import java.util.Map;
 
 public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAdapter.ViewHolder>{
 
-    private MainPageRecyclerViewInterface mainPageRecyclerViewInterface;
-    private ArrayList<RentalMainPageModel> rentalModel;
+    private final MainPageRecyclerViewInterface mainPageRecyclerViewInterface;
+    private final ArrayList<RentalMainPageModel> rentalModel;
     private final Map<Long, Bitmap> rentalImages;     // <chatId, rentalImage>
 
     public MainPageRentalAdapter(MainPageRecyclerViewInterface mainPageRecyclerViewInterface, ArrayList<RentalMainPageModel> rentalModel) {
@@ -35,8 +35,7 @@ public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAd
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_page_rental, parent, false);
-        ViewHolder holder = new ViewHolder(view, mainPageRecyclerViewInterface);
-        return holder;
+        return new ViewHolder(view, mainPageRecyclerViewInterface);
     }
 
     @Override
@@ -51,14 +50,6 @@ public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAd
     @Override
     public int getItemCount() {
         return rentalModel.size();
-    }
-
-    public void setRentalModel(ArrayList<RentalMainPageModel> rentalModel) {
-        this.rentalModel.addAll(rentalModel);
-        /* In case data come from a server and they change
-           you have to refresh them.
-         */
-        notifyDataSetChanged();
     }
 
     public void addNewRental(RentalMainPageModel rentalMainPageModel){

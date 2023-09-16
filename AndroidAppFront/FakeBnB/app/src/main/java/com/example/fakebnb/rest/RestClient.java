@@ -9,7 +9,6 @@ public class RestClient {
     private final String BASE_URL = "http://192.168.1.6:8080/";
     private Retrofit retrofit = null;
     private String authToken = null;
-    private String type = null;
 
     public RestClient () {
         initializeRetrofit();
@@ -22,7 +21,7 @@ public class RestClient {
 
     private void initializeRetrofit() {
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-        if (authToken != null && type == null) {
+        if (authToken != null) {
             httpClient.addInterceptor(new AuthInterceptor(authToken));
         }
 
@@ -35,12 +34,6 @@ public class RestClient {
 
     public Retrofit getClient() {
         return retrofit;
-    }
-
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
-        // Rebuild the Retrofit instance whenever the token is set
-        initializeRetrofit();
     }
 
 }

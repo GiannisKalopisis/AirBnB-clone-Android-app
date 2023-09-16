@@ -18,7 +18,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -52,7 +51,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
@@ -125,15 +123,14 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     private String imagePath;
     private Bitmap imageBitmap;
     private List<Bitmap> imageBitmapList;
-    private List<Bitmap> newImages = new ArrayList<>();
     private RecyclerView imagesRecyclerView;
     private ImageDeleteAdapter imageAdapter;
 
-    private List<Long> imageIds = new ArrayList<>();
+    private final List<Long> imageIds = new ArrayList<>();
 
     // Permissions for accessing the storage
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_MEDIA_IMAGES
     };
 
@@ -166,9 +163,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modificationButtonsClickListener();
         savePlaceChangesButton.setVisibility(View.GONE);
 
-        /**
-         * Variables for MULTIPLE IMAGES
-         */
         imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
         imageAdapter = new ImageDeleteAdapter(imageBitmapList);
         imagesRecyclerView = findViewById(R.id.modifyImageRecyclerView);
@@ -780,7 +774,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 }
             }
         };
-        modifyPlaceStartDate.addTextChangedListener(textWatcher);;
+        modifyPlaceStartDate.addTextChangedListener(textWatcher);
     }
 
     private void setTextWatcherEndDate() {

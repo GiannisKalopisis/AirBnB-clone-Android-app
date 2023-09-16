@@ -35,8 +35,7 @@ public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPage
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.host_page_rental, parent, false);
-        ViewHolder holder = new ViewHolder(view, hostMainPageRecyclerViewInterface);
-        return holder;
+        return new ViewHolder(view, hostMainPageRecyclerViewInterface);
     }
 
     @Override
@@ -50,14 +49,6 @@ public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPage
     @Override
     public int getItemCount() {
         return rentalModel.size();
-    }
-
-    public void setRentalModel(ArrayList<HostRentalMainPageModel> rentalModel) {
-        this.rentalModel.addAll(rentalModel);
-        /* In case data come from a server and they change
-           you have to refresh them.
-         */
-        notifyDataSetChanged();
     }
 
     public void addNewRental(HostRentalMainPageModel hostRentalMainPageModel){

@@ -21,9 +21,9 @@ import java.util.Map;
 
 public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapter.ViewHolder>{
 
-    private ChatRecyclerViewInterface chatRecyclerViewInterface;
-    private ArrayList<OverviewChatModel> overviewChatModel;
-    private Map<Long, Bitmap> usersImages;     // <chatId, userImage>
+    private final ChatRecyclerViewInterface chatRecyclerViewInterface;
+    private final ArrayList<OverviewChatModel> overviewChatModel;
+    private final Map<Long, Bitmap> usersImages;     // <chatId, userImage>
 
     public ChatRecyclerAdapter(ChatRecyclerViewInterface chatRecyclerViewInterface, ArrayList<OverviewChatModel> overviewChatModel) {
         this.chatRecyclerViewInterface = chatRecyclerViewInterface;
@@ -35,8 +35,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_user_recycler_view, parent, false);
-        ChatRecyclerAdapter.ViewHolder holder = new ChatRecyclerAdapter.ViewHolder(view, chatRecyclerViewInterface);
-        return holder;
+        return new ViewHolder(view, chatRecyclerViewInterface);
     }
 
     @Override
@@ -85,7 +84,6 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
                     int clickedPosition = getAdapterPosition();
                     if (clickedPosition != RecyclerView.NO_POSITION) {
                         long chatId = overviewChatModel.get(clickedPosition).getChatId();
-                        Bitmap userImage = usersImages.get(chatId);
                         chatRecyclerViewInterface.onItemClick(chatId);
                     }
                 }

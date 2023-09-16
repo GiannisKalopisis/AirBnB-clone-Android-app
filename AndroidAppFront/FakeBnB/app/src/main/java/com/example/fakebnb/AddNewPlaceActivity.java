@@ -20,10 +20,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,7 +50,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
@@ -101,13 +97,9 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
     private RadioGroup addPlaceRentalTypeRadioGroup;
 
-    private RadioButton checkedRadioButton;
-
     private Button addPlaceButton;
 
     private Button chatButton, profileButton, roleButton;
-
-    private boolean fieldsAreValid = false;
 
     // MapView
     private MapView addPlaceMapView;
@@ -120,7 +112,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
      * Variables for IMAGE UPLOAD
      */
     private Button selectImageButton;
-    private ImageView imageView;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private String imagePath;
     private Bitmap imageBitmap;
@@ -130,7 +121,7 @@ public class AddNewPlaceActivity extends AppCompatActivity {
 
     // Permissions for accessing the storage
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_MEDIA_IMAGES
     };
 
@@ -180,9 +171,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             });
         }
 
-        /**
-         * Variables for MULTIPLE IMAGES
-         */
         imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
         imagesRecyclerView = findViewById(R.id.imagesRecyclerView);
         imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -1198,9 +1186,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         // Buttons
         addPlaceButton = findViewById(R.id.addPlaceButton);
 
-        /**
-         * PHOTO ONLY
-         */
         selectImageButton = findViewById(R.id.selectImageButton);
 
         chatButton = findViewById(R.id.chatButton);

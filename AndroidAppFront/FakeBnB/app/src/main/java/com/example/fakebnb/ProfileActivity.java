@@ -85,7 +85,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Bitmap imageBitmap;
     private Button selectImageButton;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_MEDIA_IMAGES
     };
 
@@ -434,7 +434,6 @@ public class ProfileActivity extends AppCompatActivity {
         setTextWatcherFirstName();
         setTextWatcherLastName();
         setTextWatcherPhone();
-        setTextWatcherPhoto();
     }
 
     private void setTextWatcherFirstName() {
@@ -515,30 +514,6 @@ public class ProfileActivity extends AppCompatActivity {
         profilePhoneEditText.addTextChangedListener(textWatcher);
     }
 
-    private void setTextWatcherPhoto() {
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                if (!(imageBitmap == null)) {
-                    profilePhotoWarn.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (imageBitmap == null) {
-                    profilePhotoWarn.setVisibility(View.VISIBLE);
-                    saveProfileInfoChangesButton.setVisibility(View.GONE);
-                } else {
-                    saveProfileInfoChangesButton.setVisibility(View.VISIBLE);
-                }
-            }
-        };
-    }
-
     private void initView() {
         Log.d(TAG, "initViews: started");
 
@@ -559,9 +534,6 @@ public class ProfileActivity extends AppCompatActivity {
         profilePhoneEditText = findViewById(R.id.profilePhoneEditText);
 //        profilePhotoEditText = findViewById(R.id.profilePhotoEditText);
 
-        /**
-         * PHOTO ONLY
-         */
         imageView = findViewById(R.id.imageView);
         selectImageButton = findViewById(R.id.selectImageButton);
 

@@ -9,7 +9,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -65,13 +64,13 @@ public class IndividualChatActivity extends AppCompatActivity {
     private RoleName currentRole;
 
     // pagination
-    private ArrayList<MessageModel> messageModel = new ArrayList<>();
+    private final ArrayList<MessageModel> messageModel = new ArrayList<>();
     private String senderUsername, receiverUsername;
     private Long senderId, receiverId;
-    private MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter(senderUsername, receiverUsername);
+    private final MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter(senderUsername, receiverUsername);
 //    private boolean isLoading = false;
     private int currentPage = 0; // Keeps track of the current page
-    private int size = 20; // The number of items fetched per page
+    private final int size = 20; // The number of items fetched per page
     private int lastVisibleItem = 0;
     private boolean isLoading = false;
     private List<MessageModel> messageResponseList = new ArrayList<>();
@@ -262,7 +261,7 @@ public class IndividualChatActivity extends AppCompatActivity {
 
         // Calculate the offset before fetching newer data
         LinearLayoutManager layoutManager = (LinearLayoutManager) chat_recycler_view.getLayoutManager();
-        int lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
+        int lastVisibleItemPosition = Objects.requireNonNull(layoutManager).findLastCompletelyVisibleItemPosition();
 
         // Simulate fetching newer data from backend
         RestClient restClient = new RestClient(jwtToken);
