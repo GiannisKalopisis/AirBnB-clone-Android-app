@@ -46,10 +46,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.MultipartBody.Part;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -232,7 +230,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private UserRegisterModel setUserRegisterModel() {
-        // TODO: must change and send data to backend
 
         Log.d(TAG, "setUserRegisterModel: Started");
 

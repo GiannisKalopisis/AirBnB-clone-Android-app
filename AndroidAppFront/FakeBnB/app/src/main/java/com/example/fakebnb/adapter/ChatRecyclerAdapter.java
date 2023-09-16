@@ -1,34 +1,23 @@
 package com.example.fakebnb.adapter;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.ChatRecyclerViewInterface;
-import com.example.fakebnb.MainPageActivity;
 import com.example.fakebnb.R;
 import com.example.fakebnb.model.OverviewChatModel;
-import com.example.fakebnb.rest.ImageAPI;
-import com.example.fakebnb.rest.RestClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapter.ViewHolder>{
 

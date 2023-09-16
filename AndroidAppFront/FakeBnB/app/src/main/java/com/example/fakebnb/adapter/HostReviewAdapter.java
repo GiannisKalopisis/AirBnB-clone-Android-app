@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.R;
 import com.example.fakebnb.model.BookingReviewModel;
-import com.example.fakebnb.model.HostReviewModel;
 
 import java.util.ArrayList;
 

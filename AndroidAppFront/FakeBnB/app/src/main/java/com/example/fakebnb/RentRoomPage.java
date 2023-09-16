@@ -30,7 +30,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.Callbacks.ApartmentImageLoadCallback;
-import com.example.fakebnb.Callbacks.ImageLoadCallback;
 import com.example.fakebnb.adapter.RulesAdapter;
 import com.example.fakebnb.adapter.SliderAdapter;
 import com.example.fakebnb.enums.RoleName;

@@ -1,6 +1,5 @@
 package com.example.fakebnb.adapter;
 
-import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.MainPageRecyclerViewInterface;
 import com.example.fakebnb.R;
-import com.example.fakebnb.model.HostRentalMainPageModel;
 import com.example.fakebnb.model.RentalMainPageModel;
 
 import java.util.ArrayList;

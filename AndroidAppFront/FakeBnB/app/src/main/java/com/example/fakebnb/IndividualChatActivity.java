@@ -80,7 +80,6 @@ public class IndividualChatActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        // TODO: a call to take the senderID(userID),sencerUsername,receiverID,receiverUsername
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_individual_chat);
 
