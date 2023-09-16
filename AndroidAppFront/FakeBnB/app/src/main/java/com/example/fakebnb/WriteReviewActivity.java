@@ -3,7 +3,6 @@ package com.example.fakebnb;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RatingBar;
@@ -87,42 +86,39 @@ public class WriteReviewActivity extends AppCompatActivity {
     private void submitReviewButtonClickListener() {
         Log.d(TAG, "submitReviewButtonClickListener: started");
 
-        submitReviewButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed SUBMIT REVIEW BUTTON", Toast.LENGTH_SHORT).show();
+        submitReviewButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed SUBMIT REVIEW BUTTON", Toast.LENGTH_SHORT).show();
 
-                RestClient restClient = new RestClient(jwtToken);
-                BookingReviewAPI bookingReviewAPI = restClient.getClient().create(BookingReviewAPI.class);
-                BookingReviewRequest bookingReviewRequest = createBookingReviewRequest();
+            RestClient restClient = new RestClient(jwtToken);
+            BookingReviewAPI bookingReviewAPI = restClient.getClient().create(BookingReviewAPI.class);
+            BookingReviewRequest bookingReviewRequest = createBookingReviewRequest();
 
-                bookingReviewAPI.createBookingReview(bookingReviewRequest)
-                        .enqueue(new Callback<BookingReviewResponse>() {
-                            @Override
-                            public void onResponse(@NonNull Call<BookingReviewResponse> call, @NonNull Response<BookingReviewResponse> response) {
-                                if (response.isSuccessful()) {
-                                    if (response.body() != null) {
-                                        if (response.body().getSuccess()) {
-                                            Toast.makeText(WriteReviewActivity.this, "Review submitted successfully", Toast.LENGTH_SHORT).show();
-                                            NavigationUtils.goToMainPage(WriteReviewActivity.this, userId, jwtToken, roles);
-                                        } else {
-                                            Toast.makeText(WriteReviewActivity.this, "Failed to submit review", Toast.LENGTH_SHORT).show();
-                                        }
+            bookingReviewAPI.createBookingReview(bookingReviewRequest)
+                    .enqueue(new Callback<BookingReviewResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<BookingReviewResponse> call, @NonNull Response<BookingReviewResponse> response) {
+                            if (response.isSuccessful()) {
+                                if (response.body() != null) {
+                                    if (response.body().getSuccess()) {
+                                        Toast.makeText(WriteReviewActivity.this, "Review submitted successfully", Toast.LENGTH_SHORT).show();
+                                        NavigationUtils.goToMainPage(WriteReviewActivity.this, userId, jwtToken, roles);
                                     } else {
                                         Toast.makeText(WriteReviewActivity.this, "Failed to submit review", Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
                                     Toast.makeText(WriteReviewActivity.this, "Failed to submit review", Toast.LENGTH_SHORT).show();
                                 }
+                            } else {
+                                Toast.makeText(WriteReviewActivity.this, "Failed to submit review", Toast.LENGTH_SHORT).show();
                             }
+                        }
 
-                            @Override
-                            public void onFailure(@NonNull Call<BookingReviewResponse> call, @NonNull Throwable t) {
-                                Log.d(TAG, "Failed to connect to server and submit review, " + t.getMessage());
-                                Toast.makeText(WriteReviewActivity.this, "Failed to connect to server and submit review", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            }
+                        @Override
+                        public void onFailure(@NonNull Call<BookingReviewResponse> call, @NonNull Throwable t) {
+                            Log.d(TAG, "Failed to connect to server and submit review, " + t.getMessage());
+                            Toast.makeText(WriteReviewActivity.this, "Failed to connect to server and submit review", Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
     }
 
@@ -137,29 +133,16 @@ public class WriteReviewActivity extends AppCompatActivity {
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavigationUtils.goToChatPage(WriteReviewActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
-        });
+        chatButton.setOnClickListener(view -> NavigationUtils.goToChatPage(WriteReviewActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString()));
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavigationUtils.goToProfilePage(WriteReviewActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
-        });
+        profileButton.setOnClickListener(view -> NavigationUtils.goToProfilePage(WriteReviewActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString()));
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: pressed role button");
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    NavigationUtils.goToHostMainPage(WriteReviewActivity.this, userId, jwtToken, roles);
-                } else {
-                    Toast.makeText(WriteReviewActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
-                }
+        roleButton.setOnClickListener(view -> {
+            Log.d(TAG, "onClick: pressed role button");
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                NavigationUtils.goToHostMainPage(WriteReviewActivity.this, userId, jwtToken, roles);
+            } else {
+                Toast.makeText(WriteReviewActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }

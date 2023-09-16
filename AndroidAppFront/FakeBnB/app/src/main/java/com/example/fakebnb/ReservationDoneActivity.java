@@ -3,7 +3,6 @@ package com.example.fakebnb;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -60,20 +59,17 @@ public class ReservationDoneActivity extends AppCompatActivity {
 
         reservationDoneHomeButton = findViewById(R.id.reservationDoneHomeButton);
 
-        reservationDoneHomeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
-                Intent main_page_intent = new Intent(ReservationDoneActivity.this, MainPageActivity.class);
-                main_page_intent.putExtra("user_id", userId);
-                main_page_intent.putExtra("user_jwt", jwtToken);
-                ArrayList<String> roleList = new ArrayList<>();
-                for (RoleName role : roles) {
-                    roleList.add(role.toString());
-                }
-                main_page_intent.putStringArrayListExtra("user_roles", roleList);
-                startActivity(main_page_intent);
+        reservationDoneHomeButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
+            Intent main_page_intent = new Intent(ReservationDoneActivity.this, MainPageActivity.class);
+            main_page_intent.putExtra("user_id", userId);
+            main_page_intent.putExtra("user_jwt", jwtToken);
+            ArrayList<String> roleList = new ArrayList<>();
+            for (RoleName role : roles) {
+                roleList.add(role.toString());
             }
+            main_page_intent.putStringArrayListExtra("user_roles", roleList);
+            startActivity(main_page_intent);
         });
     }
 

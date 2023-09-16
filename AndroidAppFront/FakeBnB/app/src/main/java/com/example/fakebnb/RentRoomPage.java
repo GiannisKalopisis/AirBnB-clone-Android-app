@@ -53,7 +53,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.smarteist.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType;
@@ -200,17 +199,14 @@ public class RentRoomPage extends AppCompatActivity {
                                 if (ContextCompat.checkSelfPermission(RentRoomPage.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                                     ActivityCompat.requestPermissions(RentRoomPage.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
                                 } else {
-                                    rentRoomMapView.getMapAsync(new OnMapReadyCallback() {
-                                        @Override
-                                        public void onMapReady(@NonNull GoogleMap map) {
-                                            googleMap = map;
-                                            isMapReady = true; // Mark the map as ready
-                                            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                                            googleMap.getUiSettings().setZoomControlsEnabled(true);
-                                            // Check if an address is available and show it on the map
-                                            if (apartmentData != null) {
-                                                showAddressOnMap(finalAddress);
-                                            }
+                                    rentRoomMapView.getMapAsync(map -> {
+                                        googleMap = map;
+                                        isMapReady = true; // Mark the map as ready
+                                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                        googleMap.getUiSettings().setZoomControlsEnabled(true);
+                                        // Check if an address is available and show it on the map
+                                        if (apartmentData != null) {
+                                            showAddressOnMap(finalAddress);
                                         }
                                     });
                                 }
@@ -245,16 +241,13 @@ public class RentRoomPage extends AppCompatActivity {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Location permission granted, initialize the map
-                rentRoomMapView.getMapAsync(new OnMapReadyCallback() {
-                    @Override
-                    public void onMapReady(@NonNull GoogleMap map) {
-                        googleMap = map;
-                        isMapReady = true;
-                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                        googleMap.getUiSettings().setZoomControlsEnabled(true);
-                        if (apartmentData != null) {
-                            showAddressOnMap(finalAddress);
-                        }
+                rentRoomMapView.getMapAsync(map -> {
+                    googleMap = map;
+                    isMapReady = true;
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    googleMap.getUiSettings().setZoomControlsEnabled(true);
+                    if (apartmentData != null) {
+                        showAddressOnMap(finalAddress);
                     }
                 });
             } else {
@@ -633,124 +626,103 @@ public class RentRoomPage extends AppCompatActivity {
         Log.d(TAG, "bottomBarClickListeners: started");
         // only user_role can be here
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToChatPage(RentRoomPage.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
+        chatButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToChatPage(RentRoomPage.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToProfilePage(RentRoomPage.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
+        profileButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToProfilePage(RentRoomPage.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: pressed role button");
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
+        roleButton.setOnClickListener(view -> {
+            Log.d(TAG, "onClick: pressed role button");
+            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    NavigationUtils.goToHostMainPage(RentRoomPage.this, userId, jwtToken, roles);
-                } else {
-                    Toast.makeText(RentRoomPage.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
-                }
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                NavigationUtils.goToHostMainPage(RentRoomPage.this, userId, jwtToken, roles);
+            } else {
+                Toast.makeText(RentRoomPage.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void buttonClickListener() {
-        seeHostButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed SEE HOST BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToHostReviewPage(RentRoomPage.this, userId, jwtToken, roles, hostId, apartmentId);
-            }
+        seeHostButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed SEE HOST BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToHostReviewPage(RentRoomPage.this, userId, jwtToken, roles, hostId, apartmentId);
         });
 
-        contactHostButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                RestClient restClient = new RestClient(jwtToken);
-                ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
-                ChatSenderReceiverRequest chatSenderReceiverRequest = setChatSenderReceiverRequest();
+        contactHostButton.setOnClickListener(view -> {
+            RestClient restClient = new RestClient(jwtToken);
+            ChatAPI chatAPI = restClient.getClient().create(ChatAPI.class);
+            ChatSenderReceiverRequest chatSenderReceiverRequest = setChatSenderReceiverRequest();
 
-                chatAPI.getChatIdBySenderReceiver(chatSenderReceiverRequest)
-                        .enqueue(new Callback<ChatIdResponse>() {
-                            @Override
-                            public void onResponse(@NonNull Call<ChatIdResponse> call, @NonNull Response<ChatIdResponse> response) {
-                                if (response.isSuccessful() && response.body() != null) {
+            chatAPI.getChatIdBySenderReceiver(chatSenderReceiverRequest)
+                    .enqueue(new Callback<ChatIdResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<ChatIdResponse> call, @NonNull Response<ChatIdResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                if (response.body().getSuccess()) {
+                                    chatId = response.body().getObject();
+                                    Toast.makeText(view.getContext(), "Pressed CONTACT HOST BUTTON", Toast.LENGTH_SHORT).show();
+                                    NavigationUtils.goToIndividualChatPage(RentRoomPage.this, userId, jwtToken, roles, chatId, RoleName.ROLE_USER);
+                                } else {
+                                    Toast.makeText(RentRoomPage.this, "1 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(RentRoomPage.this, "2 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<ChatIdResponse> call, @NonNull Throwable t) {
+                            Log.d(TAG, "Failed to connect to server and get chat with host" + apartmentId);
+                            Toast.makeText(RentRoomPage.this, "Failed to connect to server and get chat with host", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
+
+        makeReservationButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed MAKE RESERVATION BUTTON", Toast.LENGTH_SHORT).show();
+
+            RestClient restClient = new RestClient(jwtToken);
+            BookingAPI bookingAPI = restClient.getClient().create(BookingAPI.class);
+            BookingRequest bookingRequest = setBookingRequest();
+
+            bookingAPI.createBooking(bookingRequest)
+                    .enqueue(new Callback<BookingResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<BookingResponse> call, @NonNull Response<BookingResponse> response) {
+                            if (response.isSuccessful()) {
+                                if (response.body() != null) {
                                     if (response.body().getSuccess()) {
-                                        chatId = response.body().getObject();
-                                        Toast.makeText(view.getContext(), "Pressed CONTACT HOST BUTTON", Toast.LENGTH_SHORT).show();
-                                        NavigationUtils.goToIndividualChatPage(RentRoomPage.this, userId, jwtToken, roles, chatId, RoleName.ROLE_USER);
+                                        Toast.makeText(RentRoomPage.this, "Reservation successful", Toast.LENGTH_SHORT).show();
+                                        NavigationUtils.goToReservationDonePage(RentRoomPage.this, userId, jwtToken, roles);
                                     } else {
-                                        Toast.makeText(RentRoomPage.this, "1 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(RentRoomPage.this, "1 Reservation failed", Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    Toast.makeText(RentRoomPage.this, "2 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(RentRoomPage.this, "2 Reservation failed", Toast.LENGTH_SHORT).show();
                                 }
+                            } else {
+                                Toast.makeText(RentRoomPage.this, "3 Reservation failed", Toast.LENGTH_SHORT).show();
                             }
+                        }
 
-                            @Override
-                            public void onFailure(@NonNull Call<ChatIdResponse> call, @NonNull Throwable t) {
-                                Log.d(TAG, "Failed to connect to server and get chat with host" + apartmentId);
-                                Toast.makeText(RentRoomPage.this, "Failed to connect to server and get chat with host", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            }
+                        @Override
+                        public void onFailure(@NonNull Call<BookingResponse> call, @NonNull Throwable t) {
+                            Toast.makeText(RentRoomPage.this, "4 Reservation failed", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+
         });
 
-        makeReservationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed MAKE RESERVATION BUTTON", Toast.LENGTH_SHORT).show();
-
-                RestClient restClient = new RestClient(jwtToken);
-                BookingAPI bookingAPI = restClient.getClient().create(BookingAPI.class);
-                BookingRequest bookingRequest = setBookingRequest();
-
-                bookingAPI.createBooking(bookingRequest)
-                        .enqueue(new Callback<BookingResponse>() {
-                            @Override
-                            public void onResponse(@NonNull retrofit2.Call<BookingResponse> call, @NonNull retrofit2.Response<BookingResponse> response) {
-                                if (response.isSuccessful()) {
-                                    if (response.body() != null) {
-                                        if (response.body().getSuccess()) {
-                                            Toast.makeText(RentRoomPage.this, "Reservation successful", Toast.LENGTH_SHORT).show();
-                                            NavigationUtils.goToReservationDonePage(RentRoomPage.this, userId, jwtToken, roles);
-                                        } else {
-                                            Toast.makeText(RentRoomPage.this, "1 Reservation failed", Toast.LENGTH_SHORT).show();
-                                        }
-                                    } else {
-                                        Toast.makeText(RentRoomPage.this, "2 Reservation failed", Toast.LENGTH_SHORT).show();
-                                    }
-                                } else {
-                                    Toast.makeText(RentRoomPage.this, "3 Reservation failed", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull retrofit2.Call<BookingResponse> call, @NonNull Throwable t) {
-                                Toast.makeText(RentRoomPage.this, "4 Reservation failed", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-
-            }
-        });
-
-        writeReviewButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToWriteReviewPage(RentRoomPage.this, userId, jwtToken, roles, apartmentId, hostId);
-            }
+        writeReviewButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToWriteReviewPage(RentRoomPage.this, userId, jwtToken, roles, apartmentId, hostId);
         });
     }
 

@@ -406,21 +406,11 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
         if (isSearchFieldsLayoutVisible) {
             // Hide the search fields layout with animation
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    searchFieldsLayout.setVisibility(View.GONE);
-                }
-            }, 100); // Adjust the delay time as needed
+            new Handler().postDelayed(() -> searchFieldsLayout.setVisibility(View.GONE), 100); // Adjust the delay time as needed
             isSearchFieldsLayoutVisible = false;
         } else {
             // Show the search fields layout with animation
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    searchFieldsLayout.setVisibility(View.VISIBLE);
-                }
-            }, 100); // Adjust the delay time as needed
+            new Handler().postDelayed(() -> searchFieldsLayout.setVisibility(View.VISIBLE), 100); // Adjust the delay time as needed
             isSearchFieldsLayoutVisible = true;
         }
     }
@@ -428,79 +418,63 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     private void onDatesClicked() {
         Log.d(TAG, "onDatesClicked: started");
 
-        checkInDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Calendar c = Calendar.getInstance();
+        checkInDate.setOnClickListener(v -> {
+            final Calendar c = Calendar.getInstance();
 
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        // on below line we are passing context.
-                        MainPageActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
-                                checkInDate.setText(formattedDate);
-                            }
-                        },
-                        year, month, day);
-                // not allow older dates to be selected
-                datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
-                // display date picker dialog.
-                datePickerDialog.show();
-            }
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    // on below line we are passing context.
+                    MainPageActivity.this,
+                    (view, year1, monthOfYear, dayOfMonth) -> {
+                        String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year1, (monthOfYear + 1), dayOfMonth);
+                        checkInDate.setText(formattedDate);
+                    },
+                    year, month, day);
+            // not allow older dates to be selected
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            // display date picker dialog.
+            datePickerDialog.show();
         });
 
-        checkOutDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        checkOutDate.setOnClickListener(v -> {
 
-                if (checkInDate.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final Calendar c = Calendar.getInstance();
-
-                // Get the selected check-in date from startDateEditText and parse it to Calendar.
-                String checkInDateText = checkInDate.getText().toString();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                try {
-                    Date checkInDate = dateFormat.parse(checkInDateText);
-                    c.setTime(Objects.requireNonNull(checkInDate));
-                    c.add(Calendar.DAY_OF_MONTH, 1);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        // on below line we are passing context.
-                        MainPageActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
-                                checkOutDate.setText(formattedDate);
-                            }
-                        },
-                        year, month, day);
-                // not allow older dates to be selected
-                datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
-                // display date picker dialog.
-                datePickerDialog.show();
+            if (checkInDate.getText().toString().equals("")) {
+                Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            final Calendar c = Calendar.getInstance();
+
+            // Get the selected check-in date from startDateEditText and parse it to Calendar.
+            String checkInDateText = checkInDate.getText().toString();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            try {
+                Date checkInDate = dateFormat.parse(checkInDateText);
+                c.setTime(Objects.requireNonNull(checkInDate));
+                c.add(Calendar.DAY_OF_MONTH, 1);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    // on below line we are passing context.
+                    MainPageActivity.this,
+                    (view, year12, monthOfYear, dayOfMonth) -> {
+                        String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year12, (monthOfYear + 1), dayOfMonth);
+                        checkOutDate.setText(formattedDate);
+                    },
+                    year, month, day);
+            // not allow older dates to be selected
+            datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
+            // display date picker dialog.
+            datePickerDialog.show();
         });
     }
 
@@ -610,47 +584,35 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     private void homeButtonClickListener() {
         Log.d(TAG, "homeButtonClickListener: started");
 
-        homePageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(MainPageActivity.this, "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
-                searchIsOn = false;
-                isFirstSearch = true;
-                NavigationUtils.goToMainPage(MainPageActivity.this, userId, jwtToken, roles);
-            }
+        homePageButton.setOnClickListener(view -> {
+            Toast.makeText(MainPageActivity.this, "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
+            searchIsOn = false;
+            isFirstSearch = true;
+            NavigationUtils.goToMainPage(MainPageActivity.this, userId, jwtToken, roles);
         });
     }
 
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToChatPage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
+        chatButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToChatPage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToProfilePage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
+        profileButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToProfilePage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: pressed role button");
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
+        roleButton.setOnClickListener(view -> {
+            Log.d(TAG, "onClick: pressed role button");
+            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    NavigationUtils.goToHostMainPage(MainPageActivity.this, userId, jwtToken, roles);
-                } else {
-                    Toast.makeText(MainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
-                }
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                NavigationUtils.goToHostMainPage(MainPageActivity.this, userId, jwtToken, roles);
+            } else {
+                Toast.makeText(MainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }

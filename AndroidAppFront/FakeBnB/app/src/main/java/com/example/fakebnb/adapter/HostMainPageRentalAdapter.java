@@ -85,15 +85,12 @@ public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPage
             rentalImageView = itemView.findViewById(R.id.singleImageHostRentalView);
 
             // Set click listener for the item view
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (hostMainPageRecyclerViewInterface != null){
-                        int clickedPosition = getAdapterPosition();
-                        if (clickedPosition != RecyclerView.NO_POSITION) {
-                            Long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
-                            hostMainPageRecyclerViewInterface.onItemClick(rentalId);
-                        }
+            itemView.setOnClickListener(v -> {
+                if (hostMainPageRecyclerViewInterface != null){
+                    int clickedPosition = getAdapterPosition();
+                    if (clickedPosition != RecyclerView.NO_POSITION) {
+                        Long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
+                        hostMainPageRecyclerViewInterface.onItemClick(rentalId);
                     }
                 }
             });

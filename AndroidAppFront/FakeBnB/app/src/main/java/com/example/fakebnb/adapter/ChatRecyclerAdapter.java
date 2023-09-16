@@ -80,16 +80,13 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
             lastMessageTextView = itemView.findViewById(R.id.lastMessageTextView);
             userImageView = itemView.findViewById(R.id.chat_user_profile_pic_image_view);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (chatRecyclerViewInterface != null) {
-                        int clickedPosition = getAdapterPosition();
-                        if (clickedPosition != RecyclerView.NO_POSITION) {
-                            long chatId = overviewChatModel.get(clickedPosition).getChatId();
-                            Bitmap userImage = usersImages.get(chatId);
-                            chatRecyclerViewInterface.onItemClick(chatId);
-                        }
+            itemView.setOnClickListener(v -> {
+                if (chatRecyclerViewInterface != null) {
+                    int clickedPosition = getAdapterPosition();
+                    if (clickedPosition != RecyclerView.NO_POSITION) {
+                        long chatId = overviewChatModel.get(clickedPosition).getChatId();
+                        Bitmap userImage = usersImages.get(chatId);
+                        chatRecyclerViewInterface.onItemClick(chatId);
                     }
                 }
             });

@@ -168,17 +168,14 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         } else {
             // Location permission is granted, proceed with showing the map
-            addPlaceMapView.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(@NonNull GoogleMap map) {
-                    googleMap = map; // Store the GoogleMap object in the global variable
-                    isMapReady = true; // Mark the map as ready
-                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                    googleMap.getUiSettings().setZoomControlsEnabled(true);
-                    // Check if an address is available and show it on the map
-                    if (addressToShowOnMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
+            addPlaceMapView.getMapAsync(map -> {
+                googleMap = map; // Store the GoogleMap object in the global variable
+                isMapReady = true; // Mark the map as ready
+                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                googleMap.getUiSettings().setZoomControlsEnabled(true);
+                // Check if an address is available and show it on the map
+                if (addressToShowOnMap != null) {
+                    showAddressOnMap(addressToShowOnMap);
                 }
             });
         }
@@ -202,16 +199,13 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Location permission granted, initialize the map
-                addPlaceMapView.getMapAsync(new OnMapReadyCallback() {
-                    @Override
-                    public void onMapReady(@NonNull GoogleMap map) {
-                        googleMap = map;
-                        isMapReady = true;
-                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                        googleMap.getUiSettings().setZoomControlsEnabled(true);
-                        if (addressToShowOnMap != null) {
-                            showAddressOnMap(addressToShowOnMap);
-                        }
+                addPlaceMapView.getMapAsync(map -> {
+                    googleMap = map;
+                    isMapReady = true;
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    googleMap.getUiSettings().setZoomControlsEnabled(true);
+                    if (addressToShowOnMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
                     }
                 });
             } else {
@@ -414,13 +408,10 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningAddress.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningAddress.setVisibility(View.GONE);
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            addressToShowOnMap = concatAddressToShowOnMap();
-                            if (isMapReady && googleMap != null) {
-                                showAddressOnMap(addressToShowOnMap);
-                            }
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        addressToShowOnMap = concatAddressToShowOnMap();
+                        if (isMapReady && googleMap != null) {
+                            showAddressOnMap(addressToShowOnMap);
                         }
                     });
                 }
@@ -445,13 +436,10 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningDistrict.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningDistrict.setVisibility(View.GONE);
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            addressToShowOnMap = concatAddressToShowOnMap();
-                            if (isMapReady && googleMap != null) {
-                                showAddressOnMap(addressToShowOnMap);
-                            }
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        addressToShowOnMap = concatAddressToShowOnMap();
+                        if (isMapReady && googleMap != null) {
+                            showAddressOnMap(addressToShowOnMap);
                         }
                     });
                 }
@@ -476,13 +464,10 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningCity.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningCity.setVisibility(View.GONE);
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            addressToShowOnMap = concatAddressToShowOnMap();
-                            if (isMapReady && googleMap != null) {
-                                showAddressOnMap(addressToShowOnMap);
-                            }
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        addressToShowOnMap = concatAddressToShowOnMap();
+                        if (isMapReady && googleMap != null) {
+                            showAddressOnMap(addressToShowOnMap);
                         }
                     });
                 }
@@ -507,13 +492,10 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningCountry.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningCountry.setVisibility(View.GONE);
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            addressToShowOnMap = concatAddressToShowOnMap();
-                            if (isMapReady && googleMap != null) {
-                                showAddressOnMap(addressToShowOnMap);
-                            }
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        addressToShowOnMap = concatAddressToShowOnMap();
+                        if (isMapReady && googleMap != null) {
+                            showAddressOnMap(addressToShowOnMap);
                         }
                     });
                 }
@@ -832,128 +814,109 @@ public class AddNewPlaceActivity extends AppCompatActivity {
     private void onDatesClicked() {
         Log.d(TAG, "onDatesClicked: started");
 
-        startDateEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Calendar c = Calendar.getInstance();
+        startDateEditText.setOnClickListener(v -> {
+            final Calendar c = Calendar.getInstance();
 
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        // on below line we are passing context.
-                        AddNewPlaceActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
-                                startDateEditText.setText(formattedDate);
-                            }
-                        },
-                        year, month, day);
-                // not allow older dates to be selected
-                datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
-                // display date picker dialog.
-                datePickerDialog.show();
-            }
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    // on below line we are passing context.
+                    AddNewPlaceActivity.this,
+                    (view, year1, monthOfYear, dayOfMonth) -> {
+                        String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year1, (monthOfYear + 1), dayOfMonth);
+                        startDateEditText.setText(formattedDate);
+                    },
+                    year, month, day);
+            // not allow older dates to be selected
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            // display date picker dialog.
+            datePickerDialog.show();
         });
 
-        endDateEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        endDateEditText.setOnClickListener(v -> {
 
-                if (startDateEditText.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final Calendar c = Calendar.getInstance();
-
-                // Get the selected check-in date from startDateEditText and parse it to Calendar.
-                String checkInDateText = startDateEditText.getText().toString();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                try {
-                    Date checkInDate = dateFormat.parse(checkInDateText);
-                    c.setTime(Objects.requireNonNull(checkInDate));
-                    c.add(Calendar.DAY_OF_MONTH, 1);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        // on below line we are passing context.
-                        AddNewPlaceActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
-                                endDateEditText.setText(formattedDate);
-                            }
-                        },
-                        year, month, day);
-                // not allow older dates to be selected
-                datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
-                // display date picker dialog.
-                datePickerDialog.show();
+            if (startDateEditText.getText().toString().equals("")) {
+                Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            final Calendar c = Calendar.getInstance();
+
+            // Get the selected check-in date from startDateEditText and parse it to Calendar.
+            String checkInDateText = startDateEditText.getText().toString();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            try {
+                Date checkInDate = dateFormat.parse(checkInDateText);
+                c.setTime(Objects.requireNonNull(checkInDate));
+                c.add(Calendar.DAY_OF_MONTH, 1);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    // on below line we are passing context.
+                    AddNewPlaceActivity.this,
+                    (view, year12, monthOfYear, dayOfMonth) -> {
+                        String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year12, (monthOfYear + 1), dayOfMonth);
+                        endDateEditText.setText(formattedDate);
+                    },
+                    year, month, day);
+            // not allow older dates to be selected
+            datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
+            // display date picker dialog.
+            datePickerDialog.show();
         });
     }
 
     private void addPlaceButtonClickListener() {
-        addPlaceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!validateFields()) {
-                    Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Toast.makeText(view.getContext(), "Pressed ADD PLACE BUTTON", Toast.LENGTH_SHORT).show();
-
-                ApartmentRequest apartmentRequest = setApartmentRequestData(view);
-                if (apartmentRequest == null) {
-                    Toast.makeText(view.getContext(), "Please fill correctly all the fields", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Gson gson = new Gson();
-
-                RestClient restClient = new RestClient(jwtToken);
-                ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
-
-                Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(apartmentRequest));
-                List<MultipartBody.Part> image = ImageUtils.getImageParts(imageBitmapList);
-
-                apartmentAPI.createApartment(gson.toJson(apartmentRequest), image)
-                        .enqueue(new Callback<ApartmentResponse>() {
-                            @Override
-                            public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
-                                if (response.isSuccessful()) {
-                                    Log.d(TAG, "Apartment added successfully");
-                                    Toast.makeText(view.getContext(), "Apartment added successfully", Toast.LENGTH_SHORT).show();
-                                    NavigationUtils.goToHostMainPage(getApplicationContext(), userId, jwtToken, roles);
-                                } else {
-                                    Toast.makeText(AddNewPlaceActivity.this, "1 Error adding apartment", Toast.LENGTH_SHORT).show();
-                                    Log.d(TAG, "1 Error adding apartment");
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
-                                Toast.makeText(AddNewPlaceActivity.this, "2 Error adding apartment: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                                Log.d(TAG, "2 Error adding apartment: " + t.getMessage());
-                            }
-                        });
+        addPlaceButton.setOnClickListener(view -> {
+            if (!validateFields()) {
+                Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            Toast.makeText(view.getContext(), "Pressed ADD PLACE BUTTON", Toast.LENGTH_SHORT).show();
+
+            ApartmentRequest apartmentRequest = setApartmentRequestData(view);
+            if (apartmentRequest == null) {
+                Toast.makeText(view.getContext(), "Please fill correctly all the fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Gson gson = new Gson();
+
+            RestClient restClient = new RestClient(jwtToken);
+            ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
+
+            Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(apartmentRequest));
+            List<MultipartBody.Part> image = ImageUtils.getImageParts(imageBitmapList);
+
+            apartmentAPI.createApartment(gson.toJson(apartmentRequest), image)
+                    .enqueue(new Callback<ApartmentResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                            if (response.isSuccessful()) {
+                                Log.d(TAG, "Apartment added successfully");
+                                Toast.makeText(view.getContext(), "Apartment added successfully", Toast.LENGTH_SHORT).show();
+                                NavigationUtils.goToHostMainPage(getApplicationContext(), userId, jwtToken, roles);
+                            } else {
+                                Toast.makeText(AddNewPlaceActivity.this, "1 Error adding apartment", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "1 Error adding apartment");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                            Toast.makeText(AddNewPlaceActivity.this, "2 Error adding apartment: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "2 Error adding apartment: " + t.getMessage());
+                        }
+                    });
         });
     }
 
@@ -1248,33 +1211,24 @@ public class AddNewPlaceActivity extends AppCompatActivity {
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToChatPage(AddNewPlaceActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
-            }
+        chatButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToChatPage(AddNewPlaceActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToProfilePage(AddNewPlaceActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
-            }
+        profileButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToProfilePage(AddNewPlaceActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: role button pressed");
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
+        roleButton.setOnClickListener(view -> {
+            Log.d(TAG, "onClick: role button pressed");
+            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    NavigationUtils.goToMainPage(AddNewPlaceActivity.this, userId, jwtToken, roles);
-                } else {
-                    Toast.makeText(AddNewPlaceActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
-                }
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                NavigationUtils.goToMainPage(AddNewPlaceActivity.this, userId, jwtToken, roles);
+            } else {
+                Toast.makeText(AddNewPlaceActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }

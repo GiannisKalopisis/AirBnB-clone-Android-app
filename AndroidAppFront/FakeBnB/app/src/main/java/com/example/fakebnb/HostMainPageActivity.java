@@ -302,12 +302,9 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     }
 
     private void addButtonClickListener() {
-        addRentalButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(HostMainPageActivity.this, "Add place button pressed", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToAddNewPlacePage(HostMainPageActivity.this, userId, jwtToken, roles);
-            }
+        addRentalButton.setOnClickListener(view -> {
+            Toast.makeText(HostMainPageActivity.this, "Add place button pressed", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToAddNewPlacePage(HostMainPageActivity.this, userId, jwtToken, roles);
         });
     }
 
@@ -333,33 +330,24 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToChatPage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
-            }
+        chatButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToChatPage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToProfilePage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
-            }
+        profileButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToProfilePage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: role button pressed");
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
+        roleButton.setOnClickListener(view -> {
+            Log.d(TAG, "onClick: role button pressed");
+            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    NavigationUtils.goToMainPage(HostMainPageActivity.this, userId, jwtToken, roles);
-                } else {
-                    Toast.makeText(HostMainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
-                }
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                NavigationUtils.goToMainPage(HostMainPageActivity.this, userId, jwtToken, roles);
+            } else {
+                Toast.makeText(HostMainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }

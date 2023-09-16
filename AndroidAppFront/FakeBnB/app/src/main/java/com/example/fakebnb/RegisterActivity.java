@@ -156,76 +156,73 @@ public class RegisterActivity extends AppCompatActivity {
     private void registerButtonOnClickListener() {
         Log.d(TAG, "registerButtonOnClickListener: Started");
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                resetWarnVisibility();
+        registerButton.setOnClickListener(view -> {
+            resetWarnVisibility();
 
-                // Serialize the object to JSON
-                Gson gson = new Gson();
-                UserRegisterModel userRegisterModel = setUserRegisterModel();
+            // Serialize the object to JSON
+            Gson gson = new Gson();
+            UserRegisterModel userRegisterModel = setUserRegisterModel();
 
-                if (!initRegister()) {
-                    if (!confirmPasswordEditText.getText().toString().equals(passwordEditText.getText().toString())) {
-                        Toast.makeText(RegisterActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    Toast.makeText(RegisterActivity.this, "Must fill all fields", Toast.LENGTH_SHORT).show();
+            if (!initRegister()) {
+                if (!confirmPasswordEditText.getText().toString().equals(passwordEditText.getText().toString())) {
+                    Toast.makeText(RegisterActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                Toast.makeText(RegisterActivity.this, "Must fill all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                MultipartBody.Part imagePart = ImageUtils.getImagePart(imageBitmap);
+            Part imagePart = ImageUtils.getImagePart(imageBitmap);
 
-                RestClient restClient = new RestClient(null);
-                UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
-                Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(userRegisterModel));
+            RestClient restClient = new RestClient(null);
+            UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+            Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(userRegisterModel));
 
-                userRegAPI.registerUser(gson.toJson(userRegisterModel), imagePart)
-                        .enqueue(new Callback<UserRegisterModel>() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
-                                if (response.isSuccessful()) {
-                                    Toast.makeText(RegisterActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
-                                    Log.d(TAG, "onResponse: " + response.body());
-                                    Intent login_intent = new Intent(getApplicationContext(), LoginActivity.class);
-                                    startActivity(login_intent);
-                                } else {
-                                    if (response.code() == HttpURLConnection.HTTP_CONFLICT){
-                                        String errorBodyString;
-                                        JSONObject errorObject;
-                                        try {
-                                            errorBodyString = Objects.requireNonNull(response.errorBody()).string();
-                                            errorObject = new JSONObject(errorBodyString);
-                                        } catch (IOException | JSONException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                        String errorMessage = errorObject.optString("message");
-
-                                        if (errorMessage.equals("A user with the same username already exists")) {
-                                            Toast.makeText(RegisterActivity.this, "A user with the same username already exists", Toast.LENGTH_SHORT).show();
-                                            usernameWarn.setText("Username already exists");
-                                            usernameWarn.setVisibility(View.VISIBLE);
-                                        } else if (errorMessage.equals("A user with the same email already exists")) {
-                                            Toast.makeText(RegisterActivity.this, "A user with the same email already exists", Toast.LENGTH_SHORT).show();
-                                            emailWarn.setText("Email already exists");
-                                            emailWarn.setVisibility(View.VISIBLE);
-                                        }
-                                    } else {
-                                        Toast.makeText(RegisterActivity.this, "Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
-                                        Log.d(TAG, "onResponse: " + response.errorBody());
+            userRegAPI.registerUser(gson.toJson(userRegisterModel), imagePart)
+                    .enqueue(new Callback<UserRegisterModel>() {
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(RegisterActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "onResponse: " + response.body());
+                                Intent login_intent = new Intent(getApplicationContext(), LoginActivity.class);
+                                startActivity(login_intent);
+                            } else {
+                                if (response.code() == HttpURLConnection.HTTP_CONFLICT){
+                                    String errorBodyString;
+                                    JSONObject errorObject;
+                                    try {
+                                        errorBodyString = Objects.requireNonNull(response.errorBody()).string();
+                                        errorObject = new JSONObject(errorBodyString);
+                                    } catch (IOException | JSONException e) {
+                                        throw new RuntimeException(e);
                                     }
+                                    String errorMessage = errorObject.optString("message");
+
+                                    if (errorMessage.equals("A user with the same username already exists")) {
+                                        Toast.makeText(RegisterActivity.this, "A user with the same username already exists", Toast.LENGTH_SHORT).show();
+                                        usernameWarn.setText("Username already exists");
+                                        usernameWarn.setVisibility(View.VISIBLE);
+                                    } else if (errorMessage.equals("A user with the same email already exists")) {
+                                        Toast.makeText(RegisterActivity.this, "A user with the same email already exists", Toast.LENGTH_SHORT).show();
+                                        emailWarn.setText("Email already exists");
+                                        emailWarn.setVisibility(View.VISIBLE);
+                                    }
+                                } else {
+                                    Toast.makeText(RegisterActivity.this, "Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "onResponse: " + response.errorBody());
                                 }
                             }
+                        }
 
-                            @Override
-                            public void onFailure(@NonNull Call<UserRegisterModel> call, @NonNull Throwable t) {
-                                Toast.makeText(RegisterActivity.this, "Unexpected error in backend. Please try later.", Toast.LENGTH_SHORT).show();
-                                Logger.getLogger(RegisterActivity.class.getName()).log(Level.SEVERE, "Error in Register occurred!", t);
-                                Log.d(TAG, "onFailure: " + t.getMessage());
-                            }
-                        });
-            }
+                        @Override
+                        public void onFailure(@NonNull Call<UserRegisterModel> call, @NonNull Throwable t) {
+                            Toast.makeText(RegisterActivity.this, "Unexpected error in backend. Please try later.", Toast.LENGTH_SHORT).show();
+                            Logger.getLogger(RegisterActivity.class.getName()).log(Level.SEVERE, "Error in Register occurred!", t);
+                            Log.d(TAG, "onFailure: " + t.getMessage());
+                        }
+                    });
         });
     }
 

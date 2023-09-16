@@ -273,31 +273,21 @@ public class HostReviewPageActivity extends AppCompatActivity {
         Log.d(TAG, "bottomBarClickListeners: started");
         // only role_user can be here
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToChatPage(HostReviewPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
+        chatButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToChatPage(HostReviewPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToProfilePage(HostReviewPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
+        profileButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToProfilePage(HostReviewPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // only user can be at this page so go to main Host page
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    NavigationUtils.goToHostMainPage(HostReviewPageActivity.this, userId, jwtToken, roles);
-                } else {
-                    Toast.makeText(HostReviewPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
-                }
+        roleButton.setOnClickListener(view -> {
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                NavigationUtils.goToHostMainPage(HostReviewPageActivity.this, userId, jwtToken, roles);
+            } else {
+                Toast.makeText(HostReviewPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }

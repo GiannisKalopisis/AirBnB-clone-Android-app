@@ -351,16 +351,13 @@ public class IndividualChatActivity extends AppCompatActivity {
     }
 
     private void messageSendOnClickListener() {
-        message_send_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MessageRequest messageRequest = createMessageRequest();
-                chat_message_input.setText("");
-                if (messageRequest == null) {
-                    return;
-                }
-                sendMessageToUser(messageRequest);
+        message_send_btn.setOnClickListener(view -> {
+            MessageRequest messageRequest = createMessageRequest();
+            chat_message_input.setText("");
+            if (messageRequest == null) {
+                return;
             }
+            sendMessageToUser(messageRequest);
         });
     }
 
@@ -374,11 +371,6 @@ public class IndividualChatActivity extends AppCompatActivity {
     }
 
     private void backButtonOnClickListener() {
-        back_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
+        back_btn.setOnClickListener(view -> onBackPressed());
     }
 }

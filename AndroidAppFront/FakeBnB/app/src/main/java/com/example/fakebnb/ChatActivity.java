@@ -237,36 +237,25 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
     private void bottomBarClickListener() {
         Log.d(TAG, "bottomBarClickListener: started");
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(ChatActivity.this, "Already in Chat page", Toast.LENGTH_SHORT).show();
-            }
+        chatButton.setOnClickListener(view -> Toast.makeText(ChatActivity.this, "Already in Chat page", Toast.LENGTH_SHORT).show());
+
+        profileButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToProfilePage(ChatActivity.this, userId, jwtToken, roles, currentRole.toString());
         });
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToProfilePage(ChatActivity.this, userId, jwtToken, roles, currentRole.toString());
-            }
-        });
+        roleButton.setOnClickListener(view -> {
+            Log.d(TAG, "onClick: pressed role button");
+            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: pressed role button");
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
-
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    if (currentRole == RoleName.ROLE_USER) {
-                        NavigationUtils.goToHostMainPage(ChatActivity.this, userId, jwtToken, roles);
-                    } else if (currentRole == RoleName.ROLE_HOST) {
-                        NavigationUtils.goToMainPage(ChatActivity.this, userId, jwtToken, roles);
-                    }
-                } else {
-                    Toast.makeText(ChatActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                if (currentRole == RoleName.ROLE_USER) {
+                    NavigationUtils.goToHostMainPage(ChatActivity.this, userId, jwtToken, roles);
+                } else if (currentRole == RoleName.ROLE_HOST) {
+                    NavigationUtils.goToMainPage(ChatActivity.this, userId, jwtToken, roles);
                 }
+            } else {
+                Toast.makeText(ChatActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }
