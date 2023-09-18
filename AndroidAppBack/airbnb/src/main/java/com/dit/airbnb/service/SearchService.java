@@ -10,6 +10,8 @@ import com.dit.airbnb.response.SearchResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.response.generic.PagedResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +109,9 @@ public class SearchService {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            // Create a join between Apartment and Booking
+            Join<Apartment, Booking> bookingJoin = root.join("bookings", JoinType.LEFT);
+
             if (searchRequest.getDistrict() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("district"), searchRequest.getDistrict()));
             }
@@ -133,6 +138,22 @@ public class SearchService {
 
             if (searchRequest.getNumberOfGuests() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("maxVisitors"), searchRequest.getNumberOfGuests()));
+            }
+
+            // Add a condition to check if the apartment is booked on the specified dates
+            if (searchRequest.getAvailableStartDate() != null && searchRequest.getAvailableEndDate() != null) {
+                predicates.add(criteriaBuilder.and(
+                        criteriaBuilder.isNotNull(bookingJoin.get("id")),
+                        criteriaBuilder.and(
+                                // [checkInDate, checkOutDate] vs [getAvailableStartDate, getAvailableEndDate]
+                                /*
+                                  if (checkInDate > getAvailableEndDate) => (-oo, getAvailableEndDate] ... (checkInDate, +oo)
+                                  if (checkOutDate < getAvailableStartDate) => (-oo, checkOutDate) ... [getAvailableStartDate, +oo)
+                                 */
+                                criteriaBuilder.lessThan(bookingJoin.get("checkOutDate"), searchRequest.getAvailableStartDate()),
+                                criteriaBuilder.greaterThan(bookingJoin.get("checkInDate"), searchRequest.getAvailableEndDate())
+                        )
+                ));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

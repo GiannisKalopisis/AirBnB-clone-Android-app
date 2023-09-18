@@ -3,21 +3,15 @@ package com.dit.airbnb.service;
 import com.dit.airbnb.dto.Apartment;
 import com.dit.airbnb.dto.Image;
 import com.dit.airbnb.dto.UserReg;
-import com.dit.airbnb.exception.ResourceNotFoundException;
 import com.dit.airbnb.exception.StorageException;
 import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.ImageRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.response.generic.ApiResponse;
-import com.dit.airbnb.security.user.CurrentUser;
-import com.dit.airbnb.security.user.UserDetailsImpl;
 import com.dit.airbnb.storage.StorageProperties;
 import jakarta.annotation.PostConstruct;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -41,28 +35,12 @@ import org.springframework.core.io.Resource;
 
 import org.springframework.util.FileSystemUtils;
 
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ImageService {
 
     private final Path rootLocation;
-
-    @Autowired
-    private UserRegRepository userRegRepository;
-
-    @Autowired
-    private ApartmentRepository apartmentRepository;
 
     @Autowired
     private ImageRepository imageRepository;
