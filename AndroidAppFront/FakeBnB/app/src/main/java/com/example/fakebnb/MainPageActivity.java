@@ -45,6 +45,7 @@ import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.SearchAPI;
 import com.example.fakebnb.rest.UserRegAPI;
 import com.example.fakebnb.utils.NavigationUtils;
+import com.google.gson.Gson;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -293,6 +294,9 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
         RestClient restClient = new RestClient(jwtToken);
         SearchAPI searchAPI = restClient.getClient().create(SearchAPI.class);
+
+        Gson gson = new Gson();
+        Log.d(TAG, gson.toJson(searchRequest));
 
         searchAPI.search(searchRequest, currentPage, size)
                 .enqueue(new Callback<SearchPagedResponse>() {

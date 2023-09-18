@@ -51,11 +51,11 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:background="@android:color/transparent"
-                            app:sliderIndicatorEnabled="true"
                             app:sliderAnimationDuration="600"
                             app:sliderAutoCycleDirection="back_and_forth"
                             app:sliderAutoCycleEnabled="true"
                             app:sliderIndicatorAnimationDuration="600"
+                            app:sliderIndicatorEnabled="true"
                             app:sliderIndicatorGravity="center_horizontal|bottom"
                             app:sliderIndicatorMargin="15dp"
                             app:sliderIndicatorOrientation="horizontal"
@@ -64,8 +64,7 @@
                             app:sliderIndicatorSelectedColor="#5A5A5A"
                             app:sliderIndicatorUnselectedColor="#FFF"
                             app:sliderScrollTimeInSec="1"
-                            app:sliderStartAutoCycle="true"
-                            />
+                            app:sliderStartAutoCycle="true" />
 
                     </FrameLayout>
                 </androidx.cardview.widget.CardView>
@@ -81,8 +80,8 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="10dp"
                     android:text="Room Info"
-                    android:textSize="20sp"
                     android:textColor="#777777"
+                    android:textSize="20sp"
                     tools:ignore="RtlSymmetry" />
 
                 <LinearLayout
@@ -93,20 +92,20 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Persons"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Beds"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
@@ -120,16 +119,16 @@
                         android:id="@+id/rentRoomPersonsValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Number of persons" />
 
                     <TextView
                         android:id="@+id/rentRoomBedsValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Number of beds" />
 
                 </LinearLayout>
@@ -144,20 +143,20 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Bathrooms"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Bedrooms"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
@@ -171,16 +170,16 @@
                         android:id="@+id/rentRoomBathroomsValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Number of bathrooms" />
 
                     <TextView
                         android:id="@+id/rentRoomBedroomsValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Number of bedrooms" />
 
                 </LinearLayout>
@@ -195,8 +194,8 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="10dp"
                     android:text="Price"
-                    android:textSize="20sp"
                     android:textColor="#777777"
+                    android:textSize="20sp"
                     tools:ignore="RtlSymmetry" />
 
                 <LinearLayout
@@ -207,20 +206,20 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Price per night"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Extra person price"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
@@ -234,16 +233,16 @@
                         android:id="@+id/rentRoomPriceValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Price per night" />
 
                     <TextView
                         android:id="@+id/rentRoomExtraPriceValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Extra cost per person" />
 
                 </LinearLayout>
@@ -256,12 +255,12 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
-                        android:text="Final Price"
                         android:layout_marginStart="20dp"
-                        android:layout_marginTop="5dp"/>
+                        android:layout_marginTop="5dp"
+                        android:layout_weight="0.5"
+                        android:text="Final Price"
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
@@ -275,8 +274,8 @@
                         android:id="@+id/rentRoomFinalPriceValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Price for all days and for all extra persons" />
 
                 </LinearLayout>
@@ -290,8 +289,8 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="10dp"
                     android:text="Description"
-                    android:textSize="20sp"
                     android:textColor="#777777"
+                    android:textSize="20sp"
                     tools:ignore="RtlSymmetry" />
 
                 <TextView
@@ -299,12 +298,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
                     android:layout_marginStart="20dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="20dp"
-                    android:layout_marginTop="5dp"
                     android:background="@drawable/edittext_border"
                     android:inputType="textMultiLine"
-                    android:maxLines="6"/>
+                    android:maxLines="6" />
 
                 <!-- RULES -->
                 <TextView
@@ -316,20 +315,20 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="10dp"
                     android:text="Rules"
-                    android:textSize="20sp"
                     android:textColor="#777777"
+                    android:textSize="20sp"
                     tools:ignore="RtlSymmetry" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:layout_marginStart="10dp"
                     android:id="@+id/recyclerViewRules"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
                     android:padding="8dp"
-                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <!-- LOCATION -->
                 <TextView
@@ -341,8 +340,8 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="10dp"
                     android:text="Location"
-                    android:textSize="20sp"
                     android:textColor="#777777"
+                    android:textSize="20sp"
                     tools:ignore="RtlSymmetry" />
 
                 <LinearLayout
@@ -354,20 +353,20 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Address"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="District"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
@@ -382,16 +381,16 @@
                         android:id="@+id/rentRoomAddressValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Santa Monica Boulevard " />
 
                     <TextView
                         android:id="@+id/rentRoomDistrictValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Los Angeles" />
 
                 </LinearLayout>
@@ -405,20 +404,20 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="City"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Country"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
@@ -433,16 +432,16 @@
                         android:id="@+id/rentRoomCityValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Santa Monica Boulevard" />
 
                     <TextView
                         android:id="@+id/rentRoomCountryValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
                         android:layout_marginStart="20dp"
+                        android:layout_weight="0.5"
                         android:text="Los Angeles" />
 
                 </LinearLayout>
@@ -456,29 +455,29 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
                         android:layout_weight="0.5"
-                        android:textSize="15sp"
-                        android:textColor="#777777"
                         android:text="Google Maps"
-                        android:layout_marginStart="20dp"/>
+                        android:textColor="#777777"
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginTop="5dp"-->
-<!--                    android:orientation="horizontal">-->
+                <!--                <LinearLayout-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginTop="5dp"-->
+                <!--                    android:orientation="horizontal">-->
 
                 <com.google.android.gms.maps.MapView
                     android:id="@+id/rentRoomMapView"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    android:layout_marginTop="5dp"
                     android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"/>
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="20dp" />
 
-<!--                </LinearLayout>-->
+                <!--                </LinearLayout>-->
 
                 <!-- AMENITIES -->
                 <TextView
@@ -490,20 +489,20 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="10dp"
                     android:text="Amenities"
-                    android:textSize="20sp"
                     android:textColor="#777777"
+                    android:textSize="20sp"
                     tools:ignore="RtlSymmetry" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:layout_marginStart="10dp"
                     android:id="@+id/recyclerViewAmenities"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
                     android:padding="8dp"
-                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <!-- HOST -->
                 <TextView
@@ -515,8 +514,8 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="10dp"
                     android:text="Host"
-                    android:textSize="20sp"
                     android:textColor="#777777"
+                    android:textSize="20sp"
                     tools:ignore="RtlSymmetry" />
 
                 <LinearLayout
@@ -530,19 +529,19 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_centerInParent="true"
+                        android:layout_margin="5dp"
+                        android:layout_weight="0.6"
                         android:background="@drawable/circular_bg"
                         android:backgroundTint="@color/green"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/person_icon"
-                        android:layout_margin="5dp"
-                        android:layout_weight="0.6"/>
+                        android:src="@drawable/person_icon" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.45"
-                        android:orientation="vertical"
-                        android:gravity="left">
+                        android:gravity="left"
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/rentRoomHostNameValue"
@@ -552,9 +551,9 @@
                             android:layout_marginTop="10dp"
                             android:layout_marginEnd="20dp"
                             android:layout_marginBottom="10dp"
-                            android:textSize="15sp"
+                            android:text="Host Name"
                             android:textColor="#777777"
-                            android:text="Host Name" />
+                            android:textSize="15sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -565,19 +564,19 @@
                                 android:id="@+id/seeHostButton"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="10dp"
-                                android:layout_marginBottom="10dp"
                                 android:layout_marginStart="20dp"
+                                android:layout_marginTop="10dp"
                                 android:layout_marginEnd="20dp"
+                                android:layout_marginBottom="10dp"
                                 android:text="See your host" />
 
                             <Button
                                 android:id="@+id/contactHostButton"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginBottom="10dp"
                                 android:layout_marginStart="20dp"
                                 android:layout_marginEnd="20dp"
+                                android:layout_marginBottom="10dp"
                                 android:text="Contact your host" />
                         </LinearLayout>
 
@@ -593,8 +592,8 @@
                     android:layout_marginTop="40dp"
                     android:layout_marginEnd="60dp"
                     android:layout_marginBottom="20dp"
-                    android:text="Make your reservation"
-                    android:backgroundTint="@color/green"/>
+                    android:backgroundTint="@color/green"
+                    android:text="Make your reservation" />
 
                 <TextView
                     android:id="@+id/rentRoomReviewTitle"
@@ -606,10 +605,10 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="10dp"
                     android:text="Write a review to help other users find the perfect home :"
-                    android:textSize="20sp"
                     android:textColor="#777777"
-                    tools:ignore="RtlSymmetry"
-                    android:visibility="gone"/>
+                    android:textSize="20sp"
+                    android:visibility="gone"
+                    tools:ignore="RtlSymmetry" />
 
                 <Button
                     android:id="@+id/writeReviewButton"
@@ -619,10 +618,10 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginEnd="60dp"
                     android:layout_marginBottom="20dp"
-                    android:text="Write a Review"
                     android:backgroundTint="@color/green"
                     android:gravity="center"
-                    android:visibility="gone"/>
+                    android:text="Write a Review"
+                    android:visibility="gone" />
 
             </LinearLayout>
         </RelativeLayout>

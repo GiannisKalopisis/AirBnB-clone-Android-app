@@ -25,16 +25,17 @@
         android:gravity="center"
         android:padding="20dp">
 
-        <Button
+        <!-- https://stackoverflow.com/questions/64722733/android-background-drawable-not-working-in-button-since-android-studio-4-1 -->
+        <android.widget.Button
             android:id="@+id/loginStartButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:text="@string/log_in"
             android:layout_margin="10dp"
+            android:text="@string/log_in"
             android:background="@drawable/button_style"/>
 
-        <Button
+        <android.widget.Button
             android:id="@+id/registerStartButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -43,7 +44,7 @@
             android:text="@string/register"
             android:backgroundTint="@color/black"
             android:textColor="@color/white"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:background="@drawable/button_style"/>
 
     </LinearLayout>
 
