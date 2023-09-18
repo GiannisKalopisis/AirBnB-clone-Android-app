@@ -10,9 +10,7 @@ import com.dit.airbnb.response.SearchResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.response.generic.PagedResponse;
 import com.dit.airbnb.security.user.UserDetailsImpl;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.*;
 import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -109,6 +107,8 @@ public class SearchService {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            query.distinct(true);
+
             // Create a join between Apartment and Booking
             Join<Apartment, Booking> bookingJoin = root.join("bookings", JoinType.LEFT);
 
@@ -140,20 +140,33 @@ public class SearchService {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("maxVisitors"), searchRequest.getNumberOfGuests()));
             }
 
-            // Add a condition to check if the apartment is booked on the specified dates
+//            if (searchRequest.getAvailableStartDate() != null && searchRequest.getAvailableEndDate() != null) {
+//                predicates.add(criteriaBuilder.isTrue(
+//                        criteriaBuilder.selectCase()
+//                        .when(criteriaBuilder.isNotNull(bookingJoin.get("id")),
+//                                criteriaBuilder.equal(criteriaBuilder.count(criteriaBuilder.not(criteriaBuilder.or(
+//                                criteriaBuilder.lessThan(bookingJoin.get("checkOutDate"), searchRequest.getAvailableStartDate()),
+//                                criteriaBuilder.greaterThan(bookingJoin.get("checkInDate"), searchRequest.getAvailableEndDate()))
+//                        )), criteriaBuilder.literal(0))).otherwise(criteriaBuilder.literal(true)).as(Boolean.class)
+//                        )
+//                );
+//            }
+
+            // magic :)
             if (searchRequest.getAvailableStartDate() != null && searchRequest.getAvailableEndDate() != null) {
-                predicates.add(criteriaBuilder.and(
-                        criteriaBuilder.isNotNull(bookingJoin.get("id")),
+                // Subquery for checking bookings
+                Subquery<Integer> subquery = query.subquery(Integer.class);
+                Root<Booking> subRoot = subquery.from(Booking.class);
+                subquery.select(criteriaBuilder.literal(1));
+                subquery.where(
                         criteriaBuilder.and(
-                                // [checkInDate, checkOutDate] vs [getAvailableStartDate, getAvailableEndDate]
-                                /*
-                                  if (checkInDate > getAvailableEndDate) => (-oo, getAvailableEndDate] ... (checkInDate, +oo)
-                                  if (checkOutDate < getAvailableStartDate) => (-oo, checkOutDate) ... [getAvailableStartDate, +oo)
-                                 */
-                                criteriaBuilder.lessThan(bookingJoin.get("checkOutDate"), searchRequest.getAvailableStartDate()),
-                                criteriaBuilder.greaterThan(bookingJoin.get("checkInDate"), searchRequest.getAvailableEndDate())
+                                criteriaBuilder.equal(root.get("id"), subRoot.get("apartment").get("id")),
+                                criteriaBuilder.greaterThanOrEqualTo(subRoot.get("checkOutDate"), searchRequest.getAvailableStartDate()),
+                                criteriaBuilder.lessThanOrEqualTo(subRoot.get("checkInDate"), searchRequest.getAvailableEndDate())
                         )
-                ));
+                );
+
+                predicates.add(criteriaBuilder.not(criteriaBuilder.exists(subquery)));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
