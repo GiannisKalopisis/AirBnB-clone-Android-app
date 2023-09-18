@@ -109,9 +109,6 @@ public class SearchService {
 
             query.distinct(true);
 
-            // Create a join between Apartment and Booking
-            Join<Apartment, Booking> bookingJoin = root.join("bookings", JoinType.LEFT);
-
             if (searchRequest.getDistrict() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("district"), searchRequest.getDistrict()));
             }
