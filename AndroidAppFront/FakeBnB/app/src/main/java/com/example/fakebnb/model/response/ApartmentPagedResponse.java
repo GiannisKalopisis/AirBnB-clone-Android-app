@@ -1,6 +1,5 @@
 package com.example.fakebnb.model.response;
 
-import com.example.fakebnb.model.MessageModel;
 import com.example.fakebnb.model.RentalModel;
 import com.google.gson.annotations.SerializedName;
 

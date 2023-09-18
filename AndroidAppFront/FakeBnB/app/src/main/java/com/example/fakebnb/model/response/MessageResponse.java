@@ -1,11 +1,9 @@
 package com.example.fakebnb.model.response;
 
 import com.example.fakebnb.model.MessageModel;
-import com.example.fakebnb.model.OverviewChatModel;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.List;
 
 public class MessageResponse implements Serializable {

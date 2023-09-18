@@ -17,9 +17,9 @@ import java.util.List;
 
 public class ImageDeleteAdapter extends RecyclerView.Adapter<ImageDeleteAdapter.ImageViewHolder> {
 
-    private List<Bitmap> imageBitmapList;
-    private List<Long> imageIds;
-    private List<Long> deletedImageIds;
+    private final List<Bitmap> imageBitmapList;
+    private final List<Long> imageIds;
+    private final List<Long> deletedImageIds;
 
     public ImageDeleteAdapter(List<Bitmap> imageBitmapList) {
         this.imageBitmapList = imageBitmapList;

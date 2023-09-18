@@ -17,4 +17,7 @@ public interface ImageAPI {
 
     @GET("/app/image/{apartmentId}")
     Call<ApartmentImageIdsResponse> getApartmentImageIds(@Path(value = "apartmentId") Long apartmentId);
+
+    @GET("/app/image/single/{apartmentId}")
+    Call<ResponseBody> getSingleApartmentImage(@Path(value = "apartmentId") Long apartmentId);
 }

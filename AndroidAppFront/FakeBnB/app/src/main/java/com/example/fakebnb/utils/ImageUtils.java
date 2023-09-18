@@ -1,7 +1,6 @@
 package com.example.fakebnb.utils;
 
 import android.graphics.Bitmap;
-import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;

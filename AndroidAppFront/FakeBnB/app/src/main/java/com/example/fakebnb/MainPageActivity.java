@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.Callbacks.SingleRentalImageCallback;
 import com.example.fakebnb.adapter.MainPageRentalAdapter;
 import com.example.fakebnb.enums.RentalType;
 import com.example.fakebnb.enums.RoleName;
@@ -88,10 +88,11 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     private boolean searchIsOn = false, isFirstSearch = true;
 
     // pagination
-    private ArrayList<RentalMainPageModel> rentals = new ArrayList<>();
-    private MainPageRentalAdapter rentalAdapter = new MainPageRentalAdapter(this, rentals);
+    private final ArrayList<RentalMainPageModel> rentals = new ArrayList<>();
+    private final MainPageRentalAdapter rentalAdapter = new MainPageRentalAdapter(this, rentals);
     private boolean isLoading = false, isLastPage = false;
-    private int currentPage = 0, size = 5; // Keeps track of the current page
+    private int currentPage = 0;
+    private final int size = 5; // Keeps track of the current page
 
 
     @Override
@@ -212,7 +213,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) rentalsRecyclerView.getLayoutManager();
-                int visibleItemCount = layoutManager.getChildCount();
+                int visibleItemCount = Objects.requireNonNull(layoutManager).getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
@@ -265,26 +266,23 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
     @SuppressLint("SetTextI18n")
     public void searchFieldsButtonListener() {
-        searchFieldsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (notAllSearchFieldsCompleted()) {
-                    Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Toast.makeText(view.getContext(), "Pressed SEARCH BUTTON", Toast.LENGTH_SHORT).show();
-                isSearchFieldsLayoutVisible = false;
-                searchFieldsLayout.setVisibility(View.GONE);
-                currentPage = 0;
-                searchIsOn = true;
-                rentInfoMessage.setVisibility(View.GONE);
-                rentalsTextView.setText("Top Search Results");
-                homePageButton.setVisibility(View.VISIBLE);
-                rentals.clear();
-                rentalAdapter.notifyDataSetChanged();
-                isFirstSearch = true;
-                fetchSearchRentals();
+        searchFieldsButton.setOnClickListener(view -> {
+            if (notAllSearchFieldsCompleted()) {
+                Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
+                return;
             }
+            Toast.makeText(view.getContext(), "Pressed SEARCH BUTTON", Toast.LENGTH_SHORT).show();
+            isSearchFieldsLayoutVisible = false;
+            searchFieldsLayout.setVisibility(View.GONE);
+            currentPage = 0;
+            searchIsOn = true;
+            rentInfoMessage.setVisibility(View.GONE);
+            rentalsTextView.setText("Top Search Results");
+            homePageButton.setVisibility(View.VISIBLE);
+            rentals.clear();
+            rentalAdapter.notifyDataSetChanged();
+            isFirstSearch = true;
+            fetchSearchRentals();
         });
     }
 
@@ -305,17 +303,27 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                                 searchRentalResponseList = response.body().getObject().getContent();
                                 isLastPage = response.body().getObject().isLast();
                                 if (isFirstSearch) {
-                                    rentals.clear();
-                                    rentalAdapter.notifyDataSetChanged();
+                                    rentalAdapter.deleteRentals();
                                     isFirstSearch = false;
                                 }
                                 if (searchRentalResponseList != null && !searchRentalResponseList.isEmpty()) {
                                     for (SearchRentalModel searchRentalModel : searchRentalResponseList) {
-                                        rentals.add(new RentalMainPageModel(searchRentalModel.getDescription(),
+                                        rentalAdapter.addNewRental(new RentalMainPageModel(searchRentalModel.getDescription(),
                                                 searchRentalModel.getDistrict() + ", " + searchRentalModel.getCity(),
                                                 searchRentalModel.getTotalCost() + " €",
                                                 searchRentalModel.getAvgRating().floatValue(),
                                                 searchRentalModel.getId()));
+                                        getSingleRentalImage(searchRentalModel.getId(), new SingleRentalImageCallback() {
+                                            @Override
+                                            public void onImageLoaded(Bitmap rentalImageBitmap) {
+                                                rentalAdapter.addNewRentalSingleImage(searchRentalModel.getId(), rentalImageBitmap);
+                                            }
+
+                                            @Override
+                                            public void onError(String errorMessage) {
+                                                Toast.makeText(MainPageActivity.this, "Error while downloading image: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                                     }
                                 }
                                 rentalAdapter.notifyDataSetChanged();
@@ -338,6 +346,33 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
         currentPage++;
         isLoading = false;
+    }
+
+    private void getSingleRentalImage(Long rentalId, SingleRentalImageCallback callback) {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getSingleApartmentImage(rentalId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap rentalImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            if (rentalImageBitmap != null) {
+                                callback.onImageLoaded(rentalImageBitmap);
+                            } else {
+                                callback.onError("Couldn't process user image");
+                            }
+                        } else {
+                            callback.onError("Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        callback.onError("Couldn't get user image: " + t.getMessage());
+                    }
+                });
     }
 
     private SearchRequest createSearchRequest() {
@@ -368,21 +403,11 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
         if (isSearchFieldsLayoutVisible) {
             // Hide the search fields layout with animation
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    searchFieldsLayout.setVisibility(View.GONE);
-                }
-            }, 100); // Adjust the delay time as needed
+            new Handler().postDelayed(() -> searchFieldsLayout.setVisibility(View.GONE), 100); // Adjust the delay time as needed
             isSearchFieldsLayoutVisible = false;
         } else {
             // Show the search fields layout with animation
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    searchFieldsLayout.setVisibility(View.VISIBLE);
-                }
-            }, 100); // Adjust the delay time as needed
+            new Handler().postDelayed(() -> searchFieldsLayout.setVisibility(View.VISIBLE), 100); // Adjust the delay time as needed
             isSearchFieldsLayoutVisible = true;
         }
     }
@@ -390,79 +415,63 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     private void onDatesClicked() {
         Log.d(TAG, "onDatesClicked: started");
 
-        checkInDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Calendar c = Calendar.getInstance();
+        checkInDate.setOnClickListener(v -> {
+            final Calendar c = Calendar.getInstance();
 
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        // on below line we are passing context.
-                        MainPageActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
-                                checkInDate.setText(formattedDate);
-                            }
-                        },
-                        year, month, day);
-                // not allow older dates to be selected
-                datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
-                // display date picker dialog.
-                datePickerDialog.show();
-            }
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    // on below line we are passing context.
+                    MainPageActivity.this,
+                    (view, year1, monthOfYear, dayOfMonth) -> {
+                        String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year1, (monthOfYear + 1), dayOfMonth);
+                        checkInDate.setText(formattedDate);
+                    },
+                    year, month, day);
+            // not allow older dates to be selected
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            // display date picker dialog.
+            datePickerDialog.show();
         });
 
-        checkOutDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        checkOutDate.setOnClickListener(v -> {
 
-                if (checkInDate.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final Calendar c = Calendar.getInstance();
-
-                // Get the selected check-in date from startDateEditText and parse it to Calendar.
-                String checkInDateText = checkInDate.getText().toString();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                try {
-                    Date checkInDate = dateFormat.parse(checkInDateText);
-                    c.setTime(Objects.requireNonNull(checkInDate));
-                    c.add(Calendar.DAY_OF_MONTH, 1);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        // on below line we are passing context.
-                        MainPageActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
-                                checkOutDate.setText(formattedDate);
-                            }
-                        },
-                        year, month, day);
-                // not allow older dates to be selected
-                datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
-                // display date picker dialog.
-                datePickerDialog.show();
+            if (checkInDate.getText().toString().equals("")) {
+                Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            final Calendar c = Calendar.getInstance();
+
+            // Get the selected check-in date from startDateEditText and parse it to Calendar.
+            String checkInDateText = checkInDate.getText().toString();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            try {
+                Date checkInDate = dateFormat.parse(checkInDateText);
+                c.setTime(Objects.requireNonNull(checkInDate));
+                c.add(Calendar.DAY_OF_MONTH, 1);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    // on below line we are passing context.
+                    MainPageActivity.this,
+                    (view, year12, monthOfYear, dayOfMonth) -> {
+                        String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year12, (monthOfYear + 1), dayOfMonth);
+                        checkOutDate.setText(formattedDate);
+                    },
+                    year, month, day);
+            // not allow older dates to be selected
+            datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
+            // display date picker dialog.
+            datePickerDialog.show();
         });
     }
 
@@ -572,47 +581,35 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     private void homeButtonClickListener() {
         Log.d(TAG, "homeButtonClickListener: started");
 
-        homePageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(MainPageActivity.this, "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
-                searchIsOn = false;
-                isFirstSearch = true;
-                NavigationUtils.goToMainPage(MainPageActivity.this, userId, jwtToken, roles);
-            }
+        homePageButton.setOnClickListener(view -> {
+            Toast.makeText(MainPageActivity.this, "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
+            searchIsOn = false;
+            isFirstSearch = true;
+            NavigationUtils.goToMainPage(MainPageActivity.this, userId, jwtToken, roles);
         });
     }
 
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToChatPage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
+        chatButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToChatPage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToProfilePage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
-            }
+        profileButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToProfilePage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: pressed role button");
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
+        roleButton.setOnClickListener(view -> {
+            Log.d(TAG, "onClick: pressed role button");
+            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    NavigationUtils.goToHostMainPage(MainPageActivity.this, userId, jwtToken, roles);
-                } else {
-                    Toast.makeText(MainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
-                }
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                NavigationUtils.goToHostMainPage(MainPageActivity.this, userId, jwtToken, roles);
+            } else {
+                Toast.makeText(MainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }

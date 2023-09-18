@@ -46,10 +46,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.MultipartBody.Part;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -70,7 +67,6 @@ public class RegisterActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private String imagePath;
     private Bitmap imageBitmap;
-    private Part imagePart;
     /**
      * Variables for MULTIPLE IMAGES
      */
@@ -81,7 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     // Permissions for accessing the storage
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_MEDIA_IMAGES
     };
 
@@ -95,9 +91,6 @@ public class RegisterActivity extends AppCompatActivity {
         initView();
         resetWarnVisibility();
 
-        /**
-         * Variables for MULTIPLE IMAGES
-         */
 //        imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
 //        imagesRecyclerView = findViewById(R.id.imagesRecyclerView);
 //        imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -158,81 +151,77 @@ public class RegisterActivity extends AppCompatActivity {
     private void registerButtonOnClickListener() {
         Log.d(TAG, "registerButtonOnClickListener: Started");
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                resetWarnVisibility();
+        registerButton.setOnClickListener(view -> {
+            resetWarnVisibility();
 
-                // Serialize the object to JSON
-                Gson gson = new Gson();
-                UserRegisterModel userRegisterModel = setUserRegisterModel();
+            // Serialize the object to JSON
+            Gson gson = new Gson();
+            UserRegisterModel userRegisterModel = setUserRegisterModel();
 
-                if (!initRegister()) {
-                    if (!confirmPasswordEditText.getText().toString().equals(passwordEditText.getText().toString())) {
-                        Toast.makeText(RegisterActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    Toast.makeText(RegisterActivity.this, "Must fill all fields", Toast.LENGTH_SHORT).show();
+            if (!initRegister()) {
+                if (!confirmPasswordEditText.getText().toString().equals(passwordEditText.getText().toString())) {
+                    Toast.makeText(RegisterActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                Toast.makeText(RegisterActivity.this, "Must fill all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                MultipartBody.Part imagePart = ImageUtils.getImagePart(imageBitmap);
+            Part imagePart = ImageUtils.getImagePart(imageBitmap);
 
-                RestClient restClient = new RestClient(null);
-                UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
-                Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(userRegisterModel));
+            RestClient restClient = new RestClient(null);
+            UserRegAPI userRegAPI = restClient.getClient().create(UserRegAPI.class);
+            Log.d(TAG, "userRegisterModel.toString(): " + gson.toJson(userRegisterModel));
 
-                userRegAPI.registerUser(gson.toJson(userRegisterModel), imagePart)
-                        .enqueue(new Callback<UserRegisterModel>() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
-                                if (response.isSuccessful()) {
-                                    Toast.makeText(RegisterActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
-                                    Log.d(TAG, "onResponse: " + response.body());
-                                    Intent login_intent = new Intent(getApplicationContext(), LoginActivity.class);
-                                    startActivity(login_intent);
-                                } else {
-                                    if (response.code() == HttpURLConnection.HTTP_CONFLICT){
-                                        String errorBodyString;
-                                        JSONObject errorObject;
-                                        try {
-                                            errorBodyString = Objects.requireNonNull(response.errorBody()).string();
-                                            errorObject = new JSONObject(errorBodyString);
-                                        } catch (IOException | JSONException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                        String errorMessage = errorObject.optString("message");
-
-                                        if (errorMessage.equals("A user with the same username already exists")) {
-                                            Toast.makeText(RegisterActivity.this, "A user with the same username already exists", Toast.LENGTH_SHORT).show();
-                                            usernameWarn.setText("Username already exists");
-                                            usernameWarn.setVisibility(View.VISIBLE);
-                                        } else if (errorMessage.equals("A user with the same email already exists")) {
-                                            Toast.makeText(RegisterActivity.this, "A user with the same email already exists", Toast.LENGTH_SHORT).show();
-                                            emailWarn.setText("Email already exists");
-                                            emailWarn.setVisibility(View.VISIBLE);
-                                        }
-                                    } else {
-                                        Toast.makeText(RegisterActivity.this, "Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
-                                        Log.d(TAG, "onResponse: " + response.errorBody());
+            userRegAPI.registerUser(gson.toJson(userRegisterModel), imagePart)
+                    .enqueue(new Callback<UserRegisterModel>() {
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(RegisterActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "onResponse: " + response.body());
+                                Intent login_intent = new Intent(getApplicationContext(), LoginActivity.class);
+                                startActivity(login_intent);
+                            } else {
+                                if (response.code() == HttpURLConnection.HTTP_CONFLICT){
+                                    String errorBodyString;
+                                    JSONObject errorObject;
+                                    try {
+                                        errorBodyString = Objects.requireNonNull(response.errorBody()).string();
+                                        errorObject = new JSONObject(errorBodyString);
+                                    } catch (IOException | JSONException e) {
+                                        throw new RuntimeException(e);
                                     }
+                                    String errorMessage = errorObject.optString("message");
+
+                                    if (errorMessage.equals("A user with the same username already exists")) {
+                                        Toast.makeText(RegisterActivity.this, "A user with the same username already exists", Toast.LENGTH_SHORT).show();
+                                        usernameWarn.setText("Username already exists");
+                                        usernameWarn.setVisibility(View.VISIBLE);
+                                    } else if (errorMessage.equals("A user with the same email already exists")) {
+                                        Toast.makeText(RegisterActivity.this, "A user with the same email already exists", Toast.LENGTH_SHORT).show();
+                                        emailWarn.setText("Email already exists");
+                                        emailWarn.setVisibility(View.VISIBLE);
+                                    }
+                                } else {
+                                    Toast.makeText(RegisterActivity.this, "Couldn't register. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "onResponse: " + response.errorBody());
                                 }
                             }
+                        }
 
-                            @Override
-                            public void onFailure(@NonNull Call<UserRegisterModel> call, @NonNull Throwable t) {
-                                Toast.makeText(RegisterActivity.this, "Unexpected error in backend. Please try later.", Toast.LENGTH_SHORT).show();
-                                Logger.getLogger(RegisterActivity.class.getName()).log(Level.SEVERE, "Error in Register occurred!", t);
-                                Log.d(TAG, "onFailure: " + t.getMessage());
-                            }
-                        });
-            }
+                        @Override
+                        public void onFailure(@NonNull Call<UserRegisterModel> call, @NonNull Throwable t) {
+                            Toast.makeText(RegisterActivity.this, "Unexpected error in backend. Please try later.", Toast.LENGTH_SHORT).show();
+                            Logger.getLogger(RegisterActivity.class.getName()).log(Level.SEVERE, "Error in Register occurred!", t);
+                            Log.d(TAG, "onFailure: " + t.getMessage());
+                        }
+                    });
         });
     }
 
     private UserRegisterModel setUserRegisterModel() {
-        // TODO: must change and send data to backend
 
         Log.d(TAG, "setUserRegisterModel: Started");
 
@@ -264,7 +253,6 @@ public class RegisterActivity extends AppCompatActivity {
         setTextWatcherLastName();
         setTextWatcherEmail();
         setTextWatcherPhone();
-        setTextWatcherPhoto();
     }
 
     private void setTextWatcherUsername() {
@@ -424,28 +412,6 @@ public class RegisterActivity extends AppCompatActivity {
         phoneNumberEditText.addTextChangedListener(textWatcher);
     }
 
-    private void setTextWatcherPhoto() {
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {}
-
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (imageBitmap == null) {
-                    photoWarn.setText("Enter your photo");
-                    photoWarn.setVisibility(View.VISIBLE);
-                } else {
-                    photoWarn.setVisibility(View.GONE);
-                }
-            }
-        };
-//        imageView.addTextChangedListener(textWatcher);
-    }
-
     private boolean initRegister() {
         Log.d(TAG, "initRegister: Started");
 
@@ -577,9 +543,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         registerButton = findViewById(R.id.registerButton);
 
-        /**
-         * Necessary for images
-         */
         selectImageButton = findViewById(R.id.selectImageButton);
         imageView = findViewById(R.id.imageView);
 

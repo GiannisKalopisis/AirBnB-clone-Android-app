@@ -18,7 +18,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -52,7 +51,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
@@ -125,15 +123,14 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     private String imagePath;
     private Bitmap imageBitmap;
     private List<Bitmap> imageBitmapList;
-    private List<Bitmap> newImages = new ArrayList<>();
     private RecyclerView imagesRecyclerView;
     private ImageDeleteAdapter imageAdapter;
 
-    private List<Long> imageIds = new ArrayList<>();
+    private final List<Long> imageIds = new ArrayList<>();
 
     // Permissions for accessing the storage
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_MEDIA_IMAGES
     };
 
@@ -166,9 +163,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         modificationButtonsClickListener();
         savePlaceChangesButton.setVisibility(View.GONE);
 
-        /**
-         * Variables for MULTIPLE IMAGES
-         */
         imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
         imageAdapter = new ImageDeleteAdapter(imageBitmapList);
         imagesRecyclerView = findViewById(R.id.modifyImageRecyclerView);
@@ -234,17 +228,14 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                 if (ContextCompat.checkSelfPermission(PlaceModificationPageActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                                     ActivityCompat.requestPermissions(PlaceModificationPageActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
                                 } else {
-                                    modifyPlaceMapView.getMapAsync(new OnMapReadyCallback() {
-                                        @Override
-                                        public void onMapReady(@NonNull GoogleMap map) {
-                                            googleMap = map; // Store the GoogleMap object in the global variable
-                                            isMapReady = true; // Mark the map as ready
-                                            googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                                            googleMap.getUiSettings().setZoomControlsEnabled(true);
-                                            // Check if an address is available and show it on the map
-                                            if (addressToShowOnMap != null) {
-                                                showAddressOnMap(addressToShowOnMap);
-                                            }
+                                    modifyPlaceMapView.getMapAsync(map -> {
+                                        googleMap = map; // Store the GoogleMap object in the global variable
+                                        isMapReady = true; // Mark the map as ready
+                                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                        googleMap.getUiSettings().setZoomControlsEnabled(true);
+                                        // Check if an address is available and show it on the map
+                                        if (addressToShowOnMap != null) {
+                                            showAddressOnMap(addressToShowOnMap);
                                         }
                                     });
                                 }
@@ -352,16 +343,13 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Location permission granted, initialize the map
-                modifyPlaceMapView.getMapAsync(new OnMapReadyCallback() {
-                    @Override
-                    public void onMapReady(@NonNull GoogleMap map) {
-                        googleMap = map;
-                        isMapReady = true;
-                        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                        googleMap.getUiSettings().setZoomControlsEnabled(true);
-                        if (addressToShowOnMap != null) {
-                            showAddressOnMap(addressToShowOnMap);
-                        }
+                modifyPlaceMapView.getMapAsync(map -> {
+                    googleMap = map;
+                    isMapReady = true;
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    googleMap.getUiSettings().setZoomControlsEnabled(true);
+                    if (addressToShowOnMap != null) {
+                        showAddressOnMap(addressToShowOnMap);
                     }
                 });
             } else {
@@ -786,7 +774,7 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 }
             }
         };
-        modifyPlaceStartDate.addTextChangedListener(textWatcher);;
+        modifyPlaceStartDate.addTextChangedListener(textWatcher);
     }
 
     private void setTextWatcherEndDate() {
@@ -1237,79 +1225,63 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
     private void onDatesClicked() {
         Log.d(TAG, "onDatesClicked: started");
 
-        modifyPlaceStartDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Calendar c = Calendar.getInstance();
+        modifyPlaceStartDate.setOnClickListener(v -> {
+            final Calendar c = Calendar.getInstance();
 
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        // on below line we are passing context.
-                        PlaceModificationPageActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
-                                modifyPlaceStartDate.setText(formattedDate);
-                            }
-                        },
-                        year, month, day);
-                // not allow older dates to be selected
-                datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
-                // display date picker dialog.
-                datePickerDialog.show();
-            }
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    // on below line we are passing context.
+                    PlaceModificationPageActivity.this,
+                    (view, year1, monthOfYear, dayOfMonth) -> {
+                        String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year1, (monthOfYear + 1), dayOfMonth);
+                        modifyPlaceStartDate.setText(formattedDate);
+                    },
+                    year, month, day);
+            // not allow older dates to be selected
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            // display date picker dialog.
+            datePickerDialog.show();
         });
 
-        modifyPlaceEndDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        modifyPlaceEndDate.setOnClickListener(v -> {
 
-                if (modifyPlaceStartDate.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final Calendar c = Calendar.getInstance();
-
-                // Get the selected check-in date from startDateEditText and parse it to Calendar.
-                String checkInDateText = modifyPlaceStartDate.getText().toString();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                try {
-                    Date checkInDate = dateFormat.parse(checkInDateText);
-                    c.setTime(Objects.requireNonNull(checkInDate));
-                    c.add(Calendar.DAY_OF_MONTH, 1);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        // on below line we are passing context.
-                        PlaceModificationPageActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @SuppressLint("SetTextI18n")
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, (monthOfYear + 1), dayOfMonth);
-                                modifyPlaceEndDate.setText(formattedDate);
-                            }
-                        },
-                        year, month, day);
-                // not allow older dates to be selected
-                datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
-                // display date picker dialog.
-                datePickerDialog.show();
+            if (modifyPlaceStartDate.getText().toString().equals("")) {
+                Toast.makeText(getApplicationContext(), "Please select check in date first", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            final Calendar c = Calendar.getInstance();
+
+            // Get the selected check-in date from startDateEditText and parse it to Calendar.
+            String checkInDateText = modifyPlaceStartDate.getText().toString();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            try {
+                Date checkInDate = dateFormat.parse(checkInDateText);
+                c.setTime(Objects.requireNonNull(checkInDate));
+                c.add(Calendar.DAY_OF_MONTH, 1);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    // on below line we are passing context.
+                    PlaceModificationPageActivity.this,
+                    (view, year12, monthOfYear, dayOfMonth) -> {
+                        String formattedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year12, (monthOfYear + 1), dayOfMonth);
+                        modifyPlaceEndDate.setText(formattedDate);
+                    },
+                    year, month, day);
+            // not allow older dates to be selected
+            datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
+            // display date picker dialog.
+            datePickerDialog.show();
         });
     }
 
@@ -1505,47 +1477,44 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
         });
 
-        deletePlaceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // delete place from database
-                resetWarnVisibility();
-                RestClient restClient = new RestClient(jwtToken);
-                ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
+        deletePlaceButton.setOnClickListener(view -> {
+            // delete place from database
+            resetWarnVisibility();
+            RestClient restClient = new RestClient(jwtToken);
+            ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
 
-                apartmentAPI.deleteApartment(rentalId)
-                        .enqueue(new Callback<ApartmentResponse>() {
-                            @Override
-                            public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
-                                if (response.isSuccessful()) {
-                                    // Handle successful response
-                                    ApartmentResponse apartmentResponse = response.body();
-                                    if (apartmentResponse != null) {
-                                        Toast.makeText(PlaceModificationPageActivity.this, "Rental deleted correctly", Toast.LENGTH_SHORT).show();
-                                        Log.d("API_CALL", "UpdateApartment successful");
-                                        NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
-                                    } else {
-                                        // Handle unsuccessful response
-                                        Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
-                                        Log.d("API_CALL", "UpdateApartment failed");
-                                    }
+            apartmentAPI.deleteApartment(rentalId)
+                    .enqueue(new Callback<ApartmentResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<ApartmentResponse> call, @NonNull Response<ApartmentResponse> response) {
+                            if (response.isSuccessful()) {
+                                // Handle successful response
+                                ApartmentResponse apartmentResponse = response.body();
+                                if (apartmentResponse != null) {
+                                    Toast.makeText(PlaceModificationPageActivity.this, "Rental deleted correctly", Toast.LENGTH_SHORT).show();
+                                    Log.d("API_CALL", "UpdateApartment successful");
+                                    NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                                 } else {
                                     // Handle unsuccessful response
-                                    Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
                                     Log.d("API_CALL", "UpdateApartment failed");
                                 }
+                            } else {
+                                // Handle unsuccessful response
+                                Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
+                                Log.d("API_CALL", "UpdateApartment failed");
                             }
+                        }
 
-                            @Override
-                            public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
-                                // Handle failure
-                                Toast.makeText(PlaceModificationPageActivity.this,
-                                        "Failed to communicate with server. Couldn't delete rental.",
-                                        Toast.LENGTH_SHORT).show();
-                                Log.e("API_CALL", "Error: " + t.getMessage());
-                            }
-                        });
-            }
+                        @Override
+                        public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
+                            // Handle failure
+                            Toast.makeText(PlaceModificationPageActivity.this,
+                                    "Failed to communicate with server. Couldn't delete rental.",
+                                    Toast.LENGTH_SHORT).show();
+                            Log.e("API_CALL", "Error: " + t.getMessage());
+                        }
+                    });
         });
     }
 

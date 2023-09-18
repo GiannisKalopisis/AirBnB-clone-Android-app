@@ -56,4 +56,5 @@
     <string name="rental_type">Rental type</string>
     <string name="photos_of_rental">Photos of rental</string>
     <string name="add_image">Add Image</string>
+    <string name="image_of_rental">Image of rental</string>
 </resources>

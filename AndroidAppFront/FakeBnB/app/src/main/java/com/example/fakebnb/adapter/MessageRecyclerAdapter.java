@@ -18,7 +18,7 @@ public class MessageRecyclerAdapter extends RecyclerView.Adapter<MessageRecycler
 
     private String senderUsername;
     private String receiverUsername;
-    private ArrayList<MessageModel> messageModel;
+    private final ArrayList<MessageModel> messageModel;
 
     public MessageRecyclerAdapter(String senderUsername,
                                   String receiverUsername) {
@@ -39,8 +39,7 @@ public class MessageRecyclerAdapter extends RecyclerView.Adapter<MessageRecycler
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_message_recycler_view, parent, false);
-        ViewHolder holder = new ViewHolder(view);
-        return holder;
+        return new ViewHolder(view);
     }
 
     @Override

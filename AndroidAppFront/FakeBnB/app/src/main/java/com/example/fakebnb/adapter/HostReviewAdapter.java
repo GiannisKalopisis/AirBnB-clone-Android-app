@@ -11,13 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.R;
 import com.example.fakebnb.model.BookingReviewModel;
-import com.example.fakebnb.model.HostReviewModel;
 
 import java.util.ArrayList;
 
 public class HostReviewAdapter extends RecyclerView.Adapter<HostReviewAdapter.ViewHolder>{
 
-    private ArrayList<BookingReviewModel> reviews;
+    private final ArrayList<BookingReviewModel> reviews;
 
     public HostReviewAdapter() {
         this.reviews = new ArrayList<>();
@@ -27,8 +26,7 @@ public class HostReviewAdapter extends RecyclerView.Adapter<HostReviewAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.host_review, parent, false);
-        ViewHolder holder = new ViewHolder(view);
-        return holder;
+        return new ViewHolder(view);
     }
 
     @Override

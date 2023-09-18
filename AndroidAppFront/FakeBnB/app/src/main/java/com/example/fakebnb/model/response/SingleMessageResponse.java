@@ -1,6 +1,5 @@
 package com.example.fakebnb.model.response;
 
-import com.example.fakebnb.model.MessageModel;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;

@@ -1,9 +1,10 @@
 package com.example.fakebnb.adapter;
 
-import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -15,23 +16,26 @@ import com.example.fakebnb.R;
 import com.example.fakebnb.model.HostRentalMainPageModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPageRentalAdapter.ViewHolder>{
 
     private final HostMainPageRecyclerViewInterface hostMainPageRecyclerViewInterface;
-    private ArrayList<HostRentalMainPageModel> rentalModel;
+    private final ArrayList<HostRentalMainPageModel> rentalModel;
+    private final Map<Long, Bitmap> rentalImages;     // <chatId, rentalImage>
 
     public HostMainPageRentalAdapter(HostMainPageRecyclerViewInterface hostMainPageRecyclerViewInterface, ArrayList<HostRentalMainPageModel> rentalModel) {
         this.hostMainPageRecyclerViewInterface = hostMainPageRecyclerViewInterface;
         this.rentalModel = rentalModel;
+        this.rentalImages = new HashMap<>();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.host_page_rental, parent, false);
-        ViewHolder holder = new ViewHolder(view, hostMainPageRecyclerViewInterface);
-        return holder;
+        return new ViewHolder(view, hostMainPageRecyclerViewInterface);
     }
 
     @Override
@@ -39,6 +43,7 @@ public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPage
         holder.descriptionTextView.setText(rentalModel.get(position).getDescription());
         holder.areaTextView.setText(rentalModel.get(position).getArea());
         holder.ratingStars.setRating(rentalModel.get(position).getRating());
+        holder.rentalImageView.setImageBitmap(rentalImages.get(rentalModel.get(position).getRentalId()));
     }
 
     @Override
@@ -46,35 +51,37 @@ public class HostMainPageRentalAdapter extends RecyclerView.Adapter<HostMainPage
         return rentalModel.size();
     }
 
-    public void setRentalModel(ArrayList<HostRentalMainPageModel> rentalModel) {
-        this.rentalModel.addAll(rentalModel);
-        /* In case data come from a server and they change
-           you have to refresh them.
-         */
+    public void addNewRental(HostRentalMainPageModel hostRentalMainPageModel){
+        this.rentalModel.add(hostRentalMainPageModel);
+        notifyDataSetChanged();
+    }
+
+    public void addNewRentalSingleImage(Long rentalId, Bitmap image) {
+        this.rentalImages.put(rentalId, image);
         notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView descriptionTextView, areaTextView;
-        private RatingBar ratingStars;
+        private final TextView descriptionTextView;
+        private final TextView areaTextView;
+        private final RatingBar ratingStars;
+        private final ImageView rentalImageView;
 
         ViewHolder(View itemView, HostMainPageRecyclerViewInterface hostMainPageRecyclerViewInterface) {
             super(itemView);
             descriptionTextView = itemView.findViewById(R.id.hostRentalDescription);
             areaTextView = itemView.findViewById(R.id.hostRentalArea);
             ratingStars = itemView.findViewById(R.id.ratingBarHostRentalHomePage);
+            rentalImageView = itemView.findViewById(R.id.singleImageHostRentalView);
 
             // Set click listener for the item view
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (hostMainPageRecyclerViewInterface != null){
-                        int clickedPosition = getAdapterPosition();
-                        if (clickedPosition != RecyclerView.NO_POSITION) {
-                            Long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
-                            hostMainPageRecyclerViewInterface.onItemClick(rentalId);
-                        }
+            itemView.setOnClickListener(v -> {
+                if (hostMainPageRecyclerViewInterface != null){
+                    int clickedPosition = getAdapterPosition();
+                    if (clickedPosition != RecyclerView.NO_POSITION) {
+                        Long rentalId = rentalModel.get(clickedPosition).getRentalId(); // Get the rentalId of clicked item
+                        hostMainPageRecyclerViewInterface.onItemClick(rentalId);
                     }
                 }
             });

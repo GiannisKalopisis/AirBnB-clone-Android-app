@@ -10,7 +10,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,13 +21,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.fakebnb.Callbacks.SingleRentalImageCallback;
 import com.example.fakebnb.adapter.HostMainPageRentalAdapter;
 import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.HostRentalMainPageModel;
-import com.example.fakebnb.model.MessageModel;
 import com.example.fakebnb.model.RentalModel;
 import com.example.fakebnb.model.response.ApartmentPagedResponse;
-import com.example.fakebnb.model.response.ApartmentResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
 import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.ImageAPI;
@@ -37,9 +35,9 @@ import com.example.fakebnb.rest.UserRegAPI;
 import com.example.fakebnb.utils.NavigationUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import okhttp3.ResponseBody;
@@ -63,11 +61,12 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     private Button chatButton, profileButton, roleButton, addRentalButton;
 
     // Pagination variables
-    private ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
+    private final ArrayList<HostRentalMainPageModel> hostRentals = new ArrayList<>();
     private List<RentalModel> rentalsResponseList = new ArrayList<>();
-    private HostMainPageRentalAdapter rentalAdapter = new HostMainPageRentalAdapter(this, hostRentals);
+    private HostMainPageRentalAdapter rentalAdapter;
     private boolean isLoading = false, isLastPage = false;
-    private int currentPage = 0, size = 4; // Keeps track of the current page
+    private int currentPage = 0;
+    private final int size = 4; // Keeps track of the current page
 
 
     @Override
@@ -94,6 +93,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
         bottomBarClickListeners();
         addButtonClickListener();
 
+        rentalAdapter = new HostMainPageRentalAdapter(this, hostRentals);
         hostRentalsRecyclerView.setAdapter(rentalAdapter);
         hostRentalsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -200,7 +200,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) hostRentalsRecyclerView.getLayoutManager();
-                int visibleItemCount = layoutManager.getChildCount();
+                int visibleItemCount = Objects.requireNonNull(layoutManager).getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
@@ -217,10 +217,6 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     private void loadMoreData() {
         isLoading = true;
 
-        // Calculate the offset before fetching newer data
-        LinearLayoutManager layoutManager = (LinearLayoutManager) hostRentalsRecyclerView.getLayoutManager();
-        int lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
-
         RestClient restClient = new RestClient(jwtToken);
         ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
 
@@ -235,10 +231,21 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                                 isLastPage = response.body().getObject().isLast();
                                 if (rentalsResponseList != null) {
                                     for (RentalModel rental : rentalsResponseList) {
-                                        hostRentals.add(new HostRentalMainPageModel(rental.getDescription(),
-                                                                               rental.getDistrict() + ", " + rental.getCity(),
-                                                                                    rental.getAvgApartmentRating().floatValue(),
-                                                                                    rental.getId()));
+                                        rentalAdapter.addNewRental(new HostRentalMainPageModel(rental.getDescription(),
+                                                rental.getDistrict() + ", " + rental.getCity(),
+                                                rental.getAvgApartmentRating().floatValue(),
+                                                rental.getId()));
+                                        getSingleRentalImage(rental.getId(), new SingleRentalImageCallback() {
+                                            @Override
+                                            public void onImageLoaded(Bitmap rentalImageBitmap) {
+                                                rentalAdapter.addNewRentalSingleImage(rental.getId(), rentalImageBitmap);
+                                            }
+
+                                            @Override
+                                            public void onError(String errorMessage) {
+                                                Toast.makeText(HostMainPageActivity.this, "Error while downloading image: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                                     }
                                 }
                                 rentalAdapter.notifyDataSetChanged();
@@ -264,13 +271,37 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
         currentPage++;
     }
 
+    private void getSingleRentalImage(Long rentalId, SingleRentalImageCallback callback) {
+        RestClient restClient = new RestClient(jwtToken);
+        ImageAPI imageAPI = restClient.getClient().create(ImageAPI.class);
+
+        imageAPI.getSingleApartmentImage(rentalId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Bitmap rentalImageBitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            if (rentalImageBitmap != null) {
+                                callback.onImageLoaded(rentalImageBitmap);
+                            } else {
+                                callback.onError("Couldn't process user image");
+                            }
+                        } else {
+                            callback.onError("Couldn't get user image");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                        callback.onError("Couldn't get user image: " + t.getMessage());
+                    }
+                });
+    }
+
     private void addButtonClickListener() {
-        addRentalButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(HostMainPageActivity.this, "Add place button pressed", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToAddNewPlacePage(HostMainPageActivity.this, userId, jwtToken, roles);
-            }
+        addRentalButton.setOnClickListener(view -> {
+            Toast.makeText(HostMainPageActivity.this, "Add place button pressed", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToAddNewPlacePage(HostMainPageActivity.this, userId, jwtToken, roles);
         });
     }
 
@@ -296,33 +327,24 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
     private void bottomBarClickListeners() {
         Log.d(TAG, "bottomBarClickListeners: started");
 
-        chatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToChatPage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
-            }
+        chatButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToChatPage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
-        profileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
-                NavigationUtils.goToProfilePage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
-            }
+        profileButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
+            NavigationUtils.goToProfilePage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
-        roleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: role button pressed");
-                Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
+        roleButton.setOnClickListener(view -> {
+            Log.d(TAG, "onClick: role button pressed");
+            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
-                if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
-                    NavigationUtils.goToMainPage(HostMainPageActivity.this, userId, jwtToken, roles);
-                } else {
-                    Toast.makeText(HostMainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
-                }
+            if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
+                NavigationUtils.goToMainPage(HostMainPageActivity.this, userId, jwtToken, roles);
+            } else {
+                Toast.makeText(HostMainPageActivity.this, "Do not have another role in the app to change", Toast.LENGTH_SHORT).show();
             }
         });
     }

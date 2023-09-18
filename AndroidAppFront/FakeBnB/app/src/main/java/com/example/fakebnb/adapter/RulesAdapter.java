@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class RulesAdapter extends RecyclerView.Adapter<RulesAdapter.RuleViewHolder> {
 
-    private ArrayList<String> rules;
+    private final ArrayList<String> rules;
 
     public RulesAdapter(ArrayList<String> rules) {
         this.rules = rules;

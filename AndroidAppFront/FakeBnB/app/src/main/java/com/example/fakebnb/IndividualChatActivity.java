@@ -9,7 +9,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -65,13 +64,13 @@ public class IndividualChatActivity extends AppCompatActivity {
     private RoleName currentRole;
 
     // pagination
-    private ArrayList<MessageModel> messageModel = new ArrayList<>();
+    private final ArrayList<MessageModel> messageModel = new ArrayList<>();
     private String senderUsername, receiverUsername;
     private Long senderId, receiverId;
-    private MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter(senderUsername, receiverUsername);
+    private final MessageRecyclerAdapter messageRecyclerAdapter = new MessageRecyclerAdapter(senderUsername, receiverUsername);
 //    private boolean isLoading = false;
     private int currentPage = 0; // Keeps track of the current page
-    private int size = 20; // The number of items fetched per page
+    private final int size = 20; // The number of items fetched per page
     private int lastVisibleItem = 0;
     private boolean isLoading = false;
     private List<MessageModel> messageResponseList = new ArrayList<>();
@@ -80,7 +79,6 @@ public class IndividualChatActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        // TODO: a call to take the senderID(userID),sencerUsername,receiverID,receiverUsername
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_individual_chat);
 
@@ -263,7 +261,7 @@ public class IndividualChatActivity extends AppCompatActivity {
 
         // Calculate the offset before fetching newer data
         LinearLayoutManager layoutManager = (LinearLayoutManager) chat_recycler_view.getLayoutManager();
-        int lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
+        int lastVisibleItemPosition = Objects.requireNonNull(layoutManager).findLastCompletelyVisibleItemPosition();
 
         // Simulate fetching newer data from backend
         RestClient restClient = new RestClient(jwtToken);
@@ -352,16 +350,13 @@ public class IndividualChatActivity extends AppCompatActivity {
     }
 
     private void messageSendOnClickListener() {
-        message_send_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MessageRequest messageRequest = createMessageRequest();
-                chat_message_input.setText("");
-                if (messageRequest == null) {
-                    return;
-                }
-                sendMessageToUser(messageRequest);
+        message_send_btn.setOnClickListener(view -> {
+            MessageRequest messageRequest = createMessageRequest();
+            chat_message_input.setText("");
+            if (messageRequest == null) {
+                return;
             }
+            sendMessageToUser(messageRequest);
         });
     }
 
@@ -375,11 +370,6 @@ public class IndividualChatActivity extends AppCompatActivity {
     }
 
     private void backButtonOnClickListener() {
-        back_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
+        back_btn.setOnClickListener(view -> onBackPressed());
     }
 }
