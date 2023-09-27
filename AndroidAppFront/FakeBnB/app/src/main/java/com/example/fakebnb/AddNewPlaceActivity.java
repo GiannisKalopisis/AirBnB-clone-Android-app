@@ -819,6 +819,18 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     year, month, day);
             // not allow older dates to be selected
             datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+
+            if (!endDateEditText.getText().toString().isEmpty()) {
+                String checkOutDateText = endDateEditText.getText().toString();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                try {
+                    Date checkOutDate = dateFormat.parse(checkOutDateText);
+                    datePickerDialog.getDatePicker().setMaxDate(Objects.requireNonNull(checkOutDate).getTime() - 1000);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
             // display date picker dialog.
             datePickerDialog.show();
         });
