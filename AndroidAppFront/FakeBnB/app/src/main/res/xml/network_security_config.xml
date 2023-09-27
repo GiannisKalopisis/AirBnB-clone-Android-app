@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+        <debug-overrides>
+            <trust-anchors>
+                <!-- Add any self-signed certificates or custom CA certificates here (for testing) -->
+                <certificates src="@raw/androidclientcert" />
+            </trust-anchors>
+        </debug-overrides>
+    </base-config>
+</network-security-config>
