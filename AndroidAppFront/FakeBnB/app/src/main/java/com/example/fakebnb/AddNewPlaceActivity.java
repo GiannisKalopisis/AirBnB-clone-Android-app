@@ -379,6 +379,21 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         setTextWatcherLivingRooms();
         setTextWatcherArea();
     }
+    boolean isTyping = true;
+    final int TYPING_TIMEOUT = 2000; // 5 seconds timeout
+    final Handler timeoutHandler = new Handler();
+    final Runnable typingTimeout = new Runnable() {
+        public void run() {
+            //avoid triggering event when text is empty
+            isTyping = false;
+            new Handler(Looper.getMainLooper()).post(() -> {
+                addressToShowOnMap = concatAddressToShowOnMap();
+                if (isMapReady && googleMap != null) {
+                    showAddressOnMap(addressToShowOnMap);
+                }
+            });
+        }
+    };
 
     private void setTextWatcherAddress() {
         TextWatcher textWatcher = new TextWatcher() {
@@ -386,8 +401,18 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                timeoutHandler.removeCallbacks(typingTimeout);
 
+                if (!addPlaceAddressEditText.getText().toString().trim().isEmpty()) {
+                    // schedule the timeout
+                    timeoutHandler.postDelayed(typingTimeout, TYPING_TIMEOUT);
+
+                    if (!isTyping) {
+                        isTyping = true;
+                    }
+                }
+            }
             @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable editable) {
@@ -396,12 +421,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningAddress.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningAddress.setVisibility(View.GONE);
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        addressToShowOnMap = concatAddressToShowOnMap();
-                        if (isMapReady && googleMap != null) {
-                            showAddressOnMap(addressToShowOnMap);
-                        }
-                    });
                 }
             }
         };
@@ -414,7 +433,18 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                timeoutHandler.removeCallbacks(typingTimeout);
+
+                if (!addPlaceDistrictEditText.getText().toString().trim().isEmpty()) {
+                    // schedule the timeout
+                    timeoutHandler.postDelayed(typingTimeout, TYPING_TIMEOUT);
+
+                    if (!isTyping) {
+                        isTyping = true;
+                    }
+                }
+            }
 
             @SuppressLint("SetTextI18n")
             @Override
@@ -424,12 +454,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningDistrict.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningDistrict.setVisibility(View.GONE);
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        addressToShowOnMap = concatAddressToShowOnMap();
-                        if (isMapReady && googleMap != null) {
-                            showAddressOnMap(addressToShowOnMap);
-                        }
-                    });
                 }
             }
         };
@@ -442,7 +466,18 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                timeoutHandler.removeCallbacks(typingTimeout);
+
+                if (!addPlaceCityEditText.getText().toString().trim().isEmpty()) {
+                    // schedule the timeout
+                    timeoutHandler.postDelayed(typingTimeout, TYPING_TIMEOUT);
+
+                    if (!isTyping) {
+                        isTyping = true;
+                    }
+                }
+            }
 
             @SuppressLint("SetTextI18n")
             @Override
@@ -452,14 +487,10 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningCity.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningCity.setVisibility(View.GONE);
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        addressToShowOnMap = concatAddressToShowOnMap();
-                        if (isMapReady && googleMap != null) {
-                            showAddressOnMap(addressToShowOnMap);
-                        }
-                    });
                 }
             }
+
+
         };
         addPlaceCityEditText.addTextChangedListener(textWatcher);
     }
@@ -470,7 +501,18 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                timeoutHandler.removeCallbacks(typingTimeout);
+
+                if (!addPlaceCountryEditText.getText().toString().trim().isEmpty()) {
+                    // schedule the timeout
+                    timeoutHandler.postDelayed(typingTimeout, TYPING_TIMEOUT);
+
+                    if (!isTyping) {
+                        isTyping = true;
+                    }
+                }
+            }
 
             @SuppressLint("SetTextI18n")
             @Override
@@ -480,12 +522,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                     addPlaceWarningCountry.setVisibility(View.VISIBLE);
                 } else {
                     addPlaceWarningCountry.setVisibility(View.GONE);
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        addressToShowOnMap = concatAddressToShowOnMap();
-                        if (isMapReady && googleMap != null) {
-                            showAddressOnMap(addressToShowOnMap);
-                        }
-                    });
                 }
             }
         };

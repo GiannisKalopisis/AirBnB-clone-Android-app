@@ -12,6 +12,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -615,6 +617,22 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
         setTextWatcherArea();
     }
 
+    boolean isTyping = true;
+    final int TYPING_TIMEOUT = 2000; // 5 seconds timeout
+    final Handler timeoutHandler = new Handler();
+    final Runnable typingTimeout = new Runnable() {
+        public void run() {
+            //avoid triggering event when text is empty
+            isTyping = false;
+            new Handler(Looper.getMainLooper()).post(() -> {
+                addressToShowOnMap = concatAddressToShowOnMap();
+                if (isMapReady && googleMap != null) {
+                    showAddressOnMap(addressToShowOnMap);
+                }
+            });
+        }
+    };
+
     private void setTextWatcherAddress() {
         TextWatcher textWatcher = new TextWatcher() {
             @Override
@@ -625,7 +643,18 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                timeoutHandler.removeCallbacks(typingTimeout);
+
+                if (!modifyPlaceAddress.getText().toString().trim().isEmpty()) {
+                    // schedule the timeout
+                    timeoutHandler.postDelayed(typingTimeout, TYPING_TIMEOUT);
+
+                    if (!isTyping) {
+                        isTyping = true;
+                    }
+                }
+            }
 
             @SuppressLint("SetTextI18n")
             @Override
@@ -637,10 +666,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 } else {
                     modifyPlaceWarningAddress.setVisibility(View.GONE);
                     savePlaceChangesButton.setVisibility(View.VISIBLE);
-                    addressToShowOnMap = concatAddressToShowOnMap();
-                    if (isMapReady && googleMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
                 }
             }
         };
@@ -658,7 +683,16 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                timeoutHandler.removeCallbacks(typingTimeout);
 
+                if (!modifyPlaceDistrict.getText().toString().trim().isEmpty()) {
+                    // schedule the timeout
+                    timeoutHandler.postDelayed(typingTimeout, TYPING_TIMEOUT);
+
+                    if (!isTyping) {
+                        isTyping = true;
+                    }
+                }
             }
 
             @SuppressLint("SetTextI18n")
@@ -671,10 +705,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 } else {
                     modifyPlaceWarningDistrict.setVisibility(View.GONE);
                     savePlaceChangesButton.setVisibility(View.VISIBLE);
-                    addressToShowOnMap = concatAddressToShowOnMap();
-                    if (isMapReady && googleMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
                 }
             }
         };
@@ -692,7 +722,16 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                timeoutHandler.removeCallbacks(typingTimeout);
 
+                if (!modifyPlaceAddress.getText().toString().trim().isEmpty()) {
+                    // schedule the timeout
+                    timeoutHandler.postDelayed(typingTimeout, TYPING_TIMEOUT);
+
+                    if (!isTyping) {
+                        isTyping = true;
+                    }
+                }
             }
 
             @SuppressLint("SetTextI18n")
@@ -705,10 +744,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 } else {
                     modifyPlaceWarningCity.setVisibility(View.GONE);
                     savePlaceChangesButton.setVisibility(View.VISIBLE);
-                    addressToShowOnMap = concatAddressToShowOnMap();
-                    if (isMapReady && googleMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
                 }
             }
         };
@@ -726,7 +761,16 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                timeoutHandler.removeCallbacks(typingTimeout);
 
+                if (!modifyPlaceAddress.getText().toString().trim().isEmpty()) {
+                    // schedule the timeout
+                    timeoutHandler.postDelayed(typingTimeout, TYPING_TIMEOUT);
+
+                    if (!isTyping) {
+                        isTyping = true;
+                    }
+                }
             }
 
             @SuppressLint("SetTextI18n")
@@ -739,10 +783,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                 } else {
                     modifyPlaceWarningCountry.setVisibility(View.GONE);
                     savePlaceChangesButton.setVisibility(View.VISIBLE);
-                    addressToShowOnMap = concatAddressToShowOnMap();
-                    if (isMapReady && googleMap != null) {
-                        showAddressOnMap(addressToShowOnMap);
-                    }
                 }
             }
         };
