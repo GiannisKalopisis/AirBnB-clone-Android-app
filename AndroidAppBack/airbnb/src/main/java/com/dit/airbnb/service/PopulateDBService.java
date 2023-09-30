@@ -13,6 +13,7 @@ import com.dit.airbnb.util.RecommendationParameters;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import jakarta.transaction.Transactional;
+import org.apache.commons.collections.ArrayStack;
 import org.apache.commons.math3.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,6 +53,19 @@ public class PopulateDBService {
     public Map<Long, Long> userRecFileIdToDatabaseIdMap = new HashMap<>();
     public Map<Long, Long> apartmentRecFileIdToDatabaseIdMap = new HashMap<>();
 
+    public List<String> apartmentImagesFilePath = List.of(
+            "static_apart_image_1.jpeg",
+            "static_apart_image_2.jpeg",
+            "static_apart_image_3.jpeg",
+            "static_apart_image_4.jpeg",
+            "static_apart_image_5.jpeg",
+            "static_apart_image_6.jpeg",
+            "static_apart_image_7.jpeg",
+            "static_apart_image_8.jpeg",
+            "static_apart_image_9.jpeg",
+            "static_apart_image_10.jpeg"
+    );
+
     public static final String defaultCountry = "Greece";
     public static final String defaultCity = "Athina";
     public static final String defaultDistrict = "Athina";
@@ -64,6 +78,7 @@ public class PopulateDBService {
                     Pair.create("Sarri 9", Pair.create(new BigDecimal("37.9795089"), new BigDecimal("23.7237")))
     );
 
+    public static final Random random = new Random();
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -183,6 +198,13 @@ public class PopulateDBService {
                 Apartment apartment = new Apartment(apartmentCSV);
                 apartment.setUserRegHost(hostUserReg);
                 apartmentRepository.save(apartment);
+
+                for (int i = 0; i < random.nextInt(3) + 1; i++) {
+                    Image imageIn = new Image(apartmentImagesFilePath.get(random.nextInt(apartmentImagesFilePath.size())));
+                    imageIn.setApartment(apartment);
+                    imageRepository.save(imageIn);
+                }
+
             }
         }
     }
@@ -373,6 +395,11 @@ public class PopulateDBService {
                 apartment.setUserRegHost(host);
                 Apartment savedApartment = apartmentRepository.save(apartment);
                 apartmentRecFileIdToDatabaseIdMap.put(apartmentRecCSV.getApartmentId(), savedApartment.getId());
+                for (int i = 0; i < random.nextInt(3) + 1; i++) {
+                    Image imageIn = new Image(apartmentImagesFilePath.get(random.nextInt(apartmentImagesFilePath.size())));
+                    imageIn.setApartment(savedApartment);
+                    imageRepository.save(imageIn);
+                }
                 count++;
             }
         }
@@ -393,7 +420,6 @@ public class PopulateDBService {
                     .withIgnoreLeadingWhiteSpace(true).build();
 
             int count = 0;
-            Random random = new Random();
             for (BookingReviewRecCSV bookingReviewRecCSV : csvToBean) {
                 if (count > recommendationParameters.getMaxReviewsToLoad()) break;
                 if (apartmentRecFileIdToDatabaseIdMap.containsKey(bookingReviewRecCSV.getApartmentId())) {
@@ -433,8 +459,8 @@ public class PopulateDBService {
                             description(bookingReviewRecCSV.getComment()).booking(booking).creatorUserReg(userReg).build();
 
                     bookingReviewRepository.save(bookingReview);
+                    count++;
                 }
-                count++;
             }
 
         }

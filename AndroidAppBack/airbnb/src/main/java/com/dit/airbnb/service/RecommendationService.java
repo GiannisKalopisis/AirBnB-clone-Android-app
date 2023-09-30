@@ -76,7 +76,7 @@ public class RecommendationService {
         // Set the learning rate (η) to a small positive value
         Double H = recommendationParameters.getH();
         Integer K = recommendationParameters.getK();
-        int maxIters = 50;
+        int maxIters = 20;
         double minDeltaRMSE = 0.0001;
         double prevRMSE = Double.MAX_VALUE;
 

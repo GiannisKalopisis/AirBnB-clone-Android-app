@@ -23,12 +23,12 @@ public class NormalInitializer implements VectorInitializer {
 
         for (int i = 0; i < numberOfUsers; i++) {
             for (int j = 0; j < K; j++) {
-                V[i][j] = Precision.round(random.nextGaussian() * normalFactor, RecommendationService.SCALE);
+                V[i][j] = Precision.round(random.nextDouble() * normalFactor, RecommendationService.SCALE);
             }
         }
         for (int i = 0; i < K; i++) {
             for (int j = 0; j < numberOfItems; j++) {
-                F[i][j] = Precision.round(random.nextGaussian() * normalFactor, RecommendationService.SCALE);
+                F[i][j] = Precision.round(random.nextDouble() * normalFactor, RecommendationService.SCALE);
             }
         }
         return new Pair<>(V, F);

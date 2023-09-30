@@ -189,6 +189,7 @@ public class ImageService {
             if (image.isEmpty()) continue;
             Image imageDel = image.get();
             imageRepository.delete(imageDel);
+            if (imageDel.getPath().contains("static_apart_image")) continue;
             Files.delete(Paths.get("src/main/resources/static/images/" + imageDel.getPath()));
         }
     }

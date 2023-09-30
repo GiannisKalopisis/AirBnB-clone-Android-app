@@ -69,7 +69,7 @@ public class AirbnbApplication {
             System.out.println("Load Recommendations Bookings/Reviews [END]");
 
 
-            recommendationService.recommend(130L);
+            //recommendationService.recommend(130L);
 
         }
     }
