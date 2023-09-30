@@ -1,6 +1,6 @@
 package com.dit.airbnb.dto;
 
-import com.dit.airbnb.csv_dto.MessageCSV;
+import com.dit.airbnb.csv_dto.custom.MessageCSV;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,7 +22,7 @@ public class Message {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "seen")

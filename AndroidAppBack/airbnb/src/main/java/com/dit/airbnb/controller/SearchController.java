@@ -27,5 +27,4 @@ public class SearchController {
         return searchService.searchApartment(currentUser, searchRequest, page, size);
     }
 
-
 }

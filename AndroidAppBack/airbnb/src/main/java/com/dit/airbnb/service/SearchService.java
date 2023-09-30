@@ -20,6 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 
@@ -37,6 +40,9 @@ public class SearchService {
 
     @Autowired
     private SearchLogRepository searchLogRepository;
+
+    // Create a SimpleDateFormat to parse the date strings
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     public ResponseEntity<?> searchApartment(UserDetailsImpl user, SearchRequest searchRequest, int page, int size) {
 
@@ -78,7 +84,13 @@ public class SearchService {
 
                 // = minRetailPrice + numOfGuests*extraCostPerPerson)
                 BigDecimal extraCostPerPerson = apartment.getExtraCostPerPerson();
-                BigDecimal minRetailPrice = apartment.getMinRetailPrice();
+
+                // Convert Date objects to LocalDate
+                LocalDate localDate1 = apartment.getAvailableStartDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                LocalDate localDate2 = apartment.getAvailableEndDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                long dayDifference = ChronoUnit.DAYS.between(localDate1, localDate2);
+
+                BigDecimal minRetailPrice = apartment.getMinRetailPrice() != null ? apartment.getMinRetailPrice().multiply(new BigDecimal(dayDifference)) : null;
                 totalCost = extraCostPerPerson != null && minRetailPrice != null ? extraCostPerPerson.multiply(new BigDecimal((searchRequest.getNumberOfGuests()))).add(apartment.getMinRetailPrice()) : BigDecimal.valueOf(0.0);
             }
             searchResponses.add(new SearchResponse(apartment.getId(), totalCost,  bookingReviewCard != 0 ? Precision.round((totalRating / (double) bookingReviewCard), 2) : 0.0,

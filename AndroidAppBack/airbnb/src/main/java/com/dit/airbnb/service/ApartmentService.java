@@ -8,6 +8,7 @@ import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.request.apartment.ApartmentRequest;
 import com.dit.airbnb.response.ApartmentResponse;
 import com.dit.airbnb.response.HostRentalsMainPageInfoResponse;
+import com.dit.airbnb.response.SearchResponse;
 import com.dit.airbnb.response.UserRegResponse;
 import com.dit.airbnb.response.generic.ApiResponse;
 import com.dit.airbnb.response.generic.PagedResponse;
@@ -44,6 +45,9 @@ public class ApartmentService {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private RecommendationService recommendationService;
 
     public ResponseEntity<?> createApartment(UserDetailsImpl currentUser, ApartmentRequest apartmentRequest, List<MultipartFile> images) {
         Long userId = currentUser.getId();
@@ -175,6 +179,11 @@ public class ApartmentService {
         return new PagedResponse<>(apartmentResponses, apartmentPage.getNumber(),
                 apartmentPage.getSize(), apartmentPage.getTotalElements(),
                 apartmentPage.getTotalPages(), apartmentPage.isLast());
+    }
+
+    public ResponseEntity<?> recommendApartment(Long userId) {
+        List<SearchResponse> searchResponses = recommendationService.recommend(userId);
+        return ResponseEntity.ok().body(new ApiResponse(true, "recommendApartment", searchResponses));
     }
 
 

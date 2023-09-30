@@ -1,6 +1,7 @@
 package com.dit.airbnb;
 
 import com.dit.airbnb.service.PopulateDBService;
+import com.dit.airbnb.service.RecommendationService;
 import com.dit.airbnb.service.RoleService;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
@@ -29,14 +30,47 @@ public class AirbnbApplication {
         @Autowired
         private PopulateDBService populateDBService;
 
+        @Autowired
+        private RecommendationService recommendationService;
+
         @Override
         public void run(String... args) throws Exception {
+            System.out.println("Load Static Roles [START]");
             populateDBService.populateStaticRoles();
+            System.out.println("Load Static Roles [END]");
+
+            System.out.println("Load Static Users [START]");
             populateDBService.populateUsersReg();
+            System.out.println("Load Static Users [END]");
+
+            System.out.println("Load Static Apartments [START]");
             populateDBService.populateApartments();
+            System.out.println("Load Static Apartments [END]");
+
+            System.out.println("Load Static Bookings [START]");
             populateDBService.populateBooking();
+            System.out.println("Load Static Bookings [END]");
+
+            System.out.println("Load Static Booking Reviews [START]");
             populateDBService.populateBookingReview();
+            System.out.println("Load Static Booking Reviews [END]");
+
+            System.out.println("Load Static Messages [START]");
             populateDBService.populateMessages();
+            System.out.println("Load Static Messages [END]");
+
+            // recommendation
+            System.out.println("Load Recommendations Apartments [START]");
+            populateDBService.populateRecApartments();
+            System.out.println("Load Recommendations Apartments [END]");
+
+            System.out.println("Load Recommendations Bookings/Reviews [START]");
+            populateDBService.populateRecBookingAndReviews();
+            System.out.println("Load Recommendations Bookings/Reviews [END]");
+
+
+            recommendationService.recommend(130L);
+
         }
     }
 

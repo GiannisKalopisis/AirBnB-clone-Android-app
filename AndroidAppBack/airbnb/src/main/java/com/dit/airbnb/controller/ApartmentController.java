@@ -92,4 +92,11 @@ public class ApartmentController {
                                         @Valid @CurrentUser UserDetailsImpl currentUser) {
         return apartmentService.getHostApartments(hostId, page, size);
     }
+
+    @GetMapping("/apartment/rec/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<?> getHostApartments( @PathVariable(value = "userId") Long userId) {
+        return apartmentService.recommendApartment(userId);
+    }
+
 }

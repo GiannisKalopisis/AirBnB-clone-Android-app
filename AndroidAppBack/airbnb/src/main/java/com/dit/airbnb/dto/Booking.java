@@ -1,6 +1,8 @@
 package com.dit.airbnb.dto;
 
-import com.dit.airbnb.csv_dto.BookingCSV;
+import com.dit.airbnb.csv_dto.custom.BookingCSV;
+import com.dit.airbnb.csv_dto.recommendation.BookingRecCSV;
+import com.dit.airbnb.csv_dto.recommendation.BookingReviewRecCSV;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -38,7 +40,7 @@ public class Booking {
     public Booking(BookingCSV bookingCSV) {
         this.checkInDate = bookingCSV.getCheckInDate();
         this.checkOutDate = bookingCSV.getCheckOutDate();
-        this.isReviewed = bookingCSV.getIsReviewed();
+        this.isReviewed = Boolean.valueOf(bookingCSV.getIsReviewed());
     }
 
     // external tables
@@ -58,6 +60,12 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_reg_id")
     private UserReg userReg;
+
+    public Booking(Date checkInDate, Date checkOutDate) {
+        this.checkInDate = checkInDate;
+        this.checkOutDate = checkOutDate;
+        this.isReviewed = false;
+    }
 
     public void setApartment(Apartment apartment) {
         this.apartment = apartment;

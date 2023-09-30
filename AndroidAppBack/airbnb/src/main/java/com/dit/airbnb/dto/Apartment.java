@@ -1,7 +1,9 @@
 package com.dit.airbnb.dto;
 
 
-import com.dit.airbnb.csv_dto.ApartmentCSV;
+import org.apache.commons.math3.util.Pair;
+import com.dit.airbnb.csv_dto.custom.ApartmentCSV;
+import com.dit.airbnb.csv_dto.recommendation.ApartmentRecCSV;
 import com.dit.airbnb.dto.enums.RentalType;
 import com.dit.airbnb.request.apartment.ApartmentRequest;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -12,6 +14,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 @Setter
@@ -28,7 +31,7 @@ public class Apartment {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "amenities")
+    @Column(name = "amenities", columnDefinition = "TEXT")
     private String amenities;
 
     @Column(name = "address")
@@ -60,7 +63,7 @@ public class Apartment {
     @Column(name = "extraCostPerPerson")
     private BigDecimal extraCostPerPerson;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "number_of_beds")
@@ -78,10 +81,10 @@ public class Apartment {
     @Column(name = "area")
     private BigDecimal area;
 
-    @Column(name = "geo_lat",  precision = 10, scale = 6)
+    @Column(name = "geo_lat",  precision = 12, scale = 8)
     private BigDecimal geoLat;
 
-    @Column(name = "geo_long",  precision = 10, scale = 6)
+    @Column(name = "geo_long",  precision = 12, scale = 8)
     private BigDecimal geoLong;
 
     @Column(name = "rules")
@@ -106,7 +109,7 @@ public class Apartment {
     @Getter
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "apartment", cascade = CascadeType.ALL)
-    private Set<Image> images;
+    private Set<Image> images = new HashSet<>();
 
     public Apartment(ApartmentRequest apartmentRequest) {
         this.amenities = apartmentRequest.getAmenities();
@@ -175,6 +178,30 @@ public class Apartment {
         if (apartmentRequest.getGeoLong() != null) this.geoLong = apartmentRequest.getGeoLong();
         if (apartmentRequest.getRules() != null) this.rules = apartmentRequest.getRules();
         if (apartmentRequest.getRentalType() != null) this.rentalType = apartmentRequest.getRentalType();
+    }
+
+    public Apartment(ApartmentRecCSV apartmentRecCSV, String country, String city, String district, Pair<String, Pair<BigDecimal, BigDecimal>> address, RentalType rentalType, Date availableStartDate, Date availableEndDate) {
+        this.country = country;
+        this.city = city;
+        this.district = district;
+        this.address = address.getFirst();
+        this.amenities = apartmentRecCSV.getAmenities();
+        this.rentalType = rentalType;
+        this.geoLat = address.getSecond().getFirst();
+        this.geoLong = address.getSecond().getSecond();
+        if (apartmentRecCSV.getNumberOfBathrooms() != null) this.numberOfBathrooms = apartmentRecCSV.getNumberOfBathrooms().shortValue();
+        this.numberOfBedrooms = apartmentRecCSV.getNumberOfBedrooms();
+        this.numberOfBeds = apartmentRecCSV.getNumberOfBeds();
+        this.numberOfLivingRooms = (short) (new Random().nextInt(5 - 1 + 1) + 1);
+        this.maxVisitors = apartmentRecCSV.getMaxVisitors();
+        this.rules = "rule1";
+        this.area = apartmentRecCSV.getSquareFeet() != null ? new BigDecimal(apartmentRecCSV.getSquareFeet()) : new BigDecimal(new Random().nextInt(300 - 20 + 1) + 20);
+        this.description = apartmentRecCSV.getDescription();
+        // this.description = "description example";
+        this.minRetailPrice = new BigDecimal(apartmentRecCSV.getPrice().replace("$", ""));
+        this.extraCostPerPerson = new BigDecimal(apartmentRecCSV.getExtraPeoplePrice().replace("$", ""));
+        this.availableStartDate = availableStartDate;
+        this.availableEndDate = availableEndDate;
     }
 
     public void setUserRegHost(UserReg userRegHost) {

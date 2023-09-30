@@ -1,6 +1,6 @@
 package com.dit.airbnb.dto;
 
-import com.dit.airbnb.csv_dto.BookingReviewCSV;
+import com.dit.airbnb.csv_dto.custom.BookingReviewCSV;
 import com.dit.airbnb.request.booking_review.BookingReviewRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -23,7 +23,7 @@ public class BookingReview {
     @Column(name = "rating")
     private Short rating;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     // external tables

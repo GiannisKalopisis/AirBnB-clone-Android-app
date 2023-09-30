@@ -1,7 +1,7 @@
 package com.dit.airbnb.dto;
 
 
-import com.dit.airbnb.csv_dto.UserRegCSV;
+import com.dit.airbnb.csv_dto.custom.UserRegCSV;
 import com.dit.airbnb.request.user_reg.SignUpRequest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,6 +12,7 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 
+@Builder
 @Setter
 @Getter
 @Entity
@@ -91,7 +92,7 @@ public class UserReg {
     @Getter
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userReg", cascade = CascadeType.ALL)
-    private Set<Image> images;
+    private Set<Image> images = new HashSet<>();
 
     @Getter
     @JsonIgnore
@@ -122,6 +123,7 @@ public class UserReg {
     }
 
     public void addRole(Role role) {
+        if (roles == null) roles = new HashSet<>();
         roles.add(role);
     }
 
