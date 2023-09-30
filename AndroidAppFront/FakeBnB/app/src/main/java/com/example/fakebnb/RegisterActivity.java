@@ -67,12 +67,6 @@ public class RegisterActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private String imagePath;
     private Bitmap imageBitmap;
-    /**
-     * Variables for MULTIPLE IMAGES
-     */
-//    private List<Bitmap> imageBitmapList;
-//    private RecyclerView imagesRecyclerView;
-//    private ImageAdapter imageAdapter;
 
 
     // Permissions for accessing the storage
@@ -91,13 +85,6 @@ public class RegisterActivity extends AppCompatActivity {
         initView();
         resetWarnVisibility();
 
-//        imageBitmapList = new ArrayList<>(); // Initialize the image bitmap list
-//        imagesRecyclerView = findViewById(R.id.imagesRecyclerView);
-//        imagesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-//        imageAdapter = new ImageAdapter(imageBitmapList);
-//        imagesRecyclerView.setAdapter(imageAdapter);
-
-
         setTextWatchers();
 
         registerButtonOnClickListener();
@@ -115,11 +102,7 @@ public class RegisterActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Uri imageUri = result.getData().getData();
-                        // At this point, you have the URI of the selected image
-//                        Toast.makeText(this, "URI: " + imageUri, Toast.LENGTH_SHORT).show();
-                        // You can now proceed to convert the image URI to a byte array or a File object and send it to the backend.
                         imagePath = RealPathUtil.getRealPath(RegisterActivity.this, imageUri);
-//                        Toast.makeText(this, "imagePath: " + imagePath, Toast.LENGTH_SHORT).show();
                         imageBitmap = BitmapFactory.decodeFile(imagePath);
                         imageView.setImageBitmap(imageBitmap);
                         photoWarn.setVisibility(View.GONE);
@@ -127,26 +110,6 @@ public class RegisterActivity extends AppCompatActivity {
                 }
         );
     }
-
-    /**
-     * Multiple images as RecyclerView
-     */
-//    private void setImagePickerLauncher() {
-//        imagePickerLauncher = registerForActivityResult(
-//                new ActivityResultContracts.StartActivityForResult(),
-//                result -> {
-//                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-//                        Uri imageUri = result.getData().getData();
-//                        imagePath = RealPathUtil.getRealPath(RegisterActivity.this, imageUri);
-//                        imageBitmap = BitmapFactory.decodeFile(imagePath);
-//
-//                        // Add the selected image to the layout
-//                        imageBitmapList.add(imageBitmap);
-//                        imageAdapter.notifyDataSetChanged();
-//                    }
-//                }
-//        );
-//    }
 
     private void registerButtonOnClickListener() {
         Log.d(TAG, "registerButtonOnClickListener: Started");

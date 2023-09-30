@@ -545,12 +545,6 @@ public class RentRoomPage extends AppCompatActivity {
                         Log.d(TAG, "2 Couldn't get apartment images: " + t.getMessage());
                     }
                 });
-
-//        slideModels.add(new SlideModel(R.drawable.login_image, ScaleTypes.FIT));
-//        slideModels.add(new SlideModel(R.drawable.register_image, ScaleTypes.FIT));
-//        slideModels.add(new SlideModel(R.drawable.start_image, ScaleTypes.FIT));
-//
-//        imageSlider.setImageList(slideModels, ScaleTypes.FIT);
     }
 
     private void getApartmentImage(Long imageId, ApartmentImageLoadCallback callback) {

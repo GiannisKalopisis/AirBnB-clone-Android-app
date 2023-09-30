@@ -122,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
             usernameLoginWarn.setText("Username must be at most 80 characters");
             validInput = false;
         }
-        if (passwordEditText.getText().toString().length() < 8) {
+        if (passwordEditText.getText().toString().length() < 4) {
             passwordLoginWarn.setVisibility(View.VISIBLE);
             passwordLoginWarn.setText("Password must be at least 8 characters");
             validInput = false;
