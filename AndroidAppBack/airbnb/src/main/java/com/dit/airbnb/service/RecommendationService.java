@@ -77,7 +77,7 @@ public class RecommendationService {
         Double H = recommendationParameters.getH();
         Integer K = recommendationParameters.getK();
         int maxIters = 20;
-        double minDeltaRMSE = 0.0001;
+        double minRMSE = 0.0001;
         double prevRMSE = Double.MAX_VALUE;
 
         RatingFunction ratingFunction = new DirectRatingFunction();
@@ -119,8 +119,7 @@ public class RecommendationService {
         // TODO CHECK UNRATED
         // DATA SPARSITY
 
-
-        // Init F,V
+        // init F,V
         VectorInitializer vectorInitializer;
         if (recommendationParameters.getVectorInitializer().equals(NORMAL_VECTOR_INITIALIZER)) {
             vectorInitializer = new NormalInitializer(recommendationParameters.getNormalFactor());
@@ -157,7 +156,7 @@ public class RecommendationService {
                 }
             }
             rmse = Math.sqrt(rmse / (numberOfUsers * numberOfItems));
-            if (Math.abs(prevRMSE - rmse) < minDeltaRMSE) {
+            if (Math.abs(prevRMSE - rmse) < minRMSE) {
                 break;
             }
             prevRMSE = rmse;

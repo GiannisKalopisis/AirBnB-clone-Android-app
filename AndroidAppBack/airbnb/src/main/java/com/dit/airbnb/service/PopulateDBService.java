@@ -351,6 +351,10 @@ public class PopulateDBService {
                     userReg.addRole(userRoleUser);
                     host = userRegRepository.save(userReg);
                     hostRecFileIdToDatabaseIdMap.put(apartmentRecCSV.getHostId(), host.getId());
+                    // Store image
+                    Image imageIn = new Image(IMAGE_DEFAULT_PATH);
+                    imageIn.setUserReg(userReg);
+                    imageRepository.save(imageIn);
                 } else {
                     Long realId = hostRecFileIdToDatabaseIdMap.get(apartmentRecCSV.getHostId());
                     host = userRegRepository.findById(realId).orElseThrow(() -> new ResourceNotFoundException("HostUserReg", "id", realId));
@@ -443,6 +447,10 @@ public class PopulateDBService {
                         userRegToStore.addRole(userRoleUser);
                         userReg = userRegRepository.save(userRegToStore);
                         userRecFileIdToDatabaseIdMap.put(bookingReviewRecCSV.getReviewerId(),  userReg.getId());
+                        // Store image
+                        Image imageIn = new Image(IMAGE_DEFAULT_PATH);
+                        imageIn.setUserReg(userReg);
+                        imageRepository.save(imageIn);
                     }
 
                     Date startDate = getTargetPreviousDate(bookingReviewRecCSV.getReviewDate(), 2);
