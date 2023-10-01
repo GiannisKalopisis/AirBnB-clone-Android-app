@@ -68,7 +68,7 @@ public class AirbnbApplication {
             populateDBService.populateRecBookingAndReviews();
             System.out.println("Load Recommendations Bookings/Reviews [END]");
 
-            recommendationService.recommend(150L);
+//            recommendationService.recommend(150L);
         }
     }
 }
