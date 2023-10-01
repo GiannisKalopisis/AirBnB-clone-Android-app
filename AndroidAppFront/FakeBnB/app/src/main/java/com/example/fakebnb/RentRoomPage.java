@@ -458,15 +458,15 @@ public class RentRoomPage extends AppCompatActivity {
                                 hostImage.setPadding(0, 0, 0, 0);
                             }
                         } else {
-                            Toast.makeText(RentRoomPage.this, "1 Couldn't get host image", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RentRoomPage.this, "Couldn't get host image", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "1 Couldn't get host image");
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                        Toast.makeText(RentRoomPage.this, "2 Couldn't get host image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "2 Couldn't get host image: " + t.getMessage());
+                        Toast.makeText(RentRoomPage.this, "Couldn't get host image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Couldn't get host image: " + t.getMessage());
                     }
                 });
     }
@@ -503,16 +503,16 @@ public class RentRoomPage extends AppCompatActivity {
                     public void onResponse(@NonNull Call<AbleToReviewResponse> call, @NonNull Response<AbleToReviewResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             if (Boolean.TRUE.equals(response.body().getObject())) {
-                                Log.d(TAG, "1 User can review apartment:" + apartmentId);
+                                Log.d(TAG, "User can review apartment:" + apartmentId);
                                 rentRoomReviewTitle.setVisibility(View.VISIBLE);
                                 writeReviewButton.setVisibility(View.VISIBLE);
                             } else {
-                                Log.d(TAG, "2 User cannot review apartment:" + apartmentId);
+                                Log.d(TAG, "User cannot review apartment:" + apartmentId);
                                 rentRoomReviewTitle.setVisibility(View.GONE);
                                 writeReviewButton.setVisibility(View.GONE);
                             }
                         } else {
-                            Log.d(TAG, "3 User cannot review apartment:" + apartmentId);
+                            Log.d(TAG, "User cannot review apartment:" + apartmentId);
                             rentRoomReviewTitle.setVisibility(View.GONE);
                             writeReviewButton.setVisibility(View.GONE);
                         }
@@ -521,7 +521,7 @@ public class RentRoomPage extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Call<AbleToReviewResponse> call, @NonNull Throwable t) {
                         Log.d(TAG, "Failed to connect to server and check if reviews are enabled" + apartmentId);
-                        Toast.makeText(RentRoomPage.this, "4 Failed to connect to server and check if reviews are enabled", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RentRoomPage.this, "Failed to connect to server and check if reviews are enabled", Toast.LENGTH_SHORT).show();
                         rentRoomReviewTitle.setVisibility(View.GONE);
                         writeReviewButton.setVisibility(View.GONE);
                     }
@@ -567,15 +567,15 @@ public class RentRoomPage extends AppCompatActivity {
                                 });
                             }
                         } else {
-                            Toast.makeText(RentRoomPage.this, "1 Couldn't get apartment images", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "1 Couldn't get apartment images");
+                            Toast.makeText(RentRoomPage.this, "Couldn't get apartment images", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Couldn't get apartment images");
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ApartmentImageIdsResponse> call, @NonNull Throwable t) {
-                        Toast.makeText(RentRoomPage.this, "2 Couldn't get apartment images:" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "2 Couldn't get apartment images: " + t.getMessage());
+                        Toast.makeText(RentRoomPage.this, "Couldn't get apartment images:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Couldn't get apartment images: " + t.getMessage());
                     }
                 });
     }
@@ -651,18 +651,15 @@ public class RentRoomPage extends AppCompatActivity {
         // only user_role can be here
 
         chatButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToChatPage(RentRoomPage.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
         profileButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToProfilePage(RentRoomPage.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
         roleButton.setOnClickListener(view -> {
             Log.d(TAG, "onClick: pressed role button");
-            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
             if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                 NavigationUtils.goToHostMainPage(RentRoomPage.this, userId, jwtToken, roles);
@@ -674,7 +671,6 @@ public class RentRoomPage extends AppCompatActivity {
 
     private void buttonClickListener() {
         seeHostButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed SEE HOST BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToHostReviewPage(RentRoomPage.this, userId, jwtToken, roles, hostId, apartmentId);
         });
 
@@ -690,13 +686,12 @@ public class RentRoomPage extends AppCompatActivity {
                             if (response.isSuccessful() && response.body() != null) {
                                 if (response.body().getSuccess()) {
                                     chatId = response.body().getObject();
-                                    Toast.makeText(view.getContext(), "Pressed CONTACT HOST BUTTON", Toast.LENGTH_SHORT).show();
                                     NavigationUtils.goToIndividualChatPage(RentRoomPage.this, userId, jwtToken, roles, chatId, RoleName.ROLE_USER);
                                 } else {
-                                    Toast.makeText(RentRoomPage.this, "1 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(RentRoomPage.this, "Couldn't get chat with host", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                Toast.makeText(RentRoomPage.this, "2 Couldn't get chat with host", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(RentRoomPage.this, "Couldn't get chat with host", Toast.LENGTH_SHORT).show();
                             }
                         }
 
@@ -709,7 +704,6 @@ public class RentRoomPage extends AppCompatActivity {
         });
 
         makeReservationButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed MAKE RESERVATION BUTTON", Toast.LENGTH_SHORT).show();
 
             RestClient restClient = new RestClient(jwtToken);
             BookingAPI bookingAPI = restClient.getClient().create(BookingAPI.class);
@@ -725,19 +719,19 @@ public class RentRoomPage extends AppCompatActivity {
                                         Toast.makeText(RentRoomPage.this, "Reservation successful", Toast.LENGTH_SHORT).show();
                                         NavigationUtils.goToReservationDonePage(RentRoomPage.this, userId, jwtToken, roles);
                                     } else {
-                                        Toast.makeText(RentRoomPage.this, "1 Reservation failed", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(RentRoomPage.this, "Reservation failed", Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    Toast.makeText(RentRoomPage.this, "2 Reservation failed", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(RentRoomPage.this, "Reservation failed", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                Toast.makeText(RentRoomPage.this, "3 Reservation failed", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(RentRoomPage.this, "Reservation failed", Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(@NonNull Call<BookingResponse> call, @NonNull Throwable t) {
-                            Toast.makeText(RentRoomPage.this, "4 Reservation failed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RentRoomPage.this, "Reservation failed", Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -745,7 +739,6 @@ public class RentRoomPage extends AppCompatActivity {
         });
 
         writeReviewButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed WRITE REVIEW BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToWriteReviewPage(RentRoomPage.this, userId, jwtToken, roles, apartmentId, hostId);
         });
     }

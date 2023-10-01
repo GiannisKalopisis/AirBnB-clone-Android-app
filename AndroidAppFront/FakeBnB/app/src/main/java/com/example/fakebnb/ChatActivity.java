@@ -240,13 +240,11 @@ public class ChatActivity extends AppCompatActivity implements ChatRecyclerViewI
         chatButton.setOnClickListener(view -> Toast.makeText(ChatActivity.this, "Already in Chat page", Toast.LENGTH_SHORT).show());
 
         profileButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToProfilePage(ChatActivity.this, userId, jwtToken, roles, currentRole.toString());
         });
 
         roleButton.setOnClickListener(view -> {
             Log.d(TAG, "onClick: pressed role button");
-            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
             if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                 if (currentRole == RoleName.ROLE_USER) {

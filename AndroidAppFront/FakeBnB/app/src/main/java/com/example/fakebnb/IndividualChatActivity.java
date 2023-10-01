@@ -96,7 +96,6 @@ public class IndividualChatActivity extends AppCompatActivity {
                 }
             }
         }
-        Toast.makeText(this, "ChatID: " + chatId + "\nUserID: " + userId, Toast.LENGTH_SHORT).show();
 
         initView();
 
@@ -284,17 +283,17 @@ public class IndividualChatActivity extends AppCompatActivity {
                                     sendMessage = false;
                                 }
                             } else {
-                                Toast.makeText(IndividualChatActivity.this, "1 Couldn't get messages", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(IndividualChatActivity.this, "Couldn't get messages", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            Toast.makeText(IndividualChatActivity.this, "2 Couldn't get messages", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(IndividualChatActivity.this, "Couldn't get messages", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<MessageResponse> call, @NonNull Throwable t) {
-                        Log.d(TAG, "3 Couldn't get messages, " + t.getMessage());
-                        Toast.makeText(IndividualChatActivity.this, "3 Couldn't get messages", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Couldn't get messages, " + t.getMessage());
+                        Toast.makeText(IndividualChatActivity.this, "Couldn't get messages", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -320,7 +319,6 @@ public class IndividualChatActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(@NonNull Call<SingleMessageResponse> call, @NonNull Response<SingleMessageResponse> response) {
                         if(response.isSuccessful()){
-                            Toast.makeText(IndividualChatActivity.this, "Message sent", Toast.LENGTH_SHORT).show();
                             messageRecyclerAdapter.clearMessages();
                             currentPage = 0;
                             sendMessage = true;

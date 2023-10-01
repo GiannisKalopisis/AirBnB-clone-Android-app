@@ -201,7 +201,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQUEST_EXTERNAL_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(AddNewPlaceActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             } else {
@@ -249,7 +248,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                         REQUEST_EXTERNAL_STORAGE
                 );
             } else {
-                Toast.makeText(AddNewPlaceActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             }
@@ -917,8 +915,6 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                 return;
             }
 
-            Toast.makeText(view.getContext(), "Pressed ADD PLACE BUTTON", Toast.LENGTH_SHORT).show();
-
             ApartmentRequest apartmentRequest = setApartmentRequestData(view);
             if (apartmentRequest == null) {
                 Toast.makeText(view.getContext(), "Please fill correctly all the fields", Toast.LENGTH_SHORT).show();
@@ -942,15 +938,15 @@ public class AddNewPlaceActivity extends AppCompatActivity {
                                 Toast.makeText(view.getContext(), "Apartment added successfully", Toast.LENGTH_SHORT).show();
                                 NavigationUtils.goToHostMainPage(getApplicationContext(), userId, jwtToken, roles);
                             } else {
-                                Toast.makeText(AddNewPlaceActivity.this, "1 Error adding apartment", Toast.LENGTH_SHORT).show();
-                                Log.d(TAG, "1 Error adding apartment");
+                                Toast.makeText(AddNewPlaceActivity.this, "Error adding apartment", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "Error adding apartment");
                             }
                         }
 
                         @Override
                         public void onFailure(@NonNull Call<ApartmentResponse> call, @NonNull Throwable t) {
-                            Toast.makeText(AddNewPlaceActivity.this, "2 Error adding apartment: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "2 Error adding apartment: " + t.getMessage());
+                            Toast.makeText(AddNewPlaceActivity.this, "Error adding apartment: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Error adding apartment: " + t.getMessage());
                         }
                     });
         });
@@ -1245,19 +1241,14 @@ public class AddNewPlaceActivity extends AppCompatActivity {
         Log.d(TAG, "bottomBarClickListeners: started");
 
         chatButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToChatPage(AddNewPlaceActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
         profileButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToProfilePage(AddNewPlaceActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
         roleButton.setOnClickListener(view -> {
-            Log.d(TAG, "onClick: role button pressed");
-            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
-
             if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                 NavigationUtils.goToMainPage(AddNewPlaceActivity.this, userId, jwtToken, roles);
             } else {

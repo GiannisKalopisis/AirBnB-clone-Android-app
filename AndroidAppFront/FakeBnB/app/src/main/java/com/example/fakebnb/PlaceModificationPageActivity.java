@@ -194,15 +194,15 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                 });
                             }
                         } else {
-                            Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't get apartment images", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "1 Couldn't get apartment images");
+                            Toast.makeText(PlaceModificationPageActivity.this, "Couldn't get apartment images", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Couldn't get apartment images");
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ApartmentImageIdsResponse> call, @NonNull Throwable t) {
-                        Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't get apartment images:" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "2 Couldn't get apartment images: " + t.getMessage());
+                        Toast.makeText(PlaceModificationPageActivity.this, "Couldn't get apartment images:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Couldn't get apartment images: " + t.getMessage());
                     }
                 });
 
@@ -313,7 +313,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                         REQUEST_EXTERNAL_STORAGE
                 );
             } else {
-                Toast.makeText(PlaceModificationPageActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             }
@@ -359,7 +358,6 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
             }
         } else if (requestCode == REQUEST_EXTERNAL_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(PlaceModificationPageActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             } else {
@@ -1472,12 +1470,12 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                         NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                                     } else {
                                         // Handle unsuccessful response
-                                        Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(PlaceModificationPageActivity.this, "Couldn't update apartment.", Toast.LENGTH_SHORT).show();
                                         Log.d("API_CALL", "UpdateApartment failed");
                                     }
                                 } else {
                                     // Handle unsuccessful response
-                                    Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(PlaceModificationPageActivity.this, "Couldn't update apartment.", Toast.LENGTH_SHORT).show();
                                     Log.d("API_CALL", "UpdateApartment failed");
                                 }
                             }
@@ -1505,12 +1503,12 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                         NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                                     } else {
                                         // Handle unsuccessful response
-                                        Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(PlaceModificationPageActivity.this, "Couldn't update apartment.", Toast.LENGTH_SHORT).show();
                                         Log.d("API_CALL", "UpdateApartment failed");
                                     }
                                 } else {
                                     // Handle unsuccessful response
-                                    Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't update apartment.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(PlaceModificationPageActivity.this, "Couldn't update apartment.", Toast.LENGTH_SHORT).show();
                                     Log.d("API_CALL", "UpdateApartment failed");
                                 }
                             }
@@ -1548,12 +1546,12 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
                                     NavigationUtils.goToHostMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);
                                 } else {
                                     // Handle unsuccessful response
-                                    Toast.makeText(PlaceModificationPageActivity.this, "1 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(PlaceModificationPageActivity.this, "Couldn't delete rental.", Toast.LENGTH_SHORT).show();
                                     Log.d("API_CALL", "UpdateApartment failed");
                                 }
                             } else {
                                 // Handle unsuccessful response
-                                Toast.makeText(PlaceModificationPageActivity.this, "2 Couldn't delete rental.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PlaceModificationPageActivity.this, "Couldn't delete rental.", Toast.LENGTH_SHORT).show();
                                 Log.d("API_CALL", "UpdateApartment failed");
                             }
                         }
@@ -1576,20 +1574,17 @@ public class PlaceModificationPageActivity extends AppCompatActivity {
 
         chatButton.setOnClickListener(view -> {
             resetWarnVisibility();
-            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToChatPage(PlaceModificationPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
         profileButton.setOnClickListener(view -> {
             resetWarnVisibility();
-            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToProfilePage(PlaceModificationPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
         roleButton.setOnClickListener(view -> {
             resetWarnVisibility();
             Log.d(TAG, "onClick: role button pressed");
-            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
             if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                 NavigationUtils.goToMainPage(PlaceModificationPageActivity.this, userId, jwtToken, roles);

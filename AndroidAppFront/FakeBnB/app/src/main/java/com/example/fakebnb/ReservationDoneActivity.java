@@ -60,7 +60,6 @@ public class ReservationDoneActivity extends AppCompatActivity {
         reservationDoneHomeButton = findViewById(R.id.reservationDoneHomeButton);
 
         reservationDoneHomeButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
             Intent main_page_intent = new Intent(ReservationDoneActivity.this, MainPageActivity.class);
             main_page_intent.putExtra("user_id", userId);
             main_page_intent.putExtra("user_jwt", jwtToken);

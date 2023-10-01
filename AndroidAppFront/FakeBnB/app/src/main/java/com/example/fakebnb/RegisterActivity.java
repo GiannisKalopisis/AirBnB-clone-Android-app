@@ -80,8 +80,6 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        Toast.makeText(this, "Welcome to REGISTER page", Toast.LENGTH_SHORT).show();
-
         initView();
         resetWarnVisibility();
 
@@ -142,7 +140,6 @@ public class RegisterActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(@NonNull Call<UserRegisterModel> call, @NonNull Response<UserRegisterModel> response) {
                             if (response.isSuccessful()) {
-                                Toast.makeText(RegisterActivity.this, "Registered successfully", Toast.LENGTH_SHORT).show();
                                 Log.d(TAG, "onResponse: " + response.body());
                                 Intent login_intent = new Intent(getApplicationContext(), LoginActivity.class);
                                 startActivity(login_intent);
@@ -471,7 +468,6 @@ public class RegisterActivity extends AppCompatActivity {
                         REQUEST_EXTERNAL_STORAGE
                 );
             } else {
-                Toast.makeText(RegisterActivity.this, "1 Select Image", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             }
@@ -483,7 +479,6 @@ public class RegisterActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_EXTERNAL_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(RegisterActivity.this, "2 Select Image", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             } else {

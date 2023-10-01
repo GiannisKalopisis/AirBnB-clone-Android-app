@@ -118,17 +118,17 @@ public class HostReviewPageActivity extends AppCompatActivity {
                                 reviewAdapter.setReviewsListModel((ArrayList<BookingReviewModel>) reviewResponseList);
                                 isLastPage = response.body().getObject().isLast();
                             } else {
-                                Toast.makeText(HostReviewPageActivity.this, "1 Couldn't get messages", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(HostReviewPageActivity.this, "Couldn't get messages", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            Toast.makeText(HostReviewPageActivity.this, "2 Couldn't get messages", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(HostReviewPageActivity.this, "Couldn't get messages", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<BookingReviewResponse> call, @NonNull Throwable t) {
-                        Log.d(TAG, "3 Failed to communicate with server and get reviews, " + t.getMessage());
-                        Toast.makeText(HostReviewPageActivity.this, "3 Failed to communicate with server and get reviews", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Failed to communicate with server and get reviews, " + t.getMessage());
+                        Toast.makeText(HostReviewPageActivity.this, "Failed to communicate with server and get reviews", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -219,15 +219,15 @@ public class HostReviewPageActivity extends AppCompatActivity {
                                 hostImageView.setPadding(0, 0, 0, 0);
                             }
                         } else {
-                            Toast.makeText(HostReviewPageActivity.this, "1 Couldn't get host image", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "1 Couldn't get host image");
+                            Toast.makeText(HostReviewPageActivity.this, "Couldn't get host image", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Couldn't get host image");
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                        Toast.makeText(HostReviewPageActivity.this, "2 Couldn't get host image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "2 Couldn't get host image: " + t.getMessage());
+                        Toast.makeText(HostReviewPageActivity.this, "Couldn't get host image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Couldn't get host image: " + t.getMessage());
                     }
                 });
     }
@@ -274,12 +274,10 @@ public class HostReviewPageActivity extends AppCompatActivity {
         // only role_user can be here
 
         chatButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToChatPage(HostReviewPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
         profileButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToProfilePage(HostReviewPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 

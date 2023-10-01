@@ -94,7 +94,6 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        Toast.makeText(this, "Welcome to your profile", Toast.LENGTH_SHORT).show();
 
         initView();
 
@@ -187,15 +186,15 @@ public class ProfileActivity extends AppCompatActivity {
                                 userImageView.setPadding(0, 0, 0, 0);
                             }
                         } else {
-                            Toast.makeText(ProfileActivity.this, "1 Couldn't get user image", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ProfileActivity.this, "Couldn't get user image", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "1 Couldn't get user image");
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                        Toast.makeText(ProfileActivity.this, "2 Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "2 Couldn't get user image: " + t.getMessage());
+                        Toast.makeText(ProfileActivity.this, "Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Couldn't get user image: " + t.getMessage());
                     }
                 });
     }
@@ -231,10 +230,8 @@ public class ProfileActivity extends AppCompatActivity {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Uri imageUri = result.getData().getData();
                         // At this point, you have the URI of the selected image
-                        Toast.makeText(this, "URI: " + imageUri, Toast.LENGTH_SHORT).show();
                         // You can now proceed to convert the image URI to a byte array or a File object and send it to the backend.
                         imagePath = RealPathUtil.getRealPath(ProfileActivity.this, imageUri);
-                        Toast.makeText(this, "imagePath: " + imagePath, Toast.LENGTH_SHORT).show();
                         imageBitmap = BitmapFactory.decodeFile(imagePath);
                         imageView.setImageBitmap(imageBitmap);
                         saveProfileInfoChangesButton.setVisibility(View.VISIBLE);
@@ -259,7 +256,6 @@ public class ProfileActivity extends AppCompatActivity {
                         REQUEST_EXTERNAL_STORAGE
                 );
             } else {
-                Toast.makeText(ProfileActivity.this, "Select Image", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             }
@@ -272,7 +268,6 @@ public class ProfileActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_EXTERNAL_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(ProfileActivity.this, "2 Select Image", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             } else {
@@ -450,7 +445,6 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-//                Toast.makeText(ProfileActivity.this, "First name text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
                 if (profileFirstNameEditText.getText().toString().isEmpty()) {
                     profileFirstNameWarn.setVisibility(View.VISIBLE);
                     saveProfileInfoChangesButton.setVisibility(View.GONE);
@@ -476,7 +470,6 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-//                Toast.makeText(ProfileActivity.this, "Last name text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
                 if (profileLastNameEditText.getText().toString().isEmpty()) {
                     profileLastNameWarn.setVisibility(View.VISIBLE);
                     saveProfileInfoChangesButton.setVisibility(View.GONE);
@@ -502,7 +495,6 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-//                Toast.makeText(ProfileActivity.this, "Phone text watcher: afterTextChanged", Toast.LENGTH_SHORT).show();
                 if (profilePhoneEditText.getText().toString().isEmpty()) {
                     profilePhoneWarn.setVisibility(View.VISIBLE);
                     saveProfileInfoChangesButton.setVisibility(View.GONE);
@@ -561,7 +553,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         chatButton.setOnClickListener(view -> {
             resetWarnVisibility();
-            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToChatPage(ProfileActivity.this, userId, jwtToken, roles, currentRole.toString());
         });
 
@@ -569,7 +560,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         roleButton.setOnClickListener(view -> {
             Log.d(TAG, "onClick: pressed role button");
-            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
             if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                 resetWarnVisibility();

@@ -42,8 +42,6 @@ public class LoginActivity extends AppCompatActivity {
 
         initView();
 
-        Toast.makeText(this, "Welcome to LOGIN page", Toast.LENGTH_SHORT).show();
-
         setTextWatchers();
 
         loginButton.setOnClickListener(view -> initRegister());
@@ -71,7 +69,6 @@ public class LoginActivity extends AppCompatActivity {
                             if (signInResponse != null) {
                                 Log.d(TAG, "onResponse: toString: " + signInResponse);
                                 SignInResponse.UserData userData = signInResponse.getObject();
-                                Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
 
                                 // has both roles, so login as USER
                                 if (userData.getRoleNames().contains(RoleName.ROLE_USER) && userData.getRoleNames().contains(RoleName.ROLE_HOST)) {
@@ -91,18 +88,18 @@ public class LoginActivity extends AppCompatActivity {
                                 }
                             } else {
                                 resetWarnVisibility();
-                                Toast.makeText(LoginActivity.this, "111 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, "Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             resetWarnVisibility();
-                            Toast.makeText(LoginActivity.this, "222 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<SignInResponse> call, @NonNull Throwable t) {
                         resetWarnVisibility();
-                        Toast.makeText(LoginActivity.this, "333 Couldn't login. Check your input again or try later", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Couldn't connect to server. Check your internet connection.", Toast.LENGTH_SHORT).show();
                         Logger.getLogger(LoginActivity.class.getName()).log(Level.SEVERE, "Error in SignIn occurred!", t);
                         Log.d(TAG, "onFailure: " + t.getMessage());
                     }

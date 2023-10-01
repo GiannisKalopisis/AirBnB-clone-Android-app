@@ -87,7 +87,6 @@ public class WriteReviewActivity extends AppCompatActivity {
         Log.d(TAG, "submitReviewButtonClickListener: started");
 
         submitReviewButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed SUBMIT REVIEW BUTTON", Toast.LENGTH_SHORT).show();
 
             RestClient restClient = new RestClient(jwtToken);
             BookingReviewAPI bookingReviewAPI = restClient.getClient().create(BookingReviewAPI.class);

@@ -235,8 +235,6 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                         && firstVisibleItemPosition >= 0 && !isLastPage && !isSearchFieldsLayoutVisible) {
                     if (searchIsOn) {
-                        // Load more data when the user is near the end of the list
-                        Toast.makeText(MainPageActivity.this, "LoadingPage: " + currentPage, Toast.LENGTH_SHORT).show();
                         fetchSearchRentals();
                         currentPage++;
                     }
@@ -281,7 +279,6 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                 Toast.makeText(view.getContext(), "Please fill all the fields", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Toast.makeText(view.getContext(), "Pressed SEARCH BUTTON", Toast.LENGTH_SHORT).show();
             isSearchFieldsLayoutVisible = false;
             searchFieldsLayout.setVisibility(View.GONE);
             currentPage = 0;
@@ -537,14 +534,14 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                                 profile_pic_layout.setPadding(0, 0, 0, 0);
                             }
                         } else {
-                            Toast.makeText(MainPageActivity.this, "1 Couldn't get user image", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainPageActivity.this, "Couldn't get user image", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "1 Couldn't get user image");
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                        Toast.makeText(MainPageActivity.this, "2 Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainPageActivity.this, "Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "2 Couldn't get user image: " + t.getMessage());
                     }
                 });
@@ -608,7 +605,6 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
         Log.d(TAG, "homeButtonClickListener: started");
 
         homePageButton.setOnClickListener(view -> {
-            Toast.makeText(MainPageActivity.this, "Pressed HOME BUTTON", Toast.LENGTH_SHORT).show();
             searchIsOn = false;
             isFirstSearch = true;
             NavigationUtils.goToMainPage(MainPageActivity.this, userId, jwtToken, roles);
@@ -619,18 +615,15 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
         Log.d(TAG, "bottomBarClickListeners: started");
 
         chatButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToChatPage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
         profileButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToProfilePage(MainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_USER.toString());
         });
 
         roleButton.setOnClickListener(view -> {
             Log.d(TAG, "onClick: pressed role button");
-            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
 
             if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                 NavigationUtils.goToHostMainPage(MainPageActivity.this, userId, jwtToken, roles);

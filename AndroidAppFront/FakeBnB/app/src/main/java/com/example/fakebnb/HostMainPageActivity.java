@@ -157,15 +157,15 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                                 host_profile_pic_layout.setPadding(0, 0, 0, 0);
                             }
                         } else {
-                            Toast.makeText(HostMainPageActivity.this, "1 Couldn't get user image", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "1 Couldn't get user image");
+                            Toast.makeText(HostMainPageActivity.this, "Couldn't get user image", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Couldn't get user image");
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                        Toast.makeText(HostMainPageActivity.this, "2 Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "2 Couldn't get user image: " + t.getMessage());
+                        Toast.makeText(HostMainPageActivity.this, "Couldn't get user image:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Couldn't get user image: " + t.getMessage());
                     }
                 });
     }
@@ -207,7 +207,6 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                 if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
                         && firstVisibleItemPosition >= 0  && !isLastPage) {
                     // Load more data when the user is near the end of the list
-                    Toast.makeText(HostMainPageActivity.this, "LoadingPage: " + currentPage, Toast.LENGTH_SHORT).show();
                     loadMoreData();
                 }
             }
@@ -226,7 +225,6 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
                     public void onResponse(@NonNull Call<ApartmentPagedResponse> call, @NonNull Response<ApartmentPagedResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             if (response.body().getSuccess()) {
-                                Toast.makeText(HostMainPageActivity.this, "Get rentals successfully", Toast.LENGTH_SHORT).show();
                                 rentalsResponseList = response.body().getObject().getContent();
                                 isLastPage = response.body().getObject().isLast();
                                 if (rentalsResponseList != null) {
@@ -243,7 +241,7 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
 
                                             @Override
                                             public void onError(String errorMessage) {
-                                                Toast.makeText(HostMainPageActivity.this, "Error while downloading image: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                                Log.d(TAG, "onError while downloading image: " + errorMessage);
                                             }
                                         });
                                     }
@@ -300,7 +298,6 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
 
     private void addButtonClickListener() {
         addRentalButton.setOnClickListener(view -> {
-            Toast.makeText(HostMainPageActivity.this, "Add place button pressed", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToAddNewPlacePage(HostMainPageActivity.this, userId, jwtToken, roles);
         });
     }
@@ -328,19 +325,14 @@ public class HostMainPageActivity extends AppCompatActivity implements HostMainP
         Log.d(TAG, "bottomBarClickListeners: started");
 
         chatButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed CHAT BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToChatPage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
         profileButton.setOnClickListener(view -> {
-            Toast.makeText(view.getContext(), "Pressed PROFILE BUTTON", Toast.LENGTH_SHORT).show();
             NavigationUtils.goToProfilePage(HostMainPageActivity.this, userId, jwtToken, roles, RoleName.ROLE_HOST.toString());
         });
 
         roleButton.setOnClickListener(view -> {
-            Log.d(TAG, "onClick: role button pressed");
-            Toast.makeText(view.getContext(), "Pressed ROLE BUTTON", Toast.LENGTH_SHORT).show();
-
             if (roles.contains(RoleName.ROLE_HOST) && roles.contains(RoleName.ROLE_USER)) {
                 NavigationUtils.goToMainPage(HostMainPageActivity.this, userId, jwtToken, roles);
             } else {
