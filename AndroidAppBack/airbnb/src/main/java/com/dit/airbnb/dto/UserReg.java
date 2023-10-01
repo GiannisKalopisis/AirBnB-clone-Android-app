@@ -104,6 +104,16 @@ public class UserReg {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @Getter
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "user_apartment_logs",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "apartment_id", referencedColumnName = "id")
+    )
+    private Set<Apartment> apartmentLogs = new HashSet<>();
+
     public UserReg(SignUpRequest signUpRequest) {
         this.firstName = signUpRequest.getFirstName();
         this.lastName = signUpRequest.getLastName();
@@ -125,6 +135,11 @@ public class UserReg {
     public void addRole(Role role) {
         if (roles == null) roles = new HashSet<>();
         roles.add(role);
+    }
+
+    public void addApartmentLog(Apartment apartment) {
+        if (apartmentLogs == null) apartmentLogs = new HashSet<>();
+        apartmentLogs.add(apartment);
     }
 
     @Override

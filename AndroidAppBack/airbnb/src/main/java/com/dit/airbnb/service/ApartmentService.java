@@ -109,7 +109,14 @@ public class ApartmentService {
 
     public ResponseEntity<?> getApartmentById(Long apartmentId, UserDetailsImpl currentUser) {
 
+        Long userId = currentUser.getId();
+        UserReg userReg = userRegRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("UserReg", "id", userId));
+
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
+
+        userReg.addApartmentLog(apartment);
+        userRegRepository.save(userReg); .
 
         ApartmentResponse apartmentResponse = new ApartmentResponse(
                 apartment.getAmenities(), apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),

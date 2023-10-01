@@ -12,6 +12,7 @@ import com.dit.airbnb.util.rating_function.DirectRatingFunction;
 import com.dit.airbnb.util.rating_function.RatingFunction;
 import com.dit.airbnb.util.RecommendationParameters;
 import com.dit.airbnb.util.vector_init.NormalInitializer;
+import com.dit.airbnb.util.vector_init.UniformInitializer;
 import com.dit.airbnb.util.vector_init.VectorInitializer;
 import jakarta.transaction.Transactional;
 import org.apache.commons.math3.util.Pair;
@@ -119,12 +120,13 @@ public class RecommendationService {
         // TODO CHECK UNRATED
         // DATA SPARSITY
 
+
         // init F,V
         VectorInitializer vectorInitializer;
         if (recommendationParameters.getVectorInitializer().equals(NORMAL_VECTOR_INITIALIZER)) {
             vectorInitializer = new NormalInitializer(recommendationParameters.getNormalFactor());
         } else if (recommendationParameters.getVectorInitializer().equals(UNIFORM_VECTOR_INITIALIZER)) {
-            vectorInitializer = new NormalInitializer(recommendationParameters.getNormalFactor());
+            vectorInitializer = new UniformInitializer(0.0, 1.0);
         } else {
             vectorInitializer = new NormalInitializer(recommendationParameters.getNormalFactor());
         }

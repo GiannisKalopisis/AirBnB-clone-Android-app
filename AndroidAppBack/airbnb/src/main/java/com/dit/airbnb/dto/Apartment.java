@@ -111,6 +111,12 @@ public class Apartment {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "apartment", cascade = CascadeType.ALL)
     private Set<Image> images = new HashSet<>();
 
+    @Getter
+    @JsonIgnore
+    @ManyToMany(mappedBy = "apartmentLogs", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<UserReg> userRegLogs = new HashSet<>();
+
+
     public Apartment(ApartmentRequest apartmentRequest) {
         this.amenities = apartmentRequest.getAmenities();
         this.address = apartmentRequest.getAddress();

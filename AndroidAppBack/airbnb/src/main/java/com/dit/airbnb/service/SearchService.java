@@ -55,12 +55,12 @@ public class SearchService {
 
         Page<Apartment> apartmentPage = searchProducts(searchRequest, page, size);
 
-        PagedResponse<SearchResponse> pagedSearchResponses = createApartmentPageResponse(searchRequest, apartmentPage);
+        PagedResponse<SearchResponse> pagedSearchResponses = createApartmentPageResponse(userReg, searchRequest, apartmentPage);
 
         return ResponseEntity.ok(new ApiResponse(true, "search succeed", pagedSearchResponses));
     }
 
-    private PagedResponse<SearchResponse> createApartmentPageResponse(SearchRequest searchRequest, Page<Apartment> apartmentPage) {
+    private PagedResponse<SearchResponse> createApartmentPageResponse(UserReg userReg, SearchRequest searchRequest, Page<Apartment> apartmentPage) {
         if (apartmentPage.getNumberOfElements() == 0) {
             return new PagedResponse<>(Collections.emptyList(), apartmentPage.getNumber(),
                     apartmentPage.getSize(), apartmentPage.getTotalElements(),
@@ -69,6 +69,9 @@ public class SearchService {
 
         List<SearchResponse> searchResponses = new ArrayList<>();
         for (Apartment apartment : apartmentPage) {
+            // save apartment
+            userReg.addApartmentLog(apartment);
+
             Double totalRating = 0.0;
             Set<Booking> bookings = apartment.getBookings();
             int bookingReviewCard = 0;
@@ -96,6 +99,8 @@ public class SearchService {
             searchResponses.add(new SearchResponse(apartment.getId(), totalCost,  bookingReviewCard != 0 ? Precision.round((totalRating / (double) bookingReviewCard), 2) : 0.0,
                     apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getDescription(), apartment.getMaxVisitors()));
         }
+
+        userRegRepository.save(userReg);
 
         // Define a custom comparator based on the totalCost attribute
         Comparator<SearchResponse> totalCostComparator = Comparator.comparing(SearchResponse::getTotalCost);
