@@ -116,7 +116,7 @@ public class ApartmentService {
         Apartment apartment = apartmentRepository.findById(apartmentId).orElseThrow(() -> new ResourceNotFoundException("Apartment", "id", apartmentId));
 
         userReg.addApartmentLog(apartment);
-        userRegRepository.save(userReg); .
+        userRegRepository.save(userReg);
 
         ApartmentResponse apartmentResponse = new ApartmentResponse(
                 apartment.getAmenities(), apartment.getAddress(), apartment.getCountry(), apartment.getCity(), apartment.getDistrict(), apartment.getAvailableStartDate(),
