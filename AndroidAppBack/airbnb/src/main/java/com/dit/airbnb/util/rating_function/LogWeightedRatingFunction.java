@@ -10,8 +10,8 @@ public class LogWeightedRatingFunction implements RatingFunction {
 
     private static final double ratingWeight = 0.2;
     private static final double maxVisitorsWeight = 0.1;
-    private static final double extraCostPerPersonWeight = 0.3;
-    private static final double minRetailPriceWeight = 0.2;
+    private static final double extraCostPerPersonWeight = 0.2;
+    private static final double minRetailPriceWeight = 0.3;
     private static final double numberOfPlacesWeight = 0.2;
 
     @Override
