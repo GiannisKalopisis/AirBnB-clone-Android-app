@@ -10,6 +10,7 @@ import javax.net.ssl.X509TrustManager;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.TimeUnit;
 
 public class RestClient {
 
@@ -62,6 +63,9 @@ public class RestClient {
         if (authToken != null) {
             httpClient.addInterceptor(new AuthInterceptor(authToken));
         }
+
+        httpClient.connectTimeout(30, TimeUnit.SECONDS); // Set the connection timeout
+        httpClient.readTimeout(30, TimeUnit.SECONDS);    // Set the read timeout
 
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)

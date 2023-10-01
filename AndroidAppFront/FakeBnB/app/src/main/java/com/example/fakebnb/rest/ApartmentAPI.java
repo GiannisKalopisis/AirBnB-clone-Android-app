@@ -1,7 +1,9 @@
 package com.example.fakebnb.rest;
 
+import com.example.fakebnb.model.SearchRentalModel;
 import com.example.fakebnb.model.response.ApartmentPagedResponse;
 import com.example.fakebnb.model.response.ApartmentResponse;
+import com.example.fakebnb.model.response.RecommendationResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
 
 import java.util.List;
@@ -47,4 +49,7 @@ public interface ApartmentAPI {
     Call<ApartmentPagedResponse> getHostApartments(@Path(value = "hostId") Long hostId,
                                                    @Query("page") int page,
                                                    @Query("size") int size);
+
+    @GET("/app/apartment/rec/{userId}")
+    Call<RecommendationResponse> getRecommendedApartments(@Path(value = "userId") Long userId);
 }

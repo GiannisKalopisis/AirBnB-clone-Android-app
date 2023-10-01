@@ -9,6 +9,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fakebnb.MainPageRecyclerViewInterface;
@@ -24,11 +25,13 @@ public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAd
     private final MainPageRecyclerViewInterface mainPageRecyclerViewInterface;
     private final ArrayList<RentalMainPageModel> rentalModel;
     private final Map<Long, Bitmap> rentalImages;     // <chatId, rentalImage>
+    private boolean showPrice;
 
     public MainPageRentalAdapter(MainPageRecyclerViewInterface mainPageRecyclerViewInterface, ArrayList<RentalMainPageModel> rentalModel) {
         this.mainPageRecyclerViewInterface = mainPageRecyclerViewInterface;
         this.rentalModel = rentalModel;
         this.rentalImages = new HashMap<>();
+        this.showPrice = true;
     }
 
     @NonNull
@@ -42,7 +45,12 @@ public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAd
     public void onBindViewHolder(@NonNull MainPageRentalAdapter.ViewHolder holder, int position) {
         holder.descriptionTextView.setText(rentalModel.get(position).getDescription());
         holder.areaTextView.setText(rentalModel.get(position).getArea());
-        holder.priceTextView.setText(rentalModel.get(position).getPrice());
+        if (showPrice) {
+            holder.priceTextView.setText(rentalModel.get(position).getPrice());
+        } else {
+            holder.priceCardView.setVisibility(View.GONE);
+            holder.priceTextView.setVisibility(View.GONE);
+        }
         holder.ratingStars.setRating(rentalModel.get(position).getRating());
         holder.rentalImageView.setImageBitmap(rentalImages.get(rentalModel.get(position).getRentalId()));
     }
@@ -50,6 +58,11 @@ public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAd
     @Override
     public int getItemCount() {
         return rentalModel.size();
+    }
+
+    public void setShowPriceVisibility(boolean showPrice) {
+        this.showPrice = showPrice;
+        notifyDataSetChanged();
     }
 
     public void addNewRental(RentalMainPageModel rentalMainPageModel){
@@ -73,11 +86,13 @@ public class MainPageRentalAdapter extends RecyclerView.Adapter<MainPageRentalAd
         private final TextView descriptionTextView, areaTextView, priceTextView;
         private final RatingBar ratingStars;
         private final ImageView rentalImageView;
+        private final CardView priceCardView;
 
         ViewHolder(View itemView, MainPageRecyclerViewInterface mainPageRecyclerViewInterface) {
             super(itemView);
             descriptionTextView = itemView.findViewById(R.id.rentalDescription);
             areaTextView = itemView.findViewById(R.id.rentalArea);
+            priceCardView = itemView.findViewById(R.id.priceCardView);
             priceTextView = itemView.findViewById(R.id.price);
             ratingStars = itemView.findViewById(R.id.ratingBarRentalHomePage);
             rentalImageView = itemView.findViewById(R.id.singleImageUserRentalView);

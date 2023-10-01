@@ -38,8 +38,10 @@ import com.example.fakebnb.enums.RoleName;
 import com.example.fakebnb.model.RentalMainPageModel;
 import com.example.fakebnb.model.SearchRentalModel;
 import com.example.fakebnb.model.request.SearchRequest;
+import com.example.fakebnb.model.response.RecommendationResponse;
 import com.example.fakebnb.model.response.SearchPagedResponse;
 import com.example.fakebnb.model.response.UserRegResponse;
+import com.example.fakebnb.rest.ApartmentAPI;
 import com.example.fakebnb.rest.ImageAPI;
 import com.example.fakebnb.rest.RestClient;
 import com.example.fakebnb.rest.SearchAPI;
@@ -156,23 +158,11 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
 
         onDatesClicked();
 
-
-        rentals.add(new RentalMainPageModel("Amalfi1 coast rooms", "Αθήνα", "€ 50", 4.5f, 1L));
-        rentals.add(new RentalMainPageModel("Amalfi2 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 2L));
-        rentals.add(new RentalMainPageModel("Amalfi3 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 3L));
-        rentals.add(new RentalMainPageModel("Amalfi4 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 4L));
-        rentals.add(new RentalMainPageModel("Amalfi5 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 5L));
-        rentals.add(new RentalMainPageModel("Amalfi6 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 6L));
-        rentals.add(new RentalMainPageModel("Amalfi7 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 7L));
-        rentals.add(new RentalMainPageModel("Amalfi8 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 8L));
-        rentals.add(new RentalMainPageModel("Amalfi9 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 9L));
-        rentals.add(new RentalMainPageModel("Amalfi10 coast rooms with a long description that might take up two lines", "Αθήνα", "€ 50", 4.5f, 10L));
-
         rentalsRecyclerView.setAdapter(rentalAdapter);
         rentalsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Initially load the first batch of data
-        loadMoreData();
+        loadRecommendedData();
         loadMoreRentalsOnScroll();
         setGuestNumSpinnerValues();
         searchFieldsButtonListener();
@@ -181,30 +171,54 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
     /**
      * PAGINATION METHODS
      */
-
-    private void loadMoreData() {
+    private void loadRecommendedData() {
         isLoading = true;
 
-        // Simulate fetching data from backend
-        ArrayList<RentalMainPageModel> newData = fetchDataFromBackend(currentPage);
+        RestClient restClient = new RestClient(jwtToken);
+        ApartmentAPI apartmentAPI = restClient.getClient().create(ApartmentAPI.class);
 
-        rentals.addAll(newData);
-        rentalAdapter.notifyDataSetChanged();
+        apartmentAPI.getRecommendedApartments(userId)
+                .enqueue(new Callback<RecommendationResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<RecommendationResponse> call, @NonNull Response<RecommendationResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (searchIsOn) {
+                                rentalAdapter.deleteRentals();
+                                rentalAdapter.setShowPriceVisibility(false);
+                            }
+                            searchRentalResponseList = response.body().getObject();
+                            for (SearchRentalModel searchRentalModel : searchRentalResponseList) {
+                                rentalAdapter.addNewRental(new RentalMainPageModel(searchRentalModel.getDescription(),
+                                        searchRentalModel.getDistrict() + ", " + searchRentalModel.getCity(),
+                                        searchRentalModel.getTotalCost() + " €",
+                                        searchRentalModel.getAvgRating().floatValue(),
+                                        searchRentalModel.getId()));
+                                getSingleRentalImage(searchRentalModel.getId(), new SingleRentalImageCallback() {
+                                    @Override
+                                    public void onImageLoaded(Bitmap rentalImageBitmap) {
+                                        rentalAdapter.addNewRentalSingleImage(searchRentalModel.getId(), rentalImageBitmap);
+                                    }
+
+                                    @Override
+                                    public void onError(String errorMessage) {
+                                        Toast.makeText(MainPageActivity.this, "Error while downloading image: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        } else {
+                            Toast.makeText(MainPageActivity.this, "Couldn't get the recommended rentals", Toast.LENGTH_SHORT).show();
+                            Log.e("RECOMMENDATION_API_CALL", "Couldn't get the recommended rentals");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<RecommendationResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(MainPageActivity.this, "Failed to connect to server and get the recommended rentals: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("RECOMMENDATION_API_CALL search", "Failed to connect to server and get the recommended rentals: " + t.getMessage());
+                    }
+                });
 
         isLoading = false;
-        currentPage++;
-    }
-
-    private ArrayList<RentalMainPageModel> fetchDataFromBackend(int page) {
-        // Simulate fetching data from backend based on the page number
-        ArrayList<RentalMainPageModel> newData = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            newData.add(new RentalMainPageModel("Amalfi" + (i + page * 10) + " coast rooms with a long description that might take up two lines",
-                    "Αθήνα",
-                    "€ 50",
-                    4.5f, (i + page * 10L)));
-        }
-        return newData;
     }
 
     private void loadMoreRentalsOnScroll() {
@@ -225,12 +239,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                         Toast.makeText(MainPageActivity.this, "LoadingPage: " + currentPage, Toast.LENGTH_SHORT).show();
                         fetchSearchRentals();
                         currentPage++;
-                    } else {
-                        // Load more data when the user is near the end of the list
-                        Toast.makeText(MainPageActivity.this, "LoadingPage: " + currentPage, Toast.LENGTH_SHORT).show();
-                        loadMoreData();
                     }
-
                 }
             }
         });
@@ -308,6 +317,7 @@ public class MainPageActivity extends AppCompatActivity implements MainPageRecyc
                                 isLastPage = response.body().getObject().isLast();
                                 if (isFirstSearch) {
                                     rentalAdapter.deleteRentals();
+                                    rentalAdapter.setShowPriceVisibility(true);
                                     isFirstSearch = false;
                                 }
                                 if (searchRentalResponseList != null && !searchRentalResponseList.isEmpty()) {

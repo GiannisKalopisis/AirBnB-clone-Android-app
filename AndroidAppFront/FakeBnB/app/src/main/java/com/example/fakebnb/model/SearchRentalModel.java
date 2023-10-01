@@ -18,6 +18,8 @@ public class SearchRentalModel {
 
     private String description;
 
+    private Integer maxVisitors;
+
 
     public Long getId() {
         return id;
@@ -73,5 +75,13 @@ public class SearchRentalModel {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getMaxVisitors() {
+        return maxVisitors;
+    }
+
+    public void setMaxVisitors(Integer maxVisitors) {
+        this.maxVisitors = maxVisitors;
     }
 }

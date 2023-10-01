@@ -31,7 +31,7 @@
         android:theme="@style/Theme.FakeBnB">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDrdKGBv02spF8QpPFJaK26m1ZynbnXNOg" />
+            android:value="AIzaSyDqOKXd2q-TYKYzTSoIrAKDaR4mFrbsTvk" />
         <activity
             android:name=".MainActivity"
             android:exported="true" >

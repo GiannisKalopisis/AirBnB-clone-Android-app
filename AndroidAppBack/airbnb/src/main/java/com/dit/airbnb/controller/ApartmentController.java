@@ -95,7 +95,7 @@ public class ApartmentController {
 
     @GetMapping("/apartment/rec/{userId}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<?> getHostApartments( @PathVariable(value = "userId") Long userId) {
+    public ResponseEntity<?> getRecommendedApartments( @PathVariable(value = "userId") Long userId) {
         return apartmentService.recommendApartment(userId);
     }
 
