@@ -8,7 +8,9 @@ import com.dit.airbnb.repository.ApartmentRepository;
 import com.dit.airbnb.repository.BookingReviewRepository;
 import com.dit.airbnb.repository.UserRegRepository;
 import com.dit.airbnb.response.SearchResponse;
+import com.dit.airbnb.util.MaxMinApartmentValues;
 import com.dit.airbnb.util.rating_function.DirectRatingFunction;
+import com.dit.airbnb.util.rating_function.LogWeightedRatingFunction;
 import com.dit.airbnb.util.rating_function.RatingFunction;
 import com.dit.airbnb.util.RecommendationParameters;
 import com.dit.airbnb.util.vector_init.NormalInitializer;
@@ -48,6 +50,9 @@ public class RecommendationService {
 
     public final static int SCALE = 8;
 
+    static RatingFunction ratingFunction = new DirectRatingFunction();
+    static RatingFunction logWeightedRatingFunction = new LogWeightedRatingFunction();
+
     private double calculateFinalPrediction(double[][] V, double[][] F, int i, int j) {
         double prediction = 0.0;
         for (int k = 0; k < recommendationParameters.getK(); k++) {
@@ -81,8 +86,6 @@ public class RecommendationService {
         double minRMSE = 0.0001;
         double prevRMSE = Double.MAX_VALUE;
 
-        RatingFunction ratingFunction = new DirectRatingFunction();
-
         List<UserReg> userRegs = userRegRepository.findAll();
 
         List<Apartment> apartments = apartmentRepository.findAll();
@@ -98,7 +101,22 @@ public class RecommendationService {
 
         Map<Long, Integer> indexMapper = new HashMap<>();
         Integer indexCount = 0;
+        MaxMinApartmentValues maxMinApartmentValues = new MaxMinApartmentValues();
+
         for (var apartment : apartments) {
+            maxMinApartmentValues.compMaxVisitorsValue(apartment.getMaxVisitors());
+            maxMinApartmentValues.compMinVisitorsValue(apartment.getMaxVisitors());
+            maxMinApartmentValues.compMaxExtraCostPerPersonValue(apartment.getExtraCostPerPerson().doubleValue());
+            maxMinApartmentValues.compMinExtraCostPerPersonValue(apartment.getExtraCostPerPerson().doubleValue());
+            maxMinApartmentValues.compMaxRetailPriceValue(apartment.getMinRetailPrice().doubleValue());
+            maxMinApartmentValues.compMinRetailPriceValue(apartment.getMinRetailPrice().doubleValue());
+            Short numberOfBedrooms = apartment.getNumberOfBedrooms();
+            Short numberOfBeds = apartment.getNumberOfBeds();
+            Short numberOfBathrooms = apartment.getNumberOfBathrooms();
+            Short numberOfLivingRooms =  apartment.getNumberOfLivingRooms();
+            double numOfPlaces = ( (numberOfBedrooms != null ? numberOfBedrooms : 0) + (numberOfBeds != null ? numberOfBeds : 0) + (numberOfBathrooms != null ? numberOfBathrooms : 0) + (numberOfLivingRooms != null ? numberOfLivingRooms : 0) ) / 4.0;
+            maxMinApartmentValues.compMaxNumberOfPlacesValue(numOfPlaces);
+            maxMinApartmentValues.compMinNumberOfPlacesValue(numOfPlaces);
             indexMapper.put(apartment.getId(), indexCount);
             indexCount++;
         }
@@ -107,18 +125,29 @@ public class RecommendationService {
         for (int i = 0; i < numberOfUsers; i++) {
             UserReg currentUserReg = userRegs.get(i);
             if (currentUserReg.getId().equals(userId)) currentUserIndex = i;
-            for (Booking booking : currentUserReg.getBookings()) {
+            Set<Booking> bookings = currentUserReg.getBookings();
+            if (bookings == null || bookings.isEmpty()) {
+                for (Apartment apartment : currentUserReg.getApartmentLogs()) {
+                    inputArrayX[i][indexMapper.get(apartment.getId())] = logWeightedRatingFunction.getRate(apartment, null, maxMinApartmentValues);
+                }
+                continue;
+            }
+            boolean hasBooking = false;
+            for (Booking booking : bookings) {
                 for (BookingReview bookingReview : booking.getBookingReviews()) {
                     // maybe map here
                     if (bookingReview.getCreatorUserReg().getId().equals(currentUserReg.getId())) {
-                        inputArrayX[i][indexMapper.get(booking.getApartment().getId())] = ratingFunction.getRate(currentUserReg, booking.getApartment(), booking, bookingReview);
+                        hasBooking = true;
+                        inputArrayX[i][indexMapper.get(booking.getApartment().getId())] = ratingFunction.getRate(bookingReview);
                     }
                 }
             }
+            if (!hasBooking) {
+                for (Apartment apartment : currentUserReg.getApartmentLogs()) {
+                    inputArrayX[i][indexMapper.get(apartment.getId())] = logWeightedRatingFunction.getRate(apartment, null, maxMinApartmentValues);
+                }
+            }
         }
-
-        // TODO CHECK UNRATED
-        // DATA SPARSITY
 
 
         // init F,V

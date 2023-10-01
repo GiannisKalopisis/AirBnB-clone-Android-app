@@ -7,7 +7,7 @@ import com.dit.airbnb.dto.UserReg;
 
 public class DirectRatingFunction implements RatingFunction {
     @Override
-    public Double getRate(UserReg userReg, Apartment apartment, Booking booking, BookingReview bookingReview) {
+    public Double getRate(BookingReview bookingReview) {
         return (double) bookingReview.getRating();
     }
 }
