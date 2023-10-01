@@ -16,11 +16,16 @@ public class LogWeightedRatingFunction implements RatingFunction {
 
     @Override
     public Double getRate(Apartment apartment, BookingReview bookingReview, MaxMinApartmentValues maxMinApartmentValues) {
+        Short numberOfBedrooms = apartment.getNumberOfBedrooms();
+        Short numberOfBeds = apartment.getNumberOfBeds();
+        Short numberOfBathrooms = apartment.getNumberOfBathrooms();
+        Short numberOfLivingRooms =  apartment.getNumberOfLivingRooms();
+        double numOfPlaces = ( (numberOfBedrooms != null ? numberOfBedrooms : 0) + (numberOfBeds != null ? numberOfBeds : 0) + (numberOfBathrooms != null ? numberOfBathrooms : 0) + (numberOfLivingRooms != null ? numberOfLivingRooms : 0) ) / 4.0;
         return  (bookingReview != null ? ratingWeight * bookingReview.getRating() : 0.0) +
                 (maxVisitorsWeight * ((apartment.getMaxVisitors() - 1.0) / (maxMinApartmentValues.maxVisitorsValue - 0.1) * 5) +
                 (extraCostPerPersonWeight * (apartment.getExtraCostPerPerson().doubleValue() / maxMinApartmentValues.maxExtraCostPerPersonValue) * 5)) +
                 (minRetailPriceWeight * (apartment.getMinRetailPrice().doubleValue() / maxMinApartmentValues.maxRetailPriceValue) * 5) +
-                (numberOfPlacesWeight * (((apartment.getNumberOfBedrooms() + apartment.getNumberOfBeds() + apartment.getNumberOfBathrooms() + apartment.getNumberOfLivingRooms()) / 4.0) - 0.25) / (maxMinApartmentValues.maxNumberOfPlacesValue - 0.25));
+                (numberOfPlacesWeight * ((numOfPlaces - 0.25) / (maxMinApartmentValues.maxNumberOfPlacesValue - 0.25)) * 5);
     }
 
 }

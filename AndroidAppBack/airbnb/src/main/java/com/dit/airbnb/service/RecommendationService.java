@@ -149,7 +149,6 @@ public class RecommendationService {
             }
         }
 
-
         // init F,V
         VectorInitializer vectorInitializer;
         if (recommendationParameters.getVectorInitializer().equals(NORMAL_VECTOR_INITIALIZER)) {
