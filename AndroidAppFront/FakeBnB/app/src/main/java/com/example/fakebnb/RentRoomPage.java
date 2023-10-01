@@ -433,7 +433,6 @@ public class RentRoomPage extends AppCompatActivity {
             if (trimmedPart.startsWith("\"") && trimmedPart.endsWith("\"")) {
                 trimmedPart = trimmedPart.substring(1, trimmedPart.length() - 1);
             }
-
             resultList.add(trimmedPart);
         }
 
