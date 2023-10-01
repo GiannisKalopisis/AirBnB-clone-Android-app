@@ -377,6 +377,12 @@ public class RentRoomPage extends AppCompatActivity {
                 rulesList.add(rule);
             }
         }
+
+        if (rulesList.contains(apartmentData.getRules())) {
+            rulesList.remove(apartmentData.getRules());
+            rulesList = parseInput(apartmentData.getRules());
+        }
+
         // Create an adapter for the rules
         RulesAdapter rulesAdapter = new RulesAdapter(rulesList);
         recyclerViewRules.setAdapter(rulesAdapter);
@@ -401,10 +407,37 @@ public class RentRoomPage extends AppCompatActivity {
                 amenitiesList.add(amenity);
             }
         }
+
+        if (amenitiesList.size() == 1 && amenitiesList.contains(apartmentData.getAmenities())) {
+            amenitiesList.remove(apartmentData.getAmenities());
+            amenitiesList = parseInput(apartmentData.getAmenities());
+        }
+
         // Create an adapter for the amenities
         RulesAdapter amenitiesAdapter = new RulesAdapter(amenitiesList);
         recyclerViewAmenities.setAdapter(amenitiesAdapter);
         recyclerViewAmenities.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    public static ArrayList<String> parseInput(String input) {
+        ArrayList<String> resultList = new ArrayList<>();
+
+        // Remove curly braces and split by comma
+        String[] parts = input.replaceAll("[{}]", "").split(",");
+
+        for (String part : parts) {
+            // Remove leading and trailing whitespace
+            String trimmedPart = part.trim();
+
+            // If the part is enclosed in double quotes, remove the quotes
+            if (trimmedPart.startsWith("\"") && trimmedPart.endsWith("\"")) {
+                trimmedPart = trimmedPart.substring(1, trimmedPart.length() - 1);
+            }
+
+            resultList.add(trimmedPart);
+        }
+
+        return resultList;
     }
 
     private void renderHostSection() {
